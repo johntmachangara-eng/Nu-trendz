@@ -1,0 +1,301 @@
+/* ==================== SERVICES SECTION ==================== */
+#services-section {
+    width: 100%;
+    padding: 70px 20px;
+    position: relative;
+    scroll-margin-top: 90px;
+    scroll-margin-top: -90px;
+}
+
+/* SERVICES HEADER */
+.services-header {
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.services-header h1 {
+    font-size: 50px;
+    color: #ff9800;
+    margin-bottom: 10px;
+}
+
+.services-header p {
+    font-size: 20px;
+    color: #fff;
+    font-weight: 400;
+}
+
+/* CATEGORY NAVIGATION */
+.category-nav {
+    position: relative;
+    width: 80%;
+    margin: 0 auto 30px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.categories {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 40px;
+    perspective: 800px;
+}
+
+.categories::-webkit-scrollbar {
+    display: none;
+}
+
+.categories:has(.category.active) .category:not(.active) {
+    filter: brightness(0.6) blur(0.3px);
+}
+
+/* CATEGORY BUTTONS */
+.category {
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-size: 1rem;
+    opacity: 0.7;
+    transform: scale(1);
+    position: relative;
+}
+
+.category:hover {
+    opacity: 1;
+}
+
+.category.active {
+    background: #ff9800;
+    color: #111;
+    border-color: #ff9800;
+    opacity: 1;
+    transform: scale(1.15);
+    z-index: 2;
+}
+
+.category.active::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 2px;
+    background-color: #ff9800;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.category:hover::after {
+    width: 60%;
+}
+
+/* SCROLL BUTTONS */
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 152, 0, 0.6);
+    color: #ff9800;
+    font-size: 20px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+    z-index: 3;
+}
+
+.scroll-btn.left {
+    left: 5px;
+}
+
+.scroll-btn.right {
+    right: 5px;
+}
+
+.scroll-btn.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* SEARCH BAR */
+.search-bar {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.search-bar input {
+    width: 60%;
+    max-width: 450px;
+    padding: 12px 15px;
+    border-radius: 25px;
+    border: 1px solid #ff9800;
+    background: #111;
+    color: #fff;
+    font-size: 1rem;
+}
+
+/* SERVICE CONTAINER */
+.service-container-wrapper {
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#service-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    justify-items: center;
+    width: 100%;
+    animation: fadeIn 0.5s ease-in-out;
+    min-height: 550px;
+    transition: opacity 0.4s ease;
+    position: relative;
+}
+
+/* SERVICE CARDS */
+.service-card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 320px;
+    height: 260px;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.1);
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.service-card:hover {
+    border-color: #ff9800;
+    transform: translateY(-3px);
+}
+
+.service-card.highlight {
+    border-color: #ff9800;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+}
+
+.service-card h3 {
+    color: #ff9800;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.service-time {
+    color: #ccc;
+    font-style: italic;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.service-desc {
+    color: #eee;
+    font-size: 0.9rem;
+    flex-grow: 1;
+    line-height: 1.4;
+}
+
+.service-price {
+    color: #ff9800;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 0.95rem;
+}
+
+.book-btn {
+    background: #ff9800;
+    color: #111;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.book-btn:hover {
+    background: #e68a00;
+}
+
+/* NO SERVICES MESSAGE */
+.no-services {
+    color: #bbb;
+    font-size: 1rem;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    opacity: 0.8;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .service-container-wrapper {
+        width: 90%;
+    }
+
+    .search-bar input {
+        width: 80%;
+    }
+
+    .services-header h1 {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .services-header h1 {
+        font-size: 30px;
+    }
+
+    .search-bar input {
+        width: 95%;
+    }
+}
+
+
+
+
+/* ==================== END OF SERVICES SECTION ==================== */
