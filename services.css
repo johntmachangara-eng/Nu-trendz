@@ -295,6 +295,19 @@
     }
 }
 
+@media (max-width: 768px) {
+  .search-bar {
+    position: sticky;
+    top: 60px; /* or your navbar height */
+    background: #111;
+    z-index: 10;
+    padding: 10px 0;
+  }
+
+  #serviceSearch {
+    width: 90%;
+  } 
+}
 
 
 

@@ -189,14 +189,35 @@ categoryBtns.forEach(btn => {
 });
 
 // ====== SEARCH FUNCTION ======
-searchInput.addEventListener("input", e => {
-  const term = e.target.value.toLowerCase();
-  document.querySelectorAll(".service-card").forEach(card => {
+// ====== SEARCH FUNCTION (WORKS ON MOBILE TOO) ======
+function performSearch() {
+  const term = searchInput.value.toLowerCase().trim();
+  const cards = document.querySelectorAll(".service-card");
+
+  let visibleCount = 0;
+  cards.forEach(card => {
     const title = card.querySelector("h3").textContent.toLowerCase();
-    const desc = card.querySelector(".service-desc")?.textContent.toLowerCase() || "";
-    card.style.display = title.includes(term) || desc.includes(term) ? "flex" : "none";
+    const desc = (card.querySelector(".service-desc")?.textContent.toLowerCase() || "");
+    const match = title.includes(term) || desc.includes(term);
+    card.style.display = match ? "flex" : "none";
+    if (match) visibleCount++;
   });
-});
+
+  const noMsg = document.querySelector(".no-services");
+  if (noMsg) noMsg.remove(); // remove old message if any
+
+  if (visibleCount === 0 && term !== "") {
+    const msg = document.createElement("p");
+    msg.className = "no-services";
+    msg.textContent = "No matching services found.";
+    container.appendChild(msg);
+  }
+}
+
+// Listen for both 'input' and 'keyup' to catch mobile behavior
+searchInput.addEventListener("input", performSearch);
+searchInput.addEventListener("keyup", performSearch);
+
 
 // ====== SCROLL ARROWS ======
 function updateArrows() {
