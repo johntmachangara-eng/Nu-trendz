@@ -52,9 +52,6 @@
     display: none;
 }
 
-.categories:has(.category.active) .category:not(.active) {
-    filter: brightness(0.6) blur(0.3px);
-}
 
 /* CATEGORY BUTTONS */
 .category {
@@ -293,20 +290,6 @@
     .search-bar input {
         width: 95%;
     }
-}
-
-@media (max-width: 768px) {
-  .search-bar {
-    position: sticky;
-    top: 60px; /* or your navbar height */
-    background: #111;
-    z-index: 10;
-    padding: 10px 0;
-  }
-
-  #serviceSearch {
-    width: 90%;
-  } 
 }
 
 
