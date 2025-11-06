@@ -310,6 +310,14 @@ body {
   box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
 }
 
+footer {
+  background: #000;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
 
 
 /* RESPONSIVE */
