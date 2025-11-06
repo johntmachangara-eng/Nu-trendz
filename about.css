@@ -1,117 +1,86 @@
-/* ==================== ABOUT SECTION ==================== */
-#about {
-  width: 100%;
-  padding: 70px 20px;
-  position: relative;
-  scroll-margin-top: 100px; /* adjust to your navbar height */
-  scroll-margin-top: -90px; /* adjust to your navbar height */
-}
-
-.about-title {
-  text-align: center;
-  margin-bottom: 70px;
-}
-
-.about-title  {
-  font-size: 20px;
-  color: #ff9800;
-  font-weight: bold;
-}
-
-.about-title h1 {
-  font-size: 50px;
-  margin-top: 10px;
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background-color: #000;
   color: #fff;
+  overflow-x: hidden;
+}
+
+#about {
+  min-height: 100vh;
+  padding: 100px 10%;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .about-container {
-  width: 80%;
-  margin: auto;
   display: flex;
+  align-items: center;
+  gap: 60px;
   flex-wrap: wrap;
-  align-items: center;
-  text-align: center;
-}
-
-.about-content {
-  flex-basis: 50%;
-  padding-right: 20px;
-}
-
-.about-image {
-  flex-basis: 50%;
-  margin: auto;
-}
-
-.about-image img {
-  width: 50%;
-  border-radius: 10px;
-}
-
-.about-content h2 {
-  text-align: left;
-  color: #ff9800;
-}
-
-.about-desc {
-  display: flex;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
-.about-icon {
-  width: 50px;
-  height: 50px;
-  font-size: 30px;
-  line-height: 50px;
-  border-radius: 8px;
-  color: #ff9800;
-  border: 1px solid #ff9800;
-  text-align: center;
-  transition: 0.3s ease;
-}
-
-.about-icon:hover {
-  background-color: #ff9800;
-  color: #fff;
 }
 
 .about-text {
-  margin-left: 15px;
-  text-align: left;
+  flex: 1;
+}
+
+.about-text h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.about-text h1 span {
+  color: #ff9800;
 }
 
 .about-text p {
-  color: #fff;
+  color: #ddd;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 40px;
 }
 
-@media (max-width: 992px) {
-  .about-container {
-    width: 90%;
-  }
-
-  .about-content,
-  .about-image {
-    flex-basis: 100%;
-    margin-bottom: 40px;
-  }
-
-  .about-image img {
-    width: 70%;
-  }
-
-  .about-title h1 {
-    font-size: 40px;
-  }
+.about-cards {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 576px) {
-  .about-title h1 {
-    font-size: 30px;
-  }
-
-  .about-image img {
-    width: 100%;
-  }
+.about-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 25px;
+  width: 280px;
+  text-align: center;
+  transition: 0.3s;
 }
-/* ==================== END OF ABOUT SECTION ==================== */
+
+.about-card:hover {
+  border-color: #ff9800;
+  transform: translateY(-5px);
+  box-shadow: 0 0 15px rgba(255,152,0,0.3);
+}
+
+.about-card i {
+  color: #ff9800;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.about-image img {
+  width: 400px;
+  border-radius: 16px;
+  border: 2px solid #ff9800;
+  box-shadow: 0 0 20px rgba(255,152,0,0.3);
+}
+
+footer {
+  background: #000;
+  text-align: center;
+  padding: 20px;
+  color: #bbb;
+  font-size: 0.9rem;
+}
