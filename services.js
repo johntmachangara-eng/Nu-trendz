@@ -1,27 +1,25 @@
 // ====== SERVICE DATA ======
 const servicesData = {
   "Featured": [
-    { name: "Cornrows with Design", time: "1 hour", desc: "", price: "£30" },
-    { name: "Wash Dry", time: "1 hour 30 mins", desc: "", price: "£20" },
-    { name: "Dutch Braids", time: "1 hour", desc: "", price: "£30" },
-    { name: "4 Cornrows Stitch", time: "1 hour", desc: "", price: "£25" },
-    { name: "Box Braids / Twists with Extension", time: "3 hours", desc: "", price: "from £50" },
-    { name: "Cornrows with Extension", time: "2 hours", desc: "", price: "from £30" }
+    { name: "Cornrows with Design", time: "1 hour", price: "£30" },
+    { name: "Wash Dry", time: "1 hour 30 mins", price: "£20" },
+    { name: "Dutch Braids", time: "1 hour", price: "£30" },
+    { name: "4 Cornrows Stitch", time: "1 hour", price: "£25" },
+    { name: "Box Braids / Twists with Extension", time: "3 hours", price: "from £50" },
+    { name: "Cornrows with Extension", time: "2 hours", price: "from £30" }
   ],
-
   "Training": [
-    { name: "Dread Locs Training", time: "12 hours", desc: "Learn different techniques of how to start locs and locs maintenance in 5 days. Includes comb twist, instant locs, retwist, interlocking, palm twist. Level 1 certificate included.", price: "£600" },
-    { name: "Individual Hairstyle", time: "5 hours", desc: "1-day training for an individual hairstyle you choose: Knotless, goddess, twist, box braids, cornrows, weave. Level 1 certificate included.", price: "£150" },
-    { name: "Level 1 – Sew-in Weave Extensions", time: "12 hours", desc: "2-day course (10:30–15:30). Learn cornrows, weave weft, closure, full-head weave. Level 1 certificate included.", price: "£200" },
-    { name: "Level 1 – Afro Hair Maintenance", time: "12 hours", desc: "3-day course (10:30–15:30). Hair treatments, deep conditioning, hot-oil, trimming, detangling, curl definition, and product knowledge.", price: "£300" },
-    { name: "Level 1 – Braiding Hair Extension", time: "12 hours", desc: "5-day training (10:30–15:30). Learn box braids, knotless, cornrows, twists. Level 1 certificate included.", price: "£500" }
+    { name: "Dread Locs Training", time: "12 hours", desc: "Learn different techniques ... Level 1 certificate included.", price: "£600" },
+    { name: "Individual Hairstyle", time: "5 hours", desc: "1-day training ... certificate included.", price: "£150" },
+    { name: "Level 1 – Sew-in Weave Extensions", time: "12 hours", desc: "2-day course ...", price: "£200" },
+    { name: "Level 1 – Afro Hair Maintenance", time: "12 hours", desc: "3-day course ...", price: "£300" },
+    { name: "Level 1 – Braiding Hair Extension", time: "12 hours", desc: "5-day training ...", price: "£500" }
   ],
-
   "Extras": [
     { name: "Pre-Stretch Hair Extensions", time: "35 mins", desc: "Pre-stretch the hair extensions before braiding.", price: "£10" },
-    { name: "Beads", time: "35 mins", desc: "", price: "from £10" },
-    { name: "Mixing Hair Colors (Extensions)", time: "35 mins", desc: "", price: "£10" },
-    { name: "Detangling", time: "40 mins", desc: "", price: "from £10" }
+    { name: "Beads", time: "35 mins", price: "from £10" },
+    { name: "Mixing Hair Colors (Extensions)", time: "35 mins", price: "£10" },
+    { name: "Detangling", time: "40 mins", price: "from £10" }
   ],
 
   "Locs": [
@@ -135,131 +133,162 @@ const servicesData = {
   ]
 };
 
+
 // ====== ELEMENTS ======
-const container = document.getElementById("service-container");
-const categoryBtns = document.querySelectorAll(".category");
+const allServicesContainer = document.getElementById("all-services");
+const floatingCategories = document.getElementById("floatingCategories");
 const searchInput = document.getElementById("serviceSearch");
-const scrollContainer = document.querySelector(".categories");
-const leftArrow = document.getElementById("scrollLeft");
-const rightArrow = document.getElementById("scrollRight");
 
-// ====== ANIMATION ======
-function fadeContainer() {
-  container.style.opacity = 0;
-  setTimeout(() => {
-    container.style.opacity = 1;
-  }, 150);
-}
+// ====== BUILD CATEGORY SCROLL BAR ======
+Object.keys(servicesData).forEach((category, index) => {
+  const btn = document.createElement("button");
+  btn.className = "category-btn" + (index === 0 ? " active" : "");
+  btn.textContent = category;
 
-// ====== LOAD SERVICES ======
-function loadServices(category) {
-  fadeContainer();
-  container.innerHTML = "";
+  btn.addEventListener("click", () => {
+    document.querySelector(`#cat-${category.replace(/\s+/g, '-')}`).scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  });
 
-  const list = servicesData[category] || [];
-  if (!list.length) {
-    container.innerHTML = `<p class="no-services">No services available for ${category}.</p>`;
-    return;
-  }
+  floatingCategories.appendChild(btn);
+});
 
-  list.forEach(s => {
+// ====== DISPLAY ALL SERVICES BY CATEGORY ======
+Object.entries(servicesData).forEach(([category, list]) => {
+  const section = document.createElement("div");
+  section.className = "category-section";
+  section.id = `cat-${category.replace(/\s+/g, '-')}`;
+
+  const title = document.createElement("h2");
+  title.textContent = category;
+
+  const grid = document.createElement("div");
+  grid.className = "service-grid";
+
+  list.forEach(service => {
     const card = document.createElement("div");
     card.className = "service-card";
     card.innerHTML = `
-      <h3>${s.name}</h3>
-      <p class="service-time">${s.time}</p>
-      ${s.desc ? `<p class="service-desc">${s.desc}</p>` : ""}
-      <p class="service-price">${s.price}</p>
+      <h3>${service.name}</h3>
+      <p class="service-time">${service.time}</p>
+      ${service.desc ? `<p class="service-desc">${service.desc}</p>` : ""}
+      <p class="service-price">${service.price}</p>
       <a href="booking.html"><button class="book-btn">Book Now</button></a>
     `;
-    container.appendChild(card);
+    grid.appendChild(card);
   });
-}
 
-// ====== CATEGORY SWITCH ======
-categoryBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const active = document.querySelector(".category.active");
-    if (active) active.classList.remove("active");
-    btn.classList.add("active");
-    searchInput.value = "";
-    loadServices(btn.dataset.category);
-    btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  });
+  section.append(title, grid);
+  allServicesContainer.appendChild(section);
 });
 
-// ====== SEARCH FUNCTION ======
-// ====== SEARCH FUNCTION (WORKS ON MOBILE TOO) ======
-function performSearch() {
+// ====== SMART SEARCH FUNCTION (no duplicates) ======
+searchInput.addEventListener("input", () => {
   const term = searchInput.value.toLowerCase().trim();
-  const cards = document.querySelectorAll(".service-card");
+  const sections = document.querySelectorAll(".category-section");
+  const existingResults = document.querySelector("#search-results");
+  const noMsg = document.querySelector(".no-services");
+
+  // Remove old results or messages
+  if (existingResults) existingResults.remove();
+  if (noMsg) noMsg.remove();
+
+  if (term === "") {
+    // Show all sections if search box is empty
+    sections.forEach(section => section.style.display = "block");
+    return;
+  }
+
+  // Hide all original category sections
+  sections.forEach(section => section.style.display = "none");
+
+  // Create a results section
+  const resultDiv = document.createElement("div");
+  resultDiv.id = "search-results";
+  resultDiv.className = "category-section";
+  const title = document.createElement("h2");
+  title.textContent = `Search Results for "${term}"`;
+  const grid = document.createElement("div");
+  grid.className = "service-grid";
 
   let visibleCount = 0;
-  cards.forEach(card => {
-    const title = card.querySelector("h3").textContent.toLowerCase();
-    const desc = (card.querySelector(".service-desc")?.textContent.toLowerCase() || "");
-    const match = title.includes(term) || desc.includes(term);
-    card.style.display = match ? "flex" : "none";
-    if (match) visibleCount++;
+
+  // Search through all data (not DOM) — prevents duplicates
+  Object.values(servicesData).forEach(categoryList => {
+    categoryList.forEach(service => {
+      const name = service.name.toLowerCase();
+      const desc = (service.desc || "").toLowerCase();
+      if (name.includes(term) || desc.includes(term)) {
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML = `
+          <h3>${service.name}</h3>
+          <p class="service-time">${service.time}</p>
+          ${service.desc ? `<p class="service-desc">${service.desc}</p>` : ""}
+          <p class="service-price">${service.price}</p>
+          <a href="booking.html"><button class="book-btn">Book Now</button></a>
+        `;
+        grid.appendChild(card);
+        visibleCount++;
+      }
+    });
   });
 
-  const noMsg = document.querySelector(".no-services");
-  if (noMsg) noMsg.remove(); // remove old message if any
-
-  if (visibleCount === 0 && term !== "") {
+  if (visibleCount > 0) {
+    resultDiv.append(title, grid);
+    allServicesContainer.prepend(resultDiv);
+  } else {
     const msg = document.createElement("p");
     msg.className = "no-services";
     msg.textContent = "No matching services found.";
-    container.appendChild(msg);
+    allServicesContainer.prepend(msg);
   }
-}
+});
 
-// Listen for both 'input' and 'keyup' to catch mobile behavior
-searchInput.addEventListener("input", performSearch);
-searchInput.addEventListener("keyup", performSearch);
+// ====== ACCURATE CATEGORY HIGHLIGHT ON SCROLL ======
+const categoryBtns = Array.from(document.querySelectorAll(".category-btn"));
+const sections = Array.from(document.querySelectorAll(".category-section"));
 
+// Use scroll listener instead of observer for precise control
+window.addEventListener("scroll", () => {
+  const scrollPosition = window.scrollY + 200; // Adjust offset for your layout
+  let currentSectionId = "";
 
-// ====== SCROLL ARROWS ======
-function updateArrows() {
-  const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-  leftArrow.classList.toggle("hidden", scrollContainer.scrollLeft <= 0);
-  rightArrow.classList.toggle("hidden", scrollContainer.scrollLeft >= maxScroll - 5);
-}
+  sections.forEach(section => {
+    const top = section.offsetTop;
+    const height = section.offsetHeight;
+    if (scrollPosition >= top && scrollPosition < top + height) {
+      currentSectionId = section.id;
+    }
+  });
 
-scrollContainer.addEventListener("scroll", updateArrows);
-window.addEventListener("resize", updateArrows);
+  // Update active category button
+  if (currentSectionId) {
+    const activeCategory = currentSectionId.replace("cat-", "").replace(/-/g, " ");
+    categoryBtns.forEach(btn => {
+      const isActive = btn.textContent.toLowerCase() === activeCategory.toLowerCase();
+      btn.classList.toggle("active", isActive);
 
-// ====== NEXT & PREVIOUS ONE-BY-ONE ======
-function scrollCategory(direction) {
-  const categories = Array.from(scrollContainer.querySelectorAll(".category"));
-  const active = document.querySelector(".category.active") || categories[0];
-  const currentIndex = categories.indexOf(active);
+      if (isActive) {
+        // Center the active category smoothly
+        btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    });
+  }
+});
 
-  // Calculate next index
-  let newIndex = currentIndex + direction;
-  if (newIndex < 0) newIndex = 0;
-  if (newIndex >= categories.length) newIndex = categories.length - 1;
+// ====== SHRINK NAVBAR ON SCROLL ======
+const navbar = document.getElementById("navbar");
+let lastScrollTop = 0;
 
-  // Set active class
-  if (active) active.classList.remove("active");
-  const nextBtn = categories[newIndex];
-  nextBtn.classList.add("active");
-
-  // Center the next category smoothly
-  nextBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-
-  // Load its services
-  loadServices(nextBtn.dataset.category);
-}
-
-leftArrow.onclick = () => scrollCategory(-1);  // previous
-rightArrow.onclick = () => scrollCategory(1);  // next
-
-
-// ====== INITIALIZE ======
-loadServices("Featured"); // matches the exact key in your data
-updateArrows();
-
-
-
-
+window.addEventListener("scroll", () => {
+  const scrollTop = window.scrollY;
+  if (scrollTop > lastScrollTop + 20) {
+    navbar.classList.add("shrink");
+  } else if (scrollTop < lastScrollTop - 20 || scrollTop === 0) {
+    navbar.classList.remove("shrink");
+  }
+  lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+});
