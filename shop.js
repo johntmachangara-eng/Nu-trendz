@@ -1,3 +1,4 @@
+// ===== Slideshow Logic =====
 let currentSlide = 0;
 const slides = document.querySelectorAll(".slide");
 const totalSlides = slides.length;
@@ -20,9 +21,9 @@ function prevSlide() {
   showSlide(currentSlide);
 }
 
-// Auto-slide every 6 seconds
 setInterval(nextSlide, 6000);
 
+// ===== Fade in video when loaded =====
 const video = document.querySelector('.portrait-video');
 video.addEventListener('loadeddata', () => {
   video.classList.add('loaded');
