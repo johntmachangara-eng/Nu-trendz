@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NU TRENDZ - Shop</title>
-  <link rel="stylesheet" href="shop.css" />
+  <title>Nu-Trendz | Shop</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="shop.css">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -42,29 +50,45 @@
       <p>Step inside our store, browse our latest collection, and enjoy the full experience.</p>
     </div>
 
-    <!-- Video Showcase -->
-    <div class="shop-video">
-      <video controls poster="images/shop-cover.jpg">
-        <source src="videos/shop-tour.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <p class="caption">A glimpse inside the NU-TRENDZ shopping experience</p>
-    </div>
+<!-- Video Showcase -->
+<div class="shop-video portrait">
+  <video 
+    controls 
+    autoplay 
+    muted 
+    playsinline 
+    preload="auto" 
+    class="shop-video-player portrait-video"
+  >
+    <source src="videos/shopvideos.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+  <p class="caption">A glimpse inside the NU-TRENDZ shopping experience</p>
+</div>
 
-    <!-- Image Gallery -->
-    <div class="shop-gallery">
-      <img src="images/shop2" alt="Shop Interior" />
-      <img src="images/shop2.jpg" alt="Product Display" />
-      <img src="images/shop3.jpg" alt="Customer Experience" />
-      <img src="images/shop4.jpg" alt="Shop Counter" />
+
+    <!-- ======= IMAGE SLIDESHOW ======= -->
+    <div class="shop-slideshow">
+      <div class="slides">
+        <img src="images/shop1.jpg" class="slide active" alt="Shop Interior">
+        <img src="images/shop2.jpg" class="slide" alt="Product Display">
+        <img src="images/shop3.jpg" class="slide" alt="Customer Experience">
+        <img src="images/shop4.jpg" class="slide" alt="Shop Counter">
+      </div>
+
+      <button class="prev"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="next"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
     <!-- Location Map -->
     <div class="shop-location">
       <h2>Find Us</h2>
-      <p>We’re located in the heart of Colchester — drop by and experience NU-TRENDZ in person.</p>
+      <p>
+        NU-TRENDZ — 43 St Botolph's St, Colchester CO2 7EA  
+        <br>Open daily for walk-ins and appointments.
+      </p>
       <iframe
-        src="https://www.google.com/maps?q=Colchester,+UK&output=embed"
+        src="https://www.google.com/maps?q=43+St+Botolph's+St,+Colchester+CO2+7EA&output=embed"
         width="100%"
         height="350"
         allowfullscreen=""
@@ -75,9 +99,10 @@
 
   <!-- ======= FOOTER ======= -->
   <footer>
-    <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
+    <p>&copy; 2025 Nu-Trendz. All Rights Reserved.</p>
   </footer>
 
   <script src="navbar.js"></script>
+  <script src="shop.js"></script>
 </body>
 </html>
