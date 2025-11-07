@@ -14,10 +14,17 @@
 }
 
 body {
+  min-height: 100vh;
   background: var(--bg-dark);
   color: var(--text-light);
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
+
+
+
+
 
 /* ====================== NAVBAR ====================== */
 .navbar {
@@ -25,12 +32,16 @@ body {
   top: 0;
   left: 0;
   width: 100%;
+  height: 80px;
   z-index: 10000;
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.4s ease;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navbar.shrink {
@@ -41,18 +52,18 @@ body {
 
 .nav-content {
   width: 90%;
-  margin: auto;
+  max-width: 1200px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 0;
+  padding: 0;
   transition: all 0.3s ease;
 }
 
 .logo {
   color: var(--orange);
   font-weight: 800;
-  font-size: 1.9rem;
+  font-size: 1.6rem;
   letter-spacing: 1px;
   transition: all 0.3s ease;
 }
@@ -195,6 +206,7 @@ body {
 
 /* ====================== SERVICES SECTION ====================== */
 #services-section {
+  flex: 1; /* makes the main content fill available space */
   padding: 160px 20px 80px;
 }
 .services-header {
@@ -316,6 +328,13 @@ footer {
   padding: 20px 0;
   font-size: 0.9rem;
   color: #bbb;
+  margin-top: auto; /* pushes footer to bottom */
+}
+
+
+#all-services {
+  transition: all 0.3s ease-in-out;
+  min-height: 50vh; /* prevents sudden collapse during filtering */
 }
 
 

@@ -8,13 +8,7 @@ const servicesData = {
     { name: "Box Braids / Twists with Extension", time: "3 hours", price: "from £50" },
     { name: "Cornrows with Extension", time: "2 hours", price: "from £30" }
   ],
-  "Training": [
-    { name: "Dread Locs Training", time: "12 hours", desc: "Learn different techniques ... Level 1 certificate included.", price: "£600" },
-    { name: "Individual Hairstyle", time: "5 hours", desc: "1-day training ... certificate included.", price: "£150" },
-    { name: "Level 1 – Sew-in Weave Extensions", time: "12 hours", desc: "2-day course ...", price: "£200" },
-    { name: "Level 1 – Afro Hair Maintenance", time: "12 hours", desc: "3-day course ...", price: "£300" },
-    { name: "Level 1 – Braiding Hair Extension", time: "12 hours", desc: "5-day training ...", price: "£500" }
-  ],
+
   "Extras": [
     { name: "Pre-Stretch Hair Extensions", time: "35 mins", desc: "Pre-stretch the hair extensions before braiding.", price: "£10" },
     { name: "Beads", time: "35 mins", price: "from £10" },
