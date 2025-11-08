@@ -19,6 +19,7 @@ videos.forEach(video => {
   videoObserver.observe(video);
 });
 
+
 // ===== MEDIA OVERLAY POPUP (VIDEOS & IMAGES) =====
 const overlay = document.getElementById("mediaOverlay");
 const overlayContent = document.getElementById("overlayContent");
@@ -46,6 +47,7 @@ function showMedia(src, type) {
   document.body.style.overflow = "hidden"; // disable scroll behind overlay
 }
 
+
 // ===== CLOSE OVERLAY =====
 overlay.addEventListener("click", (e) => {
   if (e.target === overlay) {
@@ -54,6 +56,7 @@ overlay.addEventListener("click", (e) => {
     document.body.style.overflow = "auto";
   }
 });
+
 
 // ===== VIDEO CLICK HANDLER =====
 videos.forEach(video => {
@@ -76,6 +79,7 @@ videos.forEach(video => {
   });
 });
 
+
 // ===== AUTO-SCROLL GALLERY (only on mobile/tablet) =====
 const scrollGallery = document.getElementById("scrollGallery");
 
@@ -96,8 +100,10 @@ if (scrollGallery && window.innerWidth <= 992) {
     }
     requestAnimationFrame(autoScroll);
   }
+
   autoScroll();
 }
+
 
 // ===== IMAGE OVERLAY WITH NAVIGATION =====
 const images = Array.from(document.querySelectorAll(".gallery-img"));
@@ -106,6 +112,7 @@ let currentIndex = 0;
 function showImage(index) {
   const img = images[index];
   if (!img) return;
+
   overlayContent.innerHTML = `<img src="${img.src}" alt="preview">`;
   overlay.style.display = "flex";
   overlay.classList.remove("video-active");
@@ -135,6 +142,7 @@ images.forEach((img, i) => {
   });
 });
 
+
 // ===== Keyboard navigation (desktop) =====
 document.addEventListener("keydown", (e) => {
   if (overlay.style.display === "flex") {
@@ -143,4 +151,6 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") overlay.click();
   }
 });
+
+
 // ===== END OF shop.js =====

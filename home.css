@@ -6,6 +6,7 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== HERO SECTION ===== */
 #home-banner {
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.5)), url('images/home_bgi.jpg') center/cover no-repeat;
   height: 100vh;
@@ -31,6 +32,15 @@ body {
   color: #ddd;
 }
 
+/* ===== CTA BUTTONS ===== */
+.cta-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
 .cta-btn {
   background: #ff9800;
   color: #111;
@@ -38,15 +48,17 @@ body {
   border-radius: 25px;
   text-decoration: none;
   font-weight: 600;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.2);
 }
 
 .cta-btn:hover {
   background: #ffb84d;
   transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
 }
 
-/* === FEATURED SECTION === */
+/* ===== FEATURED SECTION ===== */
 #featured {
   padding: 80px 10%;
   background: #111;
@@ -88,36 +100,11 @@ body {
   margin-bottom: 10px;
 }
 
+/* ===== FOOTER ===== */
 footer {
   background: #000;
   text-align: center;
   padding: 20px 0;
   font-size: 0.9rem;
   color: #bbb;
-}
-
-/* === CTA BUTTONS === */
-.cta-buttons {
-  display: flex;
-  flex-direction: column; /* stack vertically */
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.cta-btn {
-  background: #ff9800;
-  color: #111;
-  padding: 12px 35px;
-  border-radius: 25px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 10px rgba(255, 152, 0, 0.2);
-}
-
-.cta-btn:hover {
-  background: #ffb84d;
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
 }

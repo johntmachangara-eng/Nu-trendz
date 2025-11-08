@@ -1,3 +1,6 @@
+/* ==================================================
+   IMPORTS & ROOT VARIABLES
+================================================== */
 @import url('navbar.css');
 
 :root {
@@ -7,7 +10,10 @@
   --border-light: #333;
 }
 
-/* ===== GLOBAL ===== */
+
+/* ==================================================
+   GLOBAL STYLES
+================================================== */
 body {
   background: var(--bg-dark);
   color: var(--text-light);
@@ -19,7 +25,10 @@ body {
 .highlight { color: var(--orange); }
 .white-text { color: #fff; }
 
-/* ===== SHOP SECTION ===== */
+
+/* ==================================================
+   SHOP SECTION
+================================================== */
 #shop-section {
   padding: 160px 20px 80px;
   text-align: center;
@@ -37,7 +46,10 @@ body {
   margin-bottom: 50px;
 }
 
-/* ===== VIDEO SECTION ===== */
+
+/* ==================================================
+   VIDEO SECTION
+================================================== */
 .video-section {
   margin-bottom: 80px;
 }
@@ -75,7 +87,10 @@ body {
   box-shadow: 0 0 25px rgba(255, 152, 0, 0.3);
 }
 
-/* ===== SCROLL GALLERY ===== */
+
+/* ==================================================
+   SCROLL GALLERY
+================================================== */
 .gallery-section {
   margin: 80px 0;
   text-align: center;
@@ -119,7 +134,10 @@ body {
   box-shadow: 0 0 18px rgba(255, 152, 0, 0.3);
 }
 
-/* ===== AUTO SCROLL SHADOWS ===== */
+
+/* ==================================================
+   AUTO SCROLL SHADOWS
+================================================== */
 .gallery-section::before,
 .gallery-section::after {
   content: "";
@@ -141,7 +159,10 @@ body {
   background: linear-gradient(to left, var(--bg-dark), transparent);
 }
 
-/* ===== IMAGE GALLERY POPUP ===== */
+
+/* ==================================================
+   IMAGE GALLERY POPUP
+================================================== */
 .gallery-img {
   cursor: pointer;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
@@ -152,7 +173,10 @@ body {
   box-shadow: 0 0 15px rgba(255, 152, 0, 0.25);
 }
 
-/* ===== MAP SECTION ===== */
+
+/* ==================================================
+   MAP SECTION
+================================================== */
 .shop-location {
   margin-top: 80px;
 }
@@ -181,7 +205,10 @@ body {
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
 }
 
-/* ===== MEDIA OVERLAY ===== */
+
+/* ==================================================
+   MEDIA OVERLAY
+================================================== */
 .media-overlay {
   display: none;
   position: fixed;
@@ -211,6 +238,10 @@ body {
   object-fit: cover;
 }
 
+
+/* ==================================================
+   ANIMATIONS
+================================================== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -220,7 +251,10 @@ body {
   to { transform: scale(1); }
 }
 
-/* ===== OVERLAY NAVIGATION ===== */
+
+/* ==================================================
+   OVERLAY NAVIGATION
+================================================== */
 .nav-btn {
   position: absolute;
   top: 50%;
@@ -251,9 +285,14 @@ body {
 .nav-btn.next { right: 25px; }
 
 /* Hide nav buttons for videos */
-.media-overlay.video-active .nav-btn { display: none; }
+.media-overlay.video-active .nav-btn {
+  display: none;
+}
 
-/* ===== FOOTER ===== */
+
+/* ==================================================
+   FOOTER
+================================================== */
 footer {
   background: #000;
   text-align: center;
@@ -263,7 +302,10 @@ footer {
   border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-/* ===== RESPONSIVE ===== */
+
+/* ==================================================
+   RESPONSIVE STYLES
+================================================== */
 @media (max-width: 992px) {
   .portrait-video {
     max-width: 90%;
@@ -271,7 +313,9 @@ footer {
     height: auto;
   }
 
-  .overlay-content { max-width: 90%; }
+  .overlay-content {
+    max-width: 90%;
+  }
 
   .scroll-gallery img {
     width: 180px;
