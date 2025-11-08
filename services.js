@@ -286,3 +286,11 @@ window.addEventListener("scroll", () => {
   }
   lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
 });
+
+// ====== HANDLE ENTER / TICK CONFIRMATION ======
+searchInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault(); // stop form submission or refresh
+    searchInput.blur(); // hides the keyboard
+  }
+});
