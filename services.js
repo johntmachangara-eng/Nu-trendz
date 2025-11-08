@@ -241,13 +241,35 @@ searchInput.addEventListener("input", () => {
   }
 });
 
-// ====== ACCURATE CATEGORY HIGHLIGHT ON SCROLL ======
+// ====== ACCURATE CATEGORY HIGHLIGHT (scroll + click synced) ======
 const categoryBtns = Array.from(document.querySelectorAll(".category-btn"));
 const sections = Array.from(document.querySelectorAll(".category-section"));
 
-// Use scroll listener instead of observer for precise control
+let manualClick = false; // flag to track user clicking
+
+// When a category is clicked
+categoryBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    manualClick = true;
+    categoryBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const targetId = `cat-${btn.textContent.replace(/\s+/g, "-")}`;
+    document.getElementById(targetId)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+    // reset the manualClick flag after scroll completes
+    setTimeout(() => (manualClick = false), 800);
+  });
+});
+
+// Scroll listener — only updates highlight when NOT in manual click mode
 window.addEventListener("scroll", () => {
-  const scrollPosition = window.scrollY + 200; // Adjust offset for your layout
+  if (manualClick) return; // prevent overriding while a click scrolls
+
+  const scrollPosition = window.scrollY + 200;
   let currentSectionId = "";
 
   sections.forEach(section => {
@@ -258,20 +280,18 @@ window.addEventListener("scroll", () => {
     }
   });
 
-  // Update active category button
   if (currentSectionId) {
     const activeCategory = currentSectionId.replace("cat-", "").replace(/-/g, " ");
     categoryBtns.forEach(btn => {
       const isActive = btn.textContent.toLowerCase() === activeCategory.toLowerCase();
       btn.classList.toggle("active", isActive);
-
       if (isActive) {
-        // Center the active category smoothly
         btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       }
     });
   }
 });
+
 
 // ====== SHRINK NAVBAR ON SCROLL ======
 const navbar = document.getElementById("navbar");

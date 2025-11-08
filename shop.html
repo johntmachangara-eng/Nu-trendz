@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NU TRENDZ | Shop</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="navbar.css" />
+  <title>NU-TRENDZ | Shop</title>
   <link rel="stylesheet" href="shop.css" />
-
-  <!-- Fonts & Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="navbar.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -28,11 +25,11 @@
       </label>
 
       <ul class="nav-links" id="nav-links">
-        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="services.html">Services</a></li>
         <li><a href="reviews.html">Reviews</a></li>
-        <li><a href="shop.html">Shop</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="profile.html">Profile</a></li>
       </ul>
@@ -45,54 +42,72 @@
   <!-- ======= SHOP SECTION ======= -->
   <section id="shop-section">
     <div class="shop-header">
-      <h1>NU-TRENDZ Shop</h1>
-      <p>Step inside our store, browse our collection, and enjoy the full experience.</p>
+      <h1><span class="highlight">Inside</span> NU-TRENDZ</h1>
+      <p>Step inside our shop and explore <span class="white-text">authentic hair care</span> and <span class="white-text">premium styles</span>.</p>
     </div>
 
-    <!-- ===== VIDEO SHOWCASE ===== -->
-    <div class="shop-video">
-      <video 
-        controls 
-        autoplay 
-        muted 
-        playsinline 
-        preload="auto" 
-        class="portrait-video"
-      >
-        <source src="videos/My Video.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <p class="caption">A glimpse inside the NU-TRENDZ shopping experience</p>
-    </div>
+<!-- ======= VIDEO 1 ======= -->
+<div class="video-section">
+  <h2 class="highlight">Shop Experience</h2>
+  <p>Take a look inside our store — discover <span class="white-text">hair products</span>, wigs, and accessories.</p>
+  <div class="media-frame">
+    <video class="portrait-video" muted loop playsinline preload="metadata" poster="images/shop-cover1.jpg">
+      <source src="videos/shop_walkthrough.mp4" type="video/mp4" />
+    </video>
+  </div>
+</div>
 
-    <!-- ===== IMAGE SLIDESHOW ===== -->
-    <div class="shop-slideshow">
-      <div class="slides">
-        <img src="images/hair-1.jpeg" class="slide active" alt="Shop Interior">
-        <img src="images/hair-2.jpeg" class="slide" alt="Product Display">
-        <img src="images/hair-3.jpeg" class="slide" alt="Customer Experience">
-        <img src="images/hair-4.jpeg" class="slide" alt="Shop Counter">
-      </div>
+<!-- ======= VIDEO 2 ======= -->
+<div class="video-section">
+  <h2 class="highlight">Personal Assistance</h2>
+  <p>Watch our stylists help customers find their <span class="white-text">perfect wig</span> or <span class="white-text">ideal product</span>.</p>
+  <div class="media-frame">
+    <video class="portrait-video" muted loop playsinline preload="metadata" poster="images/shop-cover2.jpg">
+      <source src="videos/shop_customerexp.mp4" type="video/mp4" />
+    </video>
+  </div>
+</div>
 
-      <button class="prev"><i class="fa-solid fa-chevron-left"></i></button>
-      <button class="next"><i class="fa-solid fa-chevron-right"></i></button>
-    </div>
+<!-- ======= AUTO SCROLL GALLERY ======= -->
+<div class="gallery-section">
+  <h2 class="highlight">Inside Our Store</h2>
+  <div class="scroll-gallery" id="scrollGallery">
+    <img src="images/shoppic7.jpg" alt="Customer Area" class="gallery-img" />
+    <img src="images/shoppic8.jpg" alt="Wig Wall" class="gallery-img" />
+    <img src="images/shoppic9.jpg" alt="Display" class="gallery-img" />
+    <img src="images/shoppic10.jpg" alt="Shop Interior" class="gallery-img" />
+    <img src="images/shoppic3.jpg" alt="Reception Area" class="gallery-img" />
+    <img src="images/shoppic4.jpg" alt="Entrance" class="gallery-img" />
+    <img src="images/shoppic1.jpg" alt="Store Front" class="gallery-img" />
+    <img src="images/shoppic2.jpg" alt="Hair Products" class="gallery-img" />
+    <img src="images/shoppic5.jpg" alt="Front Counter" class="gallery-img" />
+    <img src="images/shoppic6.jpg" alt="Products" class="gallery-img" />
+  </div>
+</div>
 
-    <!-- ===== LOCATION MAP ===== -->
+<!-- ======= MEDIA OVERLAY ======= -->
+<div class="media-overlay" id="mediaOverlay">
+  <button class="nav-btn prev" id="prevBtn">&#10094;</button>
+  <div class="overlay-content" id="overlayContent"></div>
+  <button class="nav-btn next" id="nextBtn">&#10095;</button>
+</div>
+
+
+    <!-- Location -->
     <div class="shop-location">
-      <h2>Find Us</h2>
-      <p>43 St Botolph's St, Colchester CO2 7EA</p>
-      <iframe
-        src="https://www.google.com/maps?q=43+St+Botolph's+St,+Colchester+CO2+7EA&output=embed"
-        width="100%"
-        height="350"
-        allowfullscreen=""
-        loading="lazy"
-      ></iframe>
+      <h2 class="highlight">Find Us</h2>
+      <p>Visit us at <strong class="white-text">43 St Botolph's St, Colchester CO2 7EA</strong>.</p>
+      <div class="map-container">
+        <iframe
+          src="https://www.google.com/maps?q=43+St+Botolph's+St,+Colchester+CO2+7EA&output=embed"
+          allowfullscreen
+          loading="lazy">
+        </iframe>
+      </div>
     </div>
   </section>
 
-  <!-- ======= FOOTER ======= -->
+  <!-- Footer -->
   <footer>
     <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
   </footer>
