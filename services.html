@@ -5,9 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NU TRENDZ - Services</title>
   <link rel="stylesheet" href="services.css" />
-</head>
-<body>
+  <!-- Font Awesome for Basket Icon -->
+  <!-- Font Awesome CDN -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
 
+</head>
+
+<body>
   <!-- ======= NAVBAR ======= -->
   <nav class="navbar" id="navbar">
     <div class="nav-content">
@@ -21,9 +28,9 @@
       </label>
 
       <ul class="nav-links" id="nav-links">
-        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About</a></li>
-        <li><a href="services.html">Services</a></li>
+        <li><a href="services.html" class="active">Services</a></li>
         <li><a href="reviews.html">Reviews</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="contact.html">Contact</a></li>
@@ -32,7 +39,7 @@
     </div>
   </nav>
 
-  <!-- Floating Logo -->
+  <!-- ======= FLOATING LOGO ======= -->
   <div class="floating-logo" id="floatingLogo">NU-TRENDZ</div>
 
   <!-- ======= FLOATING CATEGORY SCROLL BAR ======= -->
@@ -40,7 +47,7 @@
     <div class="categories" id="floatingCategories"></div>
   </div>
 
-  <!-- ====== SERVICES SECTION ====== -->
+  <!-- ======= SERVICES SECTION ======= -->
   <section id="services-section">
     <div class="services-header">
       <h1>Our Services</h1>
@@ -50,10 +57,10 @@
     <!-- SEARCH BAR -->
     <div class="search-bar">
       <input 
-      type="search" 
-      id="serviceSearch" 
-      placeholder="Search for a service..." 
-      enterkeyhint="search" 
+        type="search" 
+        id="serviceSearch" 
+        placeholder="Search for a service..." 
+        enterkeyhint="search" 
       />
     </div>
 
@@ -66,9 +73,33 @@
     <p>&copy; 2025 Nu-Trendz. All Rights Reserved.</p>
   </footer>
 
-<!-- JS -->
-<script src="navbar.js"></script>
-<script src="services.js"></script> <!-- Only on services.html -->
+  <div class="basket-icon" id="basketIcon">
+  <i class="fa-solid fa-basket-shopping"></i>
+  <span class="basket-count" id="basketCount">0</span>
+  </div>
 
+
+
+  <!-- ===== BASKET PANEL ===== -->
+  <div class="basket-panel" id="basketPanel">
+    <div class="basket-header">
+      <h3>Your Basket</h3>
+      <button id="closeBasket" class="remove-btn">&times;</button>
+    </div>
+
+    <div class="basket-list" id="basketList"></div>
+
+    <div class="basket-total" style="text-align:center;margin-top:10px;">
+      <p>Total: <span id="basketTotal">£0</span></p>
+    </div>
+
+    <div class="basket-footer">
+      <button class="proceed-btn" id="proceedBooking">Proceed to Booking</button>
+    </div>
+  </div>
+
+  <!-- ======= SCRIPTS ======= -->
+  <script src="navbar.js"></script>
+  <script src="services.js"></script>
 </body>
 </html>

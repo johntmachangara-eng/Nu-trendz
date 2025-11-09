@@ -314,3 +314,94 @@ searchInput.addEventListener("keydown", (event) => {
     searchInput.blur(); // hides the keyboard
   }
 });
+
+
+// ===== BASKET SYSTEM =====
+const basketIcon = document.getElementById("basketIcon");
+const basketPanel = document.getElementById("basketPanel");
+const closeBasket = document.getElementById("closeBasket");
+const basketList = document.getElementById("basketList");
+const basketCount = document.getElementById("basketCount");
+const basketTotal = document.getElementById("basketTotal");
+const proceedBooking = document.getElementById("proceedBooking");
+
+// Initialize basket from localStorage
+let basket = JSON.parse(localStorage.getItem("basket")) || [];
+
+// Update basket display
+function updateBasket() {
+  basketList.innerHTML = "";
+  basketCount.textContent = basket.length;
+
+  if (basket.length === 0) {
+    basketList.innerHTML = "<p style='color:#aaa;text-align:center;'>No services selected.</p>";
+    basketTotal.textContent = "£0";
+  } else {
+    let total = 0;
+
+    basket.forEach((item, i) => {
+      const priceValue = parseFloat(item.price.replace(/[^\d.]/g, "")) || 0;
+      total += priceValue;
+
+      const div = document.createElement("div");
+      div.classList.add("basket-item");
+      div.innerHTML = `
+        <span>${item.name}</span>
+        <button class="remove-btn" data-index="${i}">&times;</button>
+      `;
+      basketList.appendChild(div);
+    });
+
+    basketTotal.textContent = `£${total.toFixed(2)}`;
+  }
+
+  localStorage.setItem("basket", JSON.stringify(basket));
+}
+
+updateBasket();
+
+// Add event listener for "Add to Basket"
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("book-btn")) {
+    e.preventDefault();
+
+    const card = e.target.closest(".service-card");
+    const name = card.querySelector("h3").textContent;
+    const price = card.querySelector(".service-price").textContent;
+    const time = card.querySelector(".service-time")?.textContent || "";
+
+    const service = { name, price, time };
+    basket.push(service);
+    updateBasket();
+
+    e.target.textContent = "Added ✓";
+    e.target.style.background = "#555";
+    setTimeout(() => {
+      e.target.textContent = "In Basket";
+      e.target.style.background = "var(--orange)";
+    }, 1000);
+  }
+});
+
+// Remove items from basket
+basketList.addEventListener("click", (e) => {
+  if (e.target.classList.contains("remove-btn")) {
+    const index = e.target.dataset.index;
+    basket.splice(index, 1);
+    updateBasket();
+  }
+});
+
+// Open/Close Basket
+basketIcon.addEventListener("click", () => basketPanel.classList.toggle("open"));
+closeBasket.addEventListener("click", () => basketPanel.classList.remove("open"));
+
+// Proceed to Booking
+proceedBooking.addEventListener("click", () => {
+  if (basket.length === 0) {
+    alert("Please select at least one service.");
+    return;
+  }
+  window.location.href = "booking.html";
+});
+

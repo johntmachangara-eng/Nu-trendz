@@ -6,6 +6,7 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== ABOUT SECTION ===== */
 #about {
   min-height: 100vh;
   padding: 100px 10%;
@@ -13,17 +14,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 
 .about-container {
-  display: flex;
-  align-items: center;
-  gap: 60px;
-  flex-wrap: wrap;
-}
-
-.about-text {
-  flex: 1;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .about-text h1 {
@@ -42,10 +38,12 @@ body {
   margin-bottom: 40px;
 }
 
+/* ===== ABOUT CARDS ===== */
 .about-cards {
   display: flex;
-  gap: 25px;
+  justify-content: center;
   flex-wrap: wrap;
+  gap: 25px;
 }
 
 .about-card {
@@ -70,17 +68,31 @@ body {
   margin-bottom: 10px;
 }
 
-.about-image img {
-  width: 400px;
-  border-radius: 16px;
-  border: 2px solid #ff9800;
-  box-shadow: 0 0 20px rgba(255,152,0,0.3);
-}
-
+/* ===== FOOTER ===== */
 footer {
   background: #000;
   text-align: center;
   padding: 20px;
   color: #bbb;
   font-size: 0.9rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  #about {
+    padding: 80px 8%;
+  }
+
+  .about-text h1 {
+    font-size: 2rem;
+  }
+
+  .about-text p {
+    font-size: 1rem;
+  }
+
+  .about-card {
+    width: 90%;
+    max-width: 300px;
+  }
 }
