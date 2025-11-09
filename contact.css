@@ -1,0 +1,108 @@
+@import url('navbar.css');
+
+:root {
+  --orange: #ff9800;
+  --bg-dark: #0a0a0a;
+  --text-light: #fff;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-light);
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.highlight {
+  color: var(--orange);
+}
+
+/* ===== CONTACT SECTION ===== */
+#contact-section {
+  padding: 160px 20px 100px;
+  text-align: center;
+}
+
+.contact-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 10px;
+  color: var(--orange);
+}
+
+.contact-header p {
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+}
+
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #111;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.1);
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: white;
+  font-size: 1rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.2);
+}
+
+.cta-btn {
+  background: var(--orange);
+  color: #111;
+  padding: 12px 35px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.cta-btn:hover {
+  background: #ffb84d;
+  transform: scale(1.05);
+}
+
+#form-status {
+  margin-top: 15px;
+  color: #ccc;
+  font-size: 0.95rem;
+}
+
+footer {
+  background: #000;
+  text-align: center;
+  padding: 20px 0;
+  color: #bbb;
+  font-size: 0.9rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
