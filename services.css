@@ -31,6 +31,12 @@ html {
   scroll-behavior: smooth;
 }
 
+/* When basket is open, prevent background scrolling */
+body.no-scroll {
+  overflow: hidden;
+}
+
+
 body {
   min-height: 100vh;
   background: var(--bg-dark);
@@ -386,6 +392,7 @@ footer {
 
 
 /* ====================== BASKET PANEL ====================== */
+/* Basket panel base */
 .basket-panel {
   position: fixed;
   top: 0;
@@ -400,7 +407,23 @@ footer {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  overflow-y: auto;
 }
+
+/* Make the basket fully visible on small screens */
+@media (max-width: 768px) {
+  .basket-panel {
+    width: 80%;          /* ✅ 80% width */
+    height: 100%;        /* ✅ full height */
+    border-left: none;
+    border-top: 2px solid var(--orange);
+    right: -100%;
+  }
+  .basket-panel.open {
+    right: 0;
+  }
+}
+
 .basket-panel.open {
   right: 0;
 }
@@ -429,14 +452,21 @@ footer {
   color: #ddd;
   font-size: 0.9rem;
 }
-.remove-btn {
+/* Larger close button in basket panel */
+#closeBasket {
   background: none;
   border: none;
-  color: #ff5555;
-  font-size: 1rem;
+  color: var(--orange);
+  font-size: 2rem; /* bigger, visible */
+  font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
+#closeBasket:hover {
+  color: var(--orange-light);
+  transform: scale(1.2);
+}
+
 .remove-btn:hover {
   color: #ff7777;
   transform: scale(1.1);

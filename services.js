@@ -393,8 +393,18 @@ basketList.addEventListener("click", (e) => {
 });
 
 // Open/Close Basket
-basketIcon.addEventListener("click", () => basketPanel.classList.toggle("open"));
-closeBasket.addEventListener("click", () => basketPanel.classList.remove("open"));
+// Open Basket
+basketIcon.addEventListener("click", () => {
+  basketPanel.classList.add("open");
+  document.body.classList.add("no-scroll"); // ✅ stop background scroll
+});
+
+// Close Basket
+closeBasket.addEventListener("click", () => {
+  basketPanel.classList.remove("open");
+  document.body.classList.remove("no-scroll"); // ✅ allow scroll again
+});
+
 
 // Proceed to Booking
 proceedBooking.addEventListener("click", () => {
