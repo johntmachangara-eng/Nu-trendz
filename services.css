@@ -1,10 +1,29 @@
 /* ============================================================
-   NU-TRENDZ SERVICES PAGE STYLESHEET
-   Enhanced Version - Fully Responsive + Animated (500+ lines)
-   ============================================================ */
+  NU-TRENDZ SERVICES PAGE STYLESHEET
+  Enhanced Version - Fully Responsive + Animated
+  ============================================================ */
 
-/* ====================== CSS VARIABLES ====================== */
+/* ====================== TABLE OF CONTENTS ======================
+  1. CSS Variables
+  2. Reset & Base Styles
+  3. Typography
+  4. Layout Components
+    - Navbar
+    - Floating Categories
+    - Services Section
+    - Footer
+  5. Interactive Elements
+    - Buttons
+    - Forms
+    - Basket System
+  6. Animations
+  7. Responsive Design
+  8. Utility Classes
+  ============================================================ */
+
+/* ====================== 1. CSS VARIABLES ====================== */
 :root {
+  /* Colors */
   --orange: #ff9800;
   --orange-light: #ffb84d;
   --orange-dark: #e68a00;
@@ -13,13 +32,15 @@
   --text-light: #fff;
   --text-muted: #ccc;
   --border-light: #333;
+  
+  /* Effects */
   --shadow-glow: 0 0 15px rgba(255, 152, 0, 0.35);
   --shadow-strong: 0 0 25px rgba(255, 152, 0, 0.45);
   --transition-fast: all 0.3s ease;
   --transition-slow: all 0.6s ease;
 }
 
-/* ====================== RESET & GLOBAL ====================== */
+/* ====================== 2. RESET & BASE STYLES ====================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -31,12 +52,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* When basket is open, prevent background scrolling */
-body.no-scroll {
-  overflow: hidden;
-}
-
-
 body {
   min-height: 100vh;
   background: var(--bg-dark);
@@ -47,19 +62,46 @@ body {
   line-height: 1.6;
 }
 
-/* Scrollbar styling */
+body.no-scroll {
+  overflow: hidden;
+}
+
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 10px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--orange);
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-track {
   background: #111;
 }
 
-/* ====================== NAVBAR ====================== */
+/* ====================== 3. TYPOGRAPHY ====================== */
+.services-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.services-header p {
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-top: 10px;
+}
+
+.glow-orange {
+  color: var(--orange);
+  text-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+}
+
+/* ====================== 4. LAYOUT COMPONENTS ====================== */
+
+/* --- Navbar --- */
 .navbar {
   position: fixed;
   top: 0;
@@ -83,7 +125,6 @@ body {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
 }
 
-
 .nav-content {
   width: 90%;
   max-width: 1200px;
@@ -101,17 +142,18 @@ body {
   text-transform: uppercase;
   transition: var(--transition-fast);
 }
+
 .logo:hover {
   color: var(--orange-light);
   text-shadow: var(--shadow-glow);
 }
 
-/* Nav Links */
 .nav-links {
   list-style: none;
   display: flex;
   gap: 25px;
 }
+
 .nav-links a {
   text-decoration: none;
   color: var(--text-light);
@@ -119,9 +161,11 @@ body {
   transition: var(--transition-fast);
   position: relative;
 }
+
 .nav-links a:hover {
   color: var(--orange);
 }
+
 .nav-links a.active::after {
   content: "";
   position: absolute;
@@ -142,6 +186,7 @@ body {
   justify-content: space-between;
   cursor: pointer;
 }
+
 .bar {
   height: 3px;
   width: 100%;
@@ -149,20 +194,24 @@ body {
   border-radius: 3px;
   transition: var(--transition-fast);
 }
+
 #menu-toggle {
   display: none;
 }
+
 #menu-toggle:checked + .menu-icon .bar:nth-child(1) {
   transform: rotate(45deg) translateY(8px);
 }
+
 #menu-toggle:checked + .menu-icon .bar:nth-child(2) {
   opacity: 0;
 }
+
 #menu-toggle:checked + .menu-icon .bar:nth-child(3) {
   transform: rotate(-45deg) translateY(-8px);
 }
 
-/* ====================== FLOATING CATEGORIES ====================== */
+/* --- Floating Categories --- */
 .floating-categories {
   position: sticky;
   top: 80px;
@@ -174,39 +223,19 @@ body {
   padding: 12px 0;
   overflow-x: auto;
 }
+
 .floating-categories::-webkit-scrollbar {
   display: none;
 }
+
 .categories {
   display: flex;
   gap: 10px;
   padding: 0 25px;
   justify-content: flex-start;
 }
-.category-btn {
-  background: var(--bg-dark);
-  border: 1px solid var(--border-light);
-  color: var(--text-light);
-  padding: 10px 22px;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  white-space: nowrap;
-  opacity: 0.85;
-}
-.category-btn:hover,
-.category-btn.active {
-  background: var(--orange);
-  color: var(--bg-dark);
-  opacity: 1;
-  transform: scale(1.05);
-}
-.category-btn.active {
-  font-weight: 700;
-  box-shadow: var(--shadow-glow);
-}
 
-/* ====================== SERVICES SECTION ====================== */
+/* --- Services Section --- */
 #services-section {
   flex: 1;
   padding: 220px 20px 80px;
@@ -217,49 +246,18 @@ body {
   transition: var(--transition-fast);
   min-height: 50vh;
 }
+
 .services-header {
   text-align: center;
   margin-bottom: 60px;
   animation: fadeIn 1.2s ease both;
 }
-.services-header h1 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  color: var(--orange);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-.services-header p {
-  color: #ccc;
-  font-size: 1.1rem;
-  margin-top: 10px;
-}
 
-/* Search Bar */
-.search-bar {
-  text-align: center;
-  margin-bottom: 40px;
-}
-.search-bar input {
-  width: 60%;
-  max-width: 450px;
-  padding: 12px 15px;
-  border-radius: 25px;
-  border: 1px solid var(--orange);
-  background: var(--bg-dark);
-  color: var(--text-light);
-  font-size: 1rem;
-  transition: var(--transition-fast);
-}
-.search-bar input:focus {
-  outline: none;
-  box-shadow: var(--shadow-glow);
-}
-
-/* Category Sections */
 .category-section {
   margin-bottom: 80px;
   scroll-margin-top: 150px;
 }
+
 .category-section h2 {
   color: var(--orange);
   margin-bottom: 25px;
@@ -269,7 +267,6 @@ body {
   letter-spacing: 1px;
 }
 
-/* Service Grid */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -278,7 +275,6 @@ body {
   margin: 0 auto;
 }
 
-/* Service Card */
 .service-card {
   background: var(--bg-light);
   border: 1px solid var(--border-light);
@@ -290,47 +286,40 @@ body {
   transition: var(--transition-fast);
   animation: fadeInUp 0.8s ease both;
 }
+
 .service-card:hover {
   transform: translateY(-6px);
   border-color: var(--orange);
   box-shadow: var(--shadow-strong);
 }
+
+.service-card:hover h3 {
+  text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+}
+
 .service-card h3 {
   color: var(--orange);
   font-size: 1.2rem;
 }
+
 .service-time {
   color: var(--text-muted);
   font-style: italic;
   font-size: 0.9rem;
 }
+
 .service-desc {
   color: #eee;
   font-size: 0.9rem;
   margin: 10px 0;
 }
+
 .service-price {
   color: var(--orange);
   font-weight: bold;
 }
-.book-btn {
-  margin-top: 10px;
-  background: var(--orange);
-  color: #111;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: var(--transition-fast);
-}
-.book-btn:hover {
-  background: var(--orange-dark);
-  transform: scale(1.05);
-  box-shadow: var(--shadow-glow);
-}
 
-/* ====================== FOOTER ====================== */
+/* --- Footer --- */
 footer {
   background: #000;
   text-align: center;
@@ -342,13 +331,110 @@ footer {
   border-top: 1px solid #222;
 }
 
-/* ====================== BASKET ICON ====================== */
+/* ====================== 5. INTERACTIVE ELEMENTS ====================== */
+
+/* --- Buttons --- */
+.category-btn {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-light);
+  color: var(--text-light);
+  padding: 10px 22px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.category-btn:hover,
+.category-btn.active {
+  background: var(--orange);
+  color: var(--bg-dark);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.category-btn.active {
+  font-weight: 700;
+  box-shadow: var(--shadow-glow);
+}
+
+.category-btn.active::before {
+  content: "●";
+  margin-right: 8px;
+  color: #111;
+}
+
+.book-btn {
+  margin-top: 10px;
+  background: var(--orange);
+  color: #111;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: var(--transition-fast);
+}
+
+.book-btn:hover {
+  background: var(--orange-dark);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+.proceed-btn {
+  background: var(--orange);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  color: #111;
+  font-size: 1rem;
+}
+
+.proceed-btn:hover {
+  background: var(--orange-light);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* --- Forms --- */
+.search-bar {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.search-bar input {
+  width: 60%;
+  max-width: 450px;
+  padding: 12px 15px;
+  border-radius: 25px;
+  border: 1px solid var(--orange);
+  background: var(--bg-dark);
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+
+.search-bar input:focus {
+  outline: none;
+  box-shadow: var(--shadow-glow);
+}
+
+/* --- Basket System --- */
 .basket-icon {
   position: fixed;
   bottom: 30px;
   right: 30px;
   background: var(--orange);
-  color: #fff; /* white icon for visibility */
+  color: #fff;
   border-radius: 50%;
   width: 60px;
   height: 60px;
@@ -365,13 +451,13 @@ footer {
 .basket-icon:hover {
   transform: scale(1.1);
   background: var(--orange-light);
-  color: #111; /* dark icon on hover for contrast */
+  color: #111;
 }
 
 .basket-icon i {
   pointer-events: none;
   font-size: 1.8rem;
-  color: inherit; /* inherits white color */
+  color: inherit;
 }
 
 .basket-count {
@@ -390,9 +476,6 @@ footer {
   align-items: center;
 }
 
-
-/* ====================== BASKET PANEL ====================== */
-/* Basket panel base */
 .basket-panel {
   position: fixed;
   top: 0;
@@ -410,23 +493,11 @@ footer {
   overflow-y: auto;
 }
 
-/* Make the basket fully visible on small screens */
-@media (max-width: 768px) {
-  .basket-panel {
-    width: 80%;          /* ✅ 80% width */
-    height: 100%;        /* ✅ full height */
-    border-left: none;
-    border-top: 2px solid var(--orange);
-    right: -100%;
-  }
-  .basket-panel.open {
-    right: 0;
-  }
-}
-
 .basket-panel.open {
   right: 0;
+  animation: slideInRight 0.5s ease forwards;
 }
+
 .basket-header {
   display: flex;
   justify-content: space-between;
@@ -434,6 +505,22 @@ footer {
   color: var(--orange);
   margin-bottom: 20px;
 }
+
+#closeBasket {
+  background: none;
+  border: none;
+  color: var(--orange);
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+#closeBasket:hover {
+  color: var(--orange-light);
+  transform: scale(1.2);
+}
+
 .basket-list {
   flex: 1;
   overflow-y: auto;
@@ -441,234 +528,258 @@ footer {
   scrollbar-width: thin;
   scrollbar-color: var(--orange) #111;
 }
+
+/* ====== Basket Items ====== */
 .basket-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #333;
   padding: 10px 0;
+  flex-wrap: wrap;
 }
-.basket-item span {
-  color: #ddd;
+
+.basket-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.basket-item-name {
+  color: #fff;
+  font-weight: 600;
+}
+
+.basket-item-price {
+  color: var(--orange);
   font-size: 0.9rem;
 }
-/* Larger close button in basket panel */
-#closeBasket {
-  background: none;
+
+/* ====== Remove Button ====== */
+.basket-remove-btn {
+  background: #ff4444;
   border: none;
-  color: var(--orange);
-  font-size: 2rem; /* bigger, visible */
+  color: #fff;
   font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s ease;
-}
-#closeBasket:hover {
-  color: var(--orange-light);
-  transform: scale(1.2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  font-size: 0.85rem;
 }
 
-.remove-btn:hover {
-  color: #ff7777;
-  transform: scale(1.1);
-}
-.basket-total {
-  border-top: 1px solid #333;
-  padding-top: 10px;
-  text-align: right;
-  font-weight: bold;
-  color: var(--orange);
-  font-size: 1.1rem;
-}
-.basket-footer {
-  text-align: center;
-  margin-top: 20px;
-}
-.proceed-btn {
-  background: var(--orange);
-  border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-  color: #111;
-  font-size: 1rem;
-}
-.proceed-btn:hover {
-  background: var(--orange-light);
+.basket-remove-btn:hover {
+  background: #ff6666;
   transform: scale(1.05);
-  box-shadow: var(--shadow-glow);
 }
 
-/* ====================== ANIMATIONS ====================== */
+.basket-remove-btn i {
+  font-size: 0.9rem;
+}
+
+@keyframes basketShake {
+  0%   { transform: translateZ(0) rotate(0deg); }
+  15%  { transform: rotate(-12deg); }
+  30%  { transform: rotate(10deg); }
+  45%  { transform: rotate(-8deg); }
+  60%  { transform: rotate(6deg); }
+  75%  { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+.basket-icon.nudge {
+  animation: basketShake 0.6s ease-in-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .basket-icon.nudge { animation: none !important; }
+}
+
+
+/* ====================== 6. ANIMATIONS ====================== */
 @keyframes fadeIn {
   from {
-    opacity: 0;
+   opacity: 0;
   }
   to {
-    opacity: 1;
+   opacity: 1;
   }
 }
+
 @keyframes fadeInUp {
   from {
-    opacity: 0;
-    transform: translateY(20px);
+   opacity: 0;
+   transform: translateY(20px);
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
+   opacity: 1;
+   transform: translateY(0);
   }
 }
+
+@keyframes slideInRight {
+  from {
+   right: -400px;
+   opacity: 0.5;
+  }
+  to {
+   right: 0;
+   opacity: 1;
+  }
+}
+
 @keyframes glowPulse {
   0% {
-    box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
+   box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
   }
   50% {
-    box-shadow: 0 0 25px rgba(255, 152, 0, 0.5);
+   box-shadow: 0 0 25px rgba(255, 152, 0, 0.5);
   }
   100% {
-    box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
+   box-shadow: 0 0 5px rgba(255, 152, 0, 0.3);
   }
 }
 
-/* ====================== RESPONSIVE DESIGN ====================== */
+/* ====================== 7. RESPONSIVE DESIGN ====================== */
+
+/* Large Desktops */
 @media (max-width: 1200px) {
   .nav-links {
-    gap: 15px;
+   gap: 15px;
   }
 }
+
+/* Tablets */
 @media (max-width: 992px) {
   .menu-icon {
-    display: flex;
+   display: flex;
   }
+  
   .nav-links {
-    position: fixed;
-    top: 70px;
-    right: 10px;
-    background: rgba(15, 15, 15, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px 25px;
-    gap: 15px;
-    width: 70%;
-    max-width: 280px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-    display: none;
-    animation: fadeIn 0.4s ease forwards;
+   position: fixed;
+   top: 70px;
+   right: 10px;
+   background: rgba(15, 15, 15, 0.95);
+   backdrop-filter: blur(20px);
+   border-radius: 16px;
+   flex-direction: column;
+   align-items: flex-start;
+   padding: 20px 25px;
+   gap: 15px;
+   width: 70%;
+   max-width: 280px;
+   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+   display: none;
+   animation: fadeIn 0.4s ease forwards;
   }
+  
   #menu-toggle:checked ~ .nav-links {
-    display: flex;
+   display: flex;
   }
+  
   .nav-links a {
-    font-size: 1.1rem;
-    font-weight: 600;
+   font-size: 1.1rem;
+   font-weight: 600;
   }
+  
   .search-bar input {
-    width: 80%;
+   width: 80%;
   }
+  
   .basket-panel {
-    width: 100%;
-    max-width: 360px;
+   width: 100%;
+   max-width: 360px;
   }
 }
+
+/* Mobile Devices */
 @media (max-width: 768px) {
   .search-bar input {
-    width: 90%;
+   width: 90%;
   }
+  
   .category-btn {
-    padding: 8px 16px;
-    font-size: 0.9rem;
+   padding: 8px 16px;
+   font-size: 0.9rem;
   }
+  
   .basket-icon {
-    width: 55px;
-    height: 55px;
-    font-size: 1.3rem;
+   width: 55px;
+   height: 55px;
+   font-size: 1.3rem;
   }
+  
   .basket-panel {
-    width: 85%;
+   width: 80%;
+   height: 100%;
+   border-left: none;
+   border-top: 2px solid var(--orange);
+   right: -100%;
   }
+  
+  .basket-panel.open {
+   right: 0;
+  }
+  
   .service-card {
-    padding: 20px;
+   padding: 20px;
   }
 }
+
+/* Small Mobile */
 @media (max-width: 600px) {
   .logo {
-    font-size: 1.3rem;
+   font-size: 1.3rem;
   }
+  
   .service-grid {
-    width: 100%;
-    gap: 20px;
+   width: 100%;
+   gap: 20px;
   }
+  
   .service-card h3 {
-    font-size: 1rem;
+   font-size: 1rem;
   }
+  
   .proceed-btn {
-    padding: 10px 20px;
-    font-size: 0.95rem;
+   padding: 10px 20px;
+   font-size: 0.95rem;
   }
+  
   footer {
-    font-size: 0.8rem;
+   font-size: 0.8rem;
   }
 }
+
+/* Extra Small Mobile */
 @media (max-width: 400px) {
   .basket-panel {
-    width: 100%;
+   width: 100%;
   }
+  
   .book-btn {
-    padding: 8px 15px;
+   padding: 8px 15px;
   }
+  
   .category-btn {
-    padding: 7px 14px;
+   padding: 7px 14px;
   }
 }
 
-/* ====================== HOVER / INTERACTION ====================== */
-button,
-a,
-input {
-  transition: var(--transition-fast);
-}
-button:active {
-  transform: scale(0.97);
-}
-
-/* ====================== UTILITY CLASSES ====================== */
+/* ====================== 8. UTILITY CLASSES ====================== */
 .text-center {
   text-align: center;
 }
+
 .mt-20 {
   margin-top: 20px;
 }
+
 .mt-40 {
   margin-top: 40px;
 }
-.glow-orange {
-  color: var(--orange);
-  text-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
-}
 
-/* ====================== EXTRA VISUAL EFFECTS ====================== */
-.service-card:hover h3 {
-  text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
-}
-.category-btn.active::before {
-  content: "●";
-  margin-right: 8px;
-  color: #111;
-}
-.basket-panel.open {
-  animation: slideInRight 0.5s ease forwards;
-}
-@keyframes slideInRight {
-  from {
-    right: -400px;
-    opacity: 0.5;
-  }
-  to {
-    right: 0;
-    opacity: 1;
-  }
-}
 /* ====================== END OF SERVICES.CSS ====================== */
+
+
