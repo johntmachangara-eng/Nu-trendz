@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NU TRENDZ - Services</title>
+  <meta name="description" content="Professional braids, locs, and hair styling services by Nu-Trendz." />
+  <title>Nu-Trendz | Services</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- Styles -->
   <link rel="stylesheet" href="services.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body>
   <!-- ======= NAVBAR ======= -->
-  <nav class="navbar" id="navbar">
+  <nav class="navbar" id="navbar" role="navigation">
     <div class="nav-content">
-      <h1 class="logo">NU-TRENDZ</h1>
+      <a href="index.html" class="logo" aria-label="Nu-Trendz Home">NU-TRENDZ</a>
 
-      <input type="checkbox" id="menu-toggle">
-      <label for="menu-toggle" class="menu-icon">
+      <!-- Mobile Menu Toggle -->
+      <input type="checkbox" id="menu-toggle" />
+      <label for="menu-toggle" class="menu-icon" aria-label="Toggle menu">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
@@ -30,73 +35,64 @@
         <li><a href="reviews.html">Reviews</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="profile.html">Profile</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- ======= FLOATING LOGO ======= -->
-  <div class="floating-logo" id="floatingLogo">NU-TRENDZ</div>
-
-  <!-- ======= FLOATING CATEGORY SCROLL BAR ======= -->
+  <!-- ======= FLOATING CATEGORY BAR ======= -->
   <div class="floating-categories">
     <div class="categories" id="floatingCategories"></div>
   </div>
 
-  <!-- ======= SERVICES SECTION ======= -->
-  <section id="services-section">
-    <div class="services-header">
+  <!-- ======= MAIN CONTENT ======= -->
+  <main id="services-section">
+    <header class="services-header">
       <h1>Our Services</h1>
-      <p>Explore our full range of professional services by category</p>
-    </div>
+      <p>Explore professional braiding, locs, and hair styling services tailored to your unique look.</p>
+    </header>
 
-    <!-- Search Bar -->
+    <!-- Search -->
     <div class="search-bar">
       <input 
         type="search" 
         id="serviceSearch" 
         placeholder="Search for a service..." 
         enterkeyhint="search" 
+        aria-label="Search services"
       />
     </div>
 
-    <!-- All Services -->
+    <!-- Services Container -->
     <div id="all-services"></div>
-  </section>
+  </main>
 
   <!-- ======= BASKET ICON ======= -->
-  <div class="basket-icon" id="basketIcon">
-  <i class="fa-solid fa-basket-shopping"></i>
-  <span class="basket-count" id="basketCount">0</span>
-  </div>
-
+  <button class="basket-icon" id="basketIcon" aria-label="Open basket">
+    <i class="fa-solid fa-basket-shopping"></i>
+    <span class="basket-count" id="basketCount">0</span>
+  </button>
 
   <!-- ======= BASKET PANEL ======= -->
-  <div class="basket-panel" id="basketPanel">
+  <aside class="basket-panel" id="basketPanel" aria-label="Basket panel">
     <div class="basket-header">
       <h3>Your Basket</h3>
-      <button id="closeBasket" class="remove-btn">&times;</button>
+      <button id="closeBasket" aria-label="Close basket">&times;</button>
     </div>
 
     <div class="basket-list" id="basketList"></div>
 
-    <div class="basket-total">
-      <p>Total: <span id="basketTotal">£0</span></p>
-    </div>
-
     <div class="basket-footer">
+      <p>Total: <span id="basketTotal">£0</span></p>
       <button class="proceed-btn" id="proceedBooking">Proceed to Booking</button>
     </div>
-  </div>
+  </aside>
 
-
-  <!-- Footer -->
+  <!-- ======= FOOTER ======= -->
   <footer>
     <p>&copy; 2025 Nu-Trendz. All Rights Reserved.</p>
   </footer>
 
   <!-- Scripts -->
-  <script src="navbar.js"></script>
-  <script src="services.js"></script>
+  <script src="services.js" defer></script>
 </body>
 </html>
