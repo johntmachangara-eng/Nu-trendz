@@ -1,41 +1,51 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const navbar = document.querySelector('.navbar');
-  const floatingLogo = document.querySelector('.floating-logo');
-  const menuToggle = document.querySelector('#menu-toggle');
-  const navLinks = document.querySelectorAll('.nav-links a');
+  // ========================================
+  // DOM Elements
+  // ========================================
+  const navbar = document.querySelector(".navbar");
+  const menuIcon = document.querySelector(".menu-icon");
+  const navLinks = document.querySelector(".nav-links");
 
-  // Shrink navbar + show floating logo
-  window.addEventListener('scroll', () => {
-    if (navbar) {
-      if (window.scrollY > 70) {
-        navbar.classList.add('shrink');
-        if (floatingLogo) floatingLogo.classList.add('visible');
-      } else {
-        navbar.classList.remove('shrink');
-        if (floatingLogo) floatingLogo.classList.remove('visible');
-      }
+  // ========================================
+  // Cleanup
+  // ========================================
+  // Remove any leftover checkbox toggles from old versions
+  document.querySelectorAll('input[type="checkbox"][id*="menu-toggle"]').forEach(el => el.remove());
+
+  // ========================================
+  // Navbar Shrink on Scroll
+  // ========================================
+  let lastScroll = 0;
+  
+  window.addEventListener("scroll", () => {
+    const current = window.scrollY;
+    
+    if (current > 80 && current > lastScroll) {
+      navbar.classList.add("shrink");
+    } else if (current < lastScroll - 10 || current <= 0) {
+      navbar.classList.remove("shrink");
     }
+    
+    lastScroll = current;
   });
 
-  // Close mobile menu when clicking a link
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (menuToggle && menuToggle.checked) menuToggle.checked = false;
+  // ========================================
+  // Mobile Menu Toggle
+  // ========================================
+  menuIcon.addEventListener("click", () => {
+    menuIcon.classList.toggle("active");
+    navLinks.classList.toggle("show");
+    document.body.classList.toggle("menu-open");
+  });
+
+  // ========================================
+  // Close Menu on Link Click
+  // ========================================
+  navLinks.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", () => {
+      menuIcon.classList.remove("active");
+      navLinks.classList.remove("show");
+      document.body.classList.remove("menu-open");
     });
-  });
-
-  // Highlight active page
-  const currentPage = window.location.pathname.split("/").pop();
-  navLinks.forEach(link => {
-    const linkPage = link.getAttribute("href").split("/").pop();
-    if (
-      linkPage === currentPage ||
-      (linkPage === "index.html" && currentPage === "") ||
-      (linkPage === "services.html" && currentPage.includes("services"))
-    ) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
   });
 });

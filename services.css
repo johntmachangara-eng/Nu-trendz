@@ -1,10 +1,26 @@
 /* ============================================================
-   NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION STYLES
-   Fully optimized for desktop & mobile
-   ============================================================ */
+  NU-TRENDZ SERVICES PAGE – CLEAN & OFFLINE-READY VERSION
+  ============================================================ */
 
-/* ---------- Root Variables ---------- */
+/* ============================================================
+  TABLE OF CONTENTS
+  1. Root Variables
+  2. Base & Reset Styles
+  3. Scrollbar
+  4. Navigation
+  5. Floating Categories
+  6. Services Section
+  7. Basket
+  8. Footer
+  9. Animations
+  10. Media Queries
+  ============================================================ */
+
+/* ============================================================
+  1. ROOT VARIABLES
+  ============================================================ */
 :root {
+  /* Colors */
   --orange: #ff9800;
   --orange-light: #ffb84d;
   --orange-dark: #e68a00;
@@ -13,18 +29,22 @@
   --text-light: #fff;
   --text-muted: #ccc;
   --border-light: #333;
+  
+  /* Effects */
   --shadow-glow: 0 0 15px rgba(255, 152, 0, 0.35);
   --shadow-strong: 0 0 25px rgba(255, 152, 0, 0.45);
   --transition-fast: all 0.3s ease;
   --transition-slow: all 0.6s ease;
 }
 
-/* ---------- Base Styles ---------- */
+/* ============================================================
+  2. BASE & RESET STYLES
+  ============================================================ */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Montserrat", sans-serif;
+  font-family: system-ui, Arial, sans-serif;
 }
 
 html {
@@ -44,24 +64,36 @@ body.no-scroll {
   touch-action: none;
 }
 
+body.no-scroll::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9400;
+}
 
-
-/* ---------- Scrollbar ---------- */
+/* ============================================================
+  3. SCROLLBAR
+  ============================================================ */
 ::-webkit-scrollbar {
   width: 10px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--orange);
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-track {
   background: #111;
 }
 
 /* ============================================================
-   NAVIGATION
-   ============================================================ */
-
+  4. NAVIGATION
+  ============================================================ */
 .navbar {
   position: fixed;
   top: 0;
@@ -97,6 +129,7 @@ body.no-scroll {
   text-decoration: none;
   transition: var(--transition-fast);
 }
+
 .logo:hover {
   color: var(--orange-light);
   text-shadow: var(--shadow-glow);
@@ -116,9 +149,11 @@ body.no-scroll {
   position: relative;
   transition: var(--transition-fast);
 }
+
 .nav-links a:hover {
   color: var(--orange);
 }
+
 .nav-links a.active::after {
   content: "";
   position: absolute;
@@ -130,7 +165,6 @@ body.no-scroll {
   border-radius: 3px;
 }
 
-/* ---------- Hamburger Menu ---------- */
 .menu-icon {
   display: none;
   flex-direction: column;
@@ -140,6 +174,7 @@ body.no-scroll {
   cursor: pointer;
   transition: var(--transition-fast);
 }
+
 .bar {
   width: 100%;
   height: 3px;
@@ -147,23 +182,26 @@ body.no-scroll {
   border-radius: 3px;
   transition: var(--transition-fast);
 }
+
 #menu-toggle {
   display: none;
 }
+
 #menu-toggle:checked + .menu-icon .bar:nth-child(1) {
   transform: rotate(45deg) translateY(8px);
 }
+
 #menu-toggle:checked + .menu-icon .bar:nth-child(2) {
   opacity: 0;
 }
+
 #menu-toggle:checked + .menu-icon .bar:nth-child(3) {
   transform: rotate(-45deg) translateY(-8px);
 }
 
 /* ============================================================
-   CATEGORIES
-   ============================================================ */
-
+  5. FLOATING CATEGORIES
+  ============================================================ */
 .floating-categories {
   position: sticky;
   top: 80px;
@@ -176,15 +214,18 @@ body.no-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .floating-categories::-webkit-scrollbar {
   display: none;
 }
+
 .categories {
   display: flex;
   gap: 12px;
   padding: 0 25px;
   white-space: nowrap;
 }
+
 .category-btn {
   background: var(--bg-dark);
   border: 1px solid var(--border-light);
@@ -194,6 +235,7 @@ body.no-scroll {
   cursor: pointer;
   transition: var(--transition-fast);
 }
+
 .category-btn:hover,
 .category-btn.active {
   background: var(--orange);
@@ -203,11 +245,9 @@ body.no-scroll {
   box-shadow: var(--shadow-glow);
 }
 
-
 /* ============================================================
-   SERVICES SECTION
-   ============================================================ */
-
+  6. SERVICES SECTION
+  ============================================================ */
 #services-section {
   padding: 180px 20px 100px;
 }
@@ -217,12 +257,14 @@ body.no-scroll {
   margin-bottom: 60px;
   animation: fadeIn 1s ease both;
 }
+
 .services-header h1 {
   color: var(--orange);
   font-size: clamp(2rem, 4vw, 3rem);
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+
 .services-header p {
   color: var(--text-muted);
   margin-top: 10px;
@@ -232,6 +274,7 @@ body.no-scroll {
   text-align: center;
   margin-bottom: 40px;
 }
+
 .search-bar input {
   width: 60%;
   max-width: 450px;
@@ -243,16 +286,17 @@ body.no-scroll {
   font-size: 1rem;
   transition: var(--transition-fast);
 }
+
 .search-bar input:focus {
   outline: none;
   box-shadow: var(--shadow-glow);
 }
 
-/* Category Sections */
 .category-section {
   margin-bottom: 80px;
   scroll-margin-top: 150px;
 }
+
 .category-section h2 {
   color: var(--orange);
   text-align: center;
@@ -261,7 +305,6 @@ body.no-scroll {
   text-transform: uppercase;
 }
 
-/* ---------- Service Cards ---------- */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -269,6 +312,7 @@ body.no-scroll {
   width: 90%;
   margin: 0 auto;
 }
+
 .service-card {
   background: var(--bg-light);
   border: 1px solid var(--border-light);
@@ -277,29 +321,35 @@ body.no-scroll {
   transition: var(--transition-fast);
   animation: fadeInUp 0.8s ease both;
 }
+
 .service-card:hover {
   transform: translateY(-6px);
   border-color: var(--orange);
   box-shadow: var(--shadow-strong);
 }
+
 .service-card h3 {
   color: var(--orange);
   font-size: 1.2rem;
 }
+
 .service-time {
   color: var(--text-muted);
   font-style: italic;
   font-size: 0.9rem;
 }
+
 .service-desc {
   color: #eee;
   font-size: 0.9rem;
   margin: 10px 0;
 }
+
 .service-price {
   color: var(--orange);
   font-weight: bold;
 }
+
 .book-btn {
   margin-top: 10px;
   background: var(--orange);
@@ -311,6 +361,7 @@ body.no-scroll {
   font-weight: bold;
   transition: var(--transition-fast);
 }
+
 .book-btn:hover {
   background: var(--orange-dark);
   transform: scale(1.05);
@@ -318,10 +369,8 @@ body.no-scroll {
 }
 
 /* ============================================================
-   BASKET
-   ============================================================ */
-
-/* ---------- Basket Icon ---------- */
+  7. BASKET
+  ============================================================ */
 .basket-icon {
   position: fixed;
   bottom: 30px;
@@ -337,9 +386,7 @@ body.no-scroll {
   font-size: 1.8rem;
   box-shadow: var(--shadow-strong);
   cursor: pointer;
-  z-index: 9000; /* lower than panel */
-  pointer-events: auto;
-  touch-action: manipulation;
+  z-index: 9000;
   transition: transform 0.3s ease, background 0.3s ease;
 }
 
@@ -349,11 +396,6 @@ body.no-scroll {
   color: #111;
 }
 
-.basket-icon.nudge {
-  animation: basketShake 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-/* ---------- Basket Panel ---------- */
 .basket-panel {
   position: fixed;
   top: 0;
@@ -364,7 +406,7 @@ body.no-scroll {
   border-left: 2px solid var(--orange);
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.6);
   transition: right 0.4s ease;
-  z-index: 9500; /* higher than icon */
+  z-index: 9500;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -383,6 +425,7 @@ body.no-scroll {
   color: var(--orange);
   margin-bottom: 20px;
 }
+
 #closeBasket {
   background: none;
   border: none;
@@ -391,15 +434,18 @@ body.no-scroll {
   cursor: pointer;
   transition: transform 0.2s, color 0.3s;
 }
+
 #closeBasket:hover {
   color: var(--orange-light);
   transform: scale(1.2);
 }
+
 .basket-list {
   flex: 1;
   overflow-y: auto;
   color: #fff;
 }
+
 .basket-item {
   display: flex;
   justify-content: space-between;
@@ -407,10 +453,12 @@ body.no-scroll {
   border-bottom: 1px solid #333;
   padding: 10px 0;
 }
+
 .basket-item-price {
   color: var(--orange);
   font-size: 0.9rem;
 }
+
 .basket-remove-btn {
   background: #ff4444;
   border: none;
@@ -419,21 +467,21 @@ body.no-scroll {
   padding: 6px 12px;
   border-radius: 8px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
   font-size: 0.85rem;
   transition: background 0.3s ease, transform 0.2s ease;
 }
+
 .basket-remove-btn:hover {
   background: #ff6666;
   transform: scale(1.05);
 }
+
 .basket-footer {
   border-top: 1px solid #333;
   padding-top: 15px;
   text-align: center;
 }
+
 .proceed-btn {
   background: var(--orange);
   border: none;
@@ -445,15 +493,15 @@ body.no-scroll {
   font-size: 1rem;
   transition: var(--transition-fast);
 }
+
 .proceed-btn:hover {
   background: var(--orange-light);
   transform: scale(1.05);
 }
 
 /* ============================================================
-   FOOTER
-   ============================================================ */
-
+  8. FOOTER
+  ============================================================ */
 footer {
   background: #000;
   text-align: center;
@@ -464,66 +512,100 @@ footer {
 }
 
 /* ============================================================
-   ANIMATIONS
-   ============================================================ */
+  9. ANIMATIONS
+  ============================================================ */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes basketShake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-  20%, 40%, 60%, 80% { transform: translateX(10px); }
-}
 
+@keyframes fadeInUp {
+  from { 
+   opacity: 0; 
+   transform: translateY(20px); 
+  }
+  to { 
+   opacity: 1; 
+   transform: translateY(0); 
+  }
+}
 
 /* ============================================================
-   RESPONSIVE DESIGN
-   ============================================================ */
+  10. MEDIA QUERIES
+  ============================================================ */
 @media (max-width: 992px) {
-  .menu-icon { display: flex; }
+  .menu-icon {
+   display: flex;
+  }
+
   .nav-links {
-    position: fixed;
-    top: 80px;
-    right: -100%;
-    flex-direction: column;
-    background: rgba(0, 0, 0, 0.95);
-    width: 70%;
-    max-width: 280px;
-    padding: 25px;
-    gap: 20px;
-    transition: right 0.4s ease;
+   position: fixed;
+   inset: 0;
+   height: 100vh;
+   width: 100%;
+   background: rgba(0, 0, 0, 0.95);
+   backdrop-filter: blur(12px);
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   gap: 35px;
+   transform: translateY(-100%);
+   opacity: 0;
+   pointer-events: none;
+   transition: all 0.35s ease;
+   z-index: 9999;
   }
-  #menu-toggle:checked ~ .nav-links {
-    right: 0;
+
+  .nav-links.show {
+   transform: translateY(0);
+   opacity: 1;
+   pointer-events: auto;
   }
+
+  .nav-links a {
+   font-size: 1.5rem;
+  }
+
+  body.menu-open {
+   overflow: hidden;
+  }
+
   .search-bar input {
-    width: 80%;
+   width: 80%;
   }
 }
 
 @media (max-width: 768px) {
   .basket-panel {
-    width: 100%;
-    max-width: 360px;
+   width: 80vw;
+   right: -80vw;
+   max-width: none;
+   border-left: 2px solid var(--orange);
+   background: rgba(17, 17, 17, 0.95);
+   backdrop-filter: blur(8px);
   }
+
+  .basket-panel.open {
+   right: 0;
+  }
+
   .basket-icon {
-    width: 55px;
-    height: 55px;
-    font-size: 1.5rem;
+   width: 55px;
+   height: 55px;
+   font-size: 1.5rem;
   }
 }
 
 @media (max-width: 600px) {
-  .search-bar input { width: 90%; }
-  .logo { font-size: 1.3rem; }
-  footer { font-size: 0.8rem; }
-}
+  .search-bar input {
+   width: 90%;
+  }
 
-/* ============================================================
-   END OF NU-TRENDZ SERVICES PAGE
-   ============================================================ */
+  .logo {
+   font-size: 1.3rem;
+  }
+
+  footer {
+   font-size: 0.8rem;
+  }
+}

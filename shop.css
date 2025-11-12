@@ -1,33 +1,49 @@
 /* ==================================================
-   IMPORTS & ROOT VARIABLES
+  ROOT VARIABLES
 ================================================== */
-@import url('navbar.css');
-
 :root {
   --orange: #ff9800;
   --bg-dark: #0a0a0a;
   --text-light: #fff;
   --border-light: #333;
+  --shadow-glow: 0 0 15px rgba(255, 152, 0, 0.25);
 }
 
-
 /* ==================================================
-   GLOBAL STYLES
+  BASE STYLES
 ================================================== */
+html, body {
+  height: 100%;
+}
+
 body {
   background: var(--bg-dark);
   color: var(--text-light);
   font-family: 'Montserrat', sans-serif;
   margin: 0;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.highlight { color: var(--orange); }
-.white-text { color: #fff; }
-
+main {
+  flex: 1;
+}
 
 /* ==================================================
-   SHOP SECTION
+  UTILITY CLASSES
+================================================== */
+.highlight {
+  color: var(--orange);
+}
+
+.white-text {
+  color: #fff;
+}
+
+/* ==================================================
+  SHOP SECTION
 ================================================== */
 #shop-section {
   padding: 160px 20px 80px;
@@ -46,50 +62,44 @@ body {
   margin-bottom: 50px;
 }
 
-
 /* ==================================================
-   VIDEO SECTION
+  VIDEO SECTION
 ================================================== */
 .video-section {
   margin-bottom: 80px;
+  text-align: center;
 }
 
 .video-section h2 {
   color: var(--orange);
   margin-bottom: 10px;
+  font-size: 1.8rem;
 }
 
 .video-section p {
   color: #ccc;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-size: 1rem;
 }
 
 .media-frame {
   display: flex;
   justify-content: center;
-  position: relative;
-  cursor: pointer;
-}
-
-.portrait-video {
+  align-items: center;
   width: 100%;
-  max-width: 380px;
-  aspect-ratio: 9/16;
-  border-radius: 14px;
-  object-fit: cover;
-  background: #000;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  box-shadow: 0 0 15px rgba(255, 152, 0, 0.25);
 }
 
-.portrait-video:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 25px rgba(255, 152, 0, 0.3);
+.media-frame iframe {
+  width: 100%;
+  max-width: 720px;
+  height: 405px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
-
 
 /* ==================================================
-   SCROLL GALLERY
+  GALLERY SECTION
 ================================================== */
 .gallery-section {
   margin: 80px 0;
@@ -101,6 +111,27 @@ body {
   color: var(--orange);
   margin-bottom: 25px;
   font-size: 2rem;
+}
+
+.gallery-section::before,
+.gallery-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.gallery-section::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-dark), transparent);
+}
+
+.gallery-section::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-dark), transparent);
 }
 
 .scroll-gallery {
@@ -131,51 +162,79 @@ body {
 
 .scroll-gallery img:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 18px rgba(255, 152, 0, 0.3);
+  box-shadow: var(--shadow-glow);
 }
 
-
 /* ==================================================
-   AUTO SCROLL SHADOWS
+  MEDIA OVERLAY
 ================================================== */
-.gallery-section::before,
-.gallery-section::after {
-  content: "";
+.media-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.media-overlay.video-active .nav-btn {
+  display: none;
+}
+
+.overlay-content {
+  position: relative;
+  width: 90%;
+  max-width: 420px;
+  transform: scale(0.95);
+  animation: popIn 0.35s ease forwards;
+}
+
+.media-overlay video,
+.media-overlay img {
+  width: 100%;
+  max-height: 80vh;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.nav-btn {
   position: absolute;
-  top: 0;
-  width: 60px;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.gallery-section::before {
-  left: 0;
-  background: linear-gradient(to right, var(--bg-dark), transparent);
-}
-
-.gallery-section::after {
-  right: 0;
-  background: linear-gradient(to left, var(--bg-dark), transparent);
-}
-
-
-/* ==================================================
-   IMAGE GALLERY POPUP
-================================================== */
-.gallery-img {
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 152, 0, 0.15);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  color: #fff;
+  font-size: 2rem;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
   cursor: pointer;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
 }
 
-.gallery-img:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 15px rgba(255, 152, 0, 0.25);
+.nav-btn:hover {
+  background: var(--orange);
+  color: #000;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
 }
 
+.nav-btn.prev {
+  left: 25px;
+}
+
+.nav-btn.next {
+  right: 25px;
+}
 
 /* ==================================================
-   MAP SECTION
+  MAP SECTION
 ================================================== */
 .shop-location {
   margin-top: 80px;
@@ -205,93 +264,8 @@ body {
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
 }
 
-
 /* ==================================================
-   MEDIA OVERLAY
-================================================== */
-.media-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.4s ease;
-}
-
-.overlay-content {
-  position: relative;
-  width: 90%;
-  max-width: 420px;
-  transform: scale(0.95);
-  animation: popIn 0.35s ease forwards;
-  margin-top: 60px; /* below navbar */
-}
-
-.media-overlay video,
-.media-overlay img {
-  width: 100%;
-  max-height: 80vh;
-  border-radius: 16px;
-  object-fit: cover;
-}
-
-
-/* ==================================================
-   ANIMATIONS
-================================================== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes popIn {
-  to { transform: scale(1); }
-}
-
-
-/* ==================================================
-   OVERLAY NAVIGATION
-================================================== */
-.nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 152, 0, 0.15);
-  border: 1px solid rgba(255, 152, 0, 0.3);
-  color: #fff;
-  font-size: 2rem;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-}
-
-.nav-btn:hover {
-  background: var(--orange);
-  color: #000;
-  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
-}
-
-.nav-btn.prev { left: 25px; }
-.nav-btn.next { right: 25px; }
-
-/* Hide nav buttons for videos */
-.media-overlay.video-active .nav-btn {
-  display: none;
-}
-
-
-/* ==================================================
-   FOOTER
+  FOOTER
 ================================================== */
 footer {
   background: #000;
@@ -299,39 +273,51 @@ footer {
   padding: 20px 0;
   color: #bbb;
   font-size: 0.9rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-
-
+/* ==================================================
+  ANIMATIONS
+================================================== */
+@keyframes popIn {
+  from {
+   transform: scale(0.95);
+   opacity: 0;
+  }
+  to {
+   transform: scale(1);
+   opacity: 1;
+  }
+}
 
 /* ==================================================
-   RESPONSIVE STYLES
+  RESPONSIVE STYLES
 ================================================== */
 @media (max-width: 992px) {
-  .portrait-video {
-    max-width: 90%;
-    aspect-ratio: auto;
-    height: auto;
-  }
-
-  .overlay-content {
-    max-width: 90%;
+  .media-frame iframe {
+   max-width: 100%;
+   height: 280px;
   }
 
   .scroll-gallery img {
-    width: 180px;
-    height: 280px;
-  }
-
-  .map-container iframe {
-    max-width: 100%;
-    height: 280px;
+   width: 180px;
+   height: 280px;
   }
 
   .nav-btn {
-    font-size: 1.5rem;
-    width: 38px;
-    height: 38px;
+   font-size: 1.5rem;
+   width: 38px;
+   height: 38px;
+  }
+
+  .map-container iframe {
+   height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .media-frame iframe {
+   max-width: 100%;
+   height: 250px;
   }
 }

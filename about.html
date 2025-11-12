@@ -5,14 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nu-Trendz | About Us</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="about.css">
+  <!-- External CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Local CSS -->
   <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="footer.css">
+  <link rel="stylesheet" href="about.css">
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <style>
+    body {
+      font-family: system-ui, Arial, sans-serif;
+    }
+  </style>
 </head>
 <body>
 
@@ -29,52 +35,94 @@
       </label>
 
       <ul class="nav-links" id="nav-links">
-        <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="about.html">About</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html" class="active">About</a></li>
         <li><a href="services.html">Services</a></li>
         <li><a href="reviews.html">Reviews</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="profile.html">Profile</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- Floating Logo -->
-  <div class="floating-logo" id="floatingLogo">NU-TRENDZ</div>
+  <!-- ======= MAIN CONTENT ======= -->
+  <main>
+    <!-- About Section -->
+    <section id="about">
+      <div class="about-container">
+        <div class="about-text">
+          <h1>About <span>Nu-Trendz</span></h1>
+          <p>Founded in Colchester, Nu-Trendz is a modern salon specializing in Afro, natural, and protective hairstyling. We believe in enhancing beauty through healthy hair care, creativity, and confidence.</p>
 
-  <!-- ======= ABOUT SECTION ======= -->
-  <section id="about">
-    <div class="about-container">
-      <div class="about-text">
-        <h1>About <span>Nu-Trendz</span></h1>
-        <p>Founded in Colchester, Nu-Trendz is a modern salon specializing in Afro, natural, and protective hairstyling. We believe in enhancing beauty through healthy hair care, creativity, and confidence.</p>
-
-        <div class="about-cards">
-          <div class="about-card">
-            <i class="fa-solid fa-heart"></i>
-            <h3>Our Mission</h3>
-            <p>To provide quality service and education while creating a community where everyone feels seen, valued, and stylish.</p>
-          </div>
-          <div class="about-card">
-            <i class="fa-solid fa-crown"></i>
-            <h3>Our Vision</h3>
-            <p>To empower people to express their individuality through exceptional hair artistry and care.</p>
-          </div>
-          <div class="about-card">
-            <i class="fa-solid fa-hands-holding"></i>
-            <h3>Our Promise</h3>
-            <p>We combine expertise, creativity, and warmth to ensure every client leaves glowing — inside and out.</p>
+          <div class="about-cards">
+            <div class="about-card">
+              <div class="icon">❤️</div>
+              <h3>Our Mission</h3>
+              <p>To provide quality service and education while creating a community where everyone feels seen, valued, and stylish.</p>
+            </div>
+            <div class="about-card">
+              <div class="icon">👑</div>
+              <h3>Our Vision</h3>
+              <p>To empower people to express their individuality through exceptional hair artistry and care.</p>
+            </div>
+            <div class="about-card">
+              <div class="icon">🤝</div>
+              <h3>Our Promise</h3>
+              <p>We combine expertise, creativity, and warmth to ensure every client leaves glowing — inside and out.</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <footer>
-    <p>&copy; 2025 Nu-Trendz. All Rights Reserved.</p>
+  <!-- ======= FOOTER ======= -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <!-- Left Section -->
+      <div class="footer-left">
+        <h2 class="footer-logo">NU-TRENDZ</h2>
+        <p class="footer-tagline">Redefining beauty, confidence & style.</p>
+      </div>
+
+      <!-- Center Links -->
+      <div class="footer-center">
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Right Social -->
+      <div class="footer-right">
+        <p>Follow us</p>
+        <div class="social-icons">
+          <a href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/" target="_blank" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://www.facebook.com/p/Nu-trendz-100037624576513/" target="_blank" aria-label="Facebook">
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a href="https://www.tiktok.com/@nu_trendz" target="_blank" aria-label="TikTok">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
+    </div>
   </footer>
 
+  <!-- Scripts -->
   <script src="navbar.js"></script>
+  <script src="footer.js"></script>
+  <script src="reviews.js"></script>
+
 </body>
 </html>

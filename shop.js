@@ -1,156 +1,176 @@
-// ===== VIDEO AUTOPLAY CONTROL =====
-const videos = document.querySelectorAll(".portrait-video");
+// ===============================
+// NU-TRENDZ SHOP PAGE SCRIPT
+// ===============================
 
-const videoObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    const video = entry.target;
-    if (entry.isIntersecting) {
-      video.play().catch(() => {});
-    } else {
-      video.pause();
-    }
+/* ============================================
+  YOUTUBE VIDEO MANAGEMENT
+============================================ */
+
+let ytPlayers = [];
+
+/**
+ * Initialize YouTube players with API
+ */
+function onYouTubeIframeAPIReady() {
+  const iframes = document.querySelectorAll("iframe[src*='youtube.com']");
+  iframes.forEach((iframe, index) => {
+   ytPlayers[index] = new YT.Player(iframe, {
+    events: {
+      onReady: (event) => setupVideoObserver(event.target, iframe),
+    },
+   });
   });
-}, { threshold: 0.6 });
-
-videos.forEach(video => {
-  video.muted = true;
-  video.playsInline = true;
-  video.loop = true;
-  videoObserver.observe(video);
-});
-
-
-// ===== MEDIA OVERLAY POPUP (VIDEOS & IMAGES) =====
-const overlay = document.getElementById("mediaOverlay");
-const overlayContent = document.getElementById("overlayContent");
-
-function showMedia(src, type) {
-  overlayContent.innerHTML = "";
-
-  if (type === "video") {
-    overlayContent.innerHTML = `
-      <video 
-        src="${src}" 
-        controls 
-        autoplay 
-        playsinline 
-        style="max-height:80vh;border-radius:16px;display:block;margin:auto;"
-      ></video>
-    `;
-    overlay.classList.add("video-active");
-  } else {
-    overlayContent.innerHTML = `<img src="${src}" alt="preview">`;
-    overlay.classList.remove("video-active");
-  }
-
-  overlay.style.display = "flex";
-  document.body.style.overflow = "hidden"; // disable scroll behind overlay
 }
 
+/**
+ * Pause video when it scrolls out of view
+ */
+function setupVideoObserver(player, iframe) {
+  const observer = new IntersectionObserver(
+   (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) {
+       try {
+        player.pauseVideo();
+       } catch (err) {
+        console.warn("Pause failed:", err);
+       }
+      }
+    });
+   },
+   { threshold: 0.5 }
+  );
+  observer.observe(iframe);
+}
 
-// ===== CLOSE OVERLAY =====
-overlay.addEventListener("click", (e) => {
-  if (e.target === overlay) {
-    overlay.style.display = "none";
-    overlayContent.innerHTML = "";
-    document.body.style.overflow = "auto";
-  }
-});
+/* ============================================
+  IMAGE GALLERY & OVERLAY
+============================================ */
 
+const GalleryManager = {
+  overlay: null,
+  overlayContent: null,
+  images: [],
+  currentIndex: 0,
 
-// ===== VIDEO CLICK HANDLER =====
-videos.forEach(video => {
-  video.addEventListener("click", (e) => {
-    e.stopPropagation();
+  init() {
+   this.overlay = document.getElementById("mediaOverlay");
+   this.overlayContent = document.getElementById("overlayContent");
+   this.images = Array.from(document.querySelectorAll(".gallery-img"));
 
-    const videoSrc = video.querySelector("source")
-      ? video.querySelector("source").src
-      : video.src;
+   this.setupEventListeners();
+   this.setupKeyboardNavigation();
+  },
 
-    // On desktop → open overlay popup
-    if (window.innerWidth > 992) {
-      showMedia(videoSrc, "video");
-    } else {
-      // On mobile → play inline
-      video.muted = false;
-      video.setAttribute("controls", true);
-      video.play();
+  showImage(index) {
+   const img = this.images[index];
+   if (!img) return;
+   this.overlayContent.innerHTML = `<img src="${img.src}" alt="preview">`;
+   this.overlay.style.display = "flex";
+   document.body.style.overflow = "hidden";
+  },
+
+  closeOverlay() {
+   this.overlay.style.display = "none";
+   this.overlayContent.innerHTML = "";
+   document.body.style.overflow = "auto";
+  },
+
+  nextImage() {
+   this.currentIndex = (this.currentIndex + 1) % this.images.length;
+   this.showImage(this.currentIndex);
+  },
+
+  prevImage() {
+   this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+   this.showImage(this.currentIndex);
+  },
+
+  setupEventListeners() {
+   // Close on overlay click
+   this.overlay.addEventListener("click", (e) => {
+    if (e.target === this.overlay) this.closeOverlay();
+   });
+
+   // Navigation buttons
+   const nextBtn = document.getElementById("nextBtn");
+   const prevBtn = document.getElementById("prevBtn");
+
+   if (nextBtn && prevBtn) {
+    nextBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.nextImage();
+    });
+
+    prevBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.prevImage();
+    });
+   }
+
+   // Image click handlers
+   this.images.forEach((img, i) => {
+    img.addEventListener("click", () => {
+      this.currentIndex = i;
+      this.showImage(this.currentIndex);
+    });
+   });
+  },
+
+  setupKeyboardNavigation() {
+   document.addEventListener("keydown", (e) => {
+    if (this.overlay.style.display === "flex") {
+      if (e.key === "ArrowRight") this.nextImage();
+      if (e.key === "ArrowLeft") this.prevImage();
+      if (e.key === "Escape") this.closeOverlay();
     }
-  });
-});
+   });
+  }
+};
 
+/* ============================================
+  AUTO-SCROLL GALLERY (Mobile/Tablet)
+============================================ */
 
-// ===== AUTO-SCROLL GALLERY (only on mobile/tablet) =====
-const scrollGallery = document.getElementById("scrollGallery");
+const AutoScrollManager = {
+  gallery: null,
+  paused: false,
 
-if (scrollGallery && window.innerWidth <= 992) {
-  let paused = false;
+  init() {
+   this.gallery = document.getElementById("scrollGallery");
+   
+   if (!this.gallery || window.innerWidth > 992) return;
 
-  scrollGallery.addEventListener("mouseenter", () => paused = true);
-  scrollGallery.addEventListener("mouseleave", () => paused = false);
-  scrollGallery.addEventListener("touchstart", () => paused = true);
-  scrollGallery.addEventListener("touchend", () => paused = false);
+   this.setupEventListeners();
+   this.startAutoScroll();
+  },
 
-  function autoScroll() {
-    if (!paused && scrollGallery.scrollWidth > scrollGallery.clientWidth) {
-      scrollGallery.scrollLeft += 0.5;
-      if (scrollGallery.scrollLeft >= scrollGallery.scrollWidth - scrollGallery.clientWidth) {
-        scrollGallery.scrollLeft = 0;
+  setupEventListeners() {
+   this.gallery.addEventListener("mouseenter", () => (this.paused = true));
+   this.gallery.addEventListener("mouseleave", () => (this.paused = false));
+   this.gallery.addEventListener("touchstart", () => (this.paused = true));
+   this.gallery.addEventListener("touchend", () => (this.paused = false));
+  },
+
+  startAutoScroll() {
+   const scroll = () => {
+    if (!this.paused && this.gallery.scrollWidth > this.gallery.clientWidth) {
+      this.gallery.scrollLeft += 0.6;
+      if (this.gallery.scrollLeft >= this.gallery.scrollWidth - this.gallery.clientWidth) {
+       this.gallery.scrollLeft = 0;
       }
     }
-    requestAnimationFrame(autoScroll);
+    requestAnimationFrame(scroll);
+   };
+   scroll();
   }
+};
 
-  autoScroll();
-}
+/* ============================================
+  INITIALIZATION
+============================================ */
 
-
-// ===== IMAGE OVERLAY WITH NAVIGATION =====
-const images = Array.from(document.querySelectorAll(".gallery-img"));
-let currentIndex = 0;
-
-function showImage(index) {
-  const img = images[index];
-  if (!img) return;
-
-  overlayContent.innerHTML = `<img src="${img.src}" alt="preview">`;
-  overlay.style.display = "flex";
-  overlay.classList.remove("video-active");
-}
-
-const nextBtn = document.getElementById("nextBtn");
-const prevBtn = document.getElementById("prevBtn");
-
-if (nextBtn && prevBtn) {
-  nextBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    currentIndex = (currentIndex + 1) % images.length;
-    showImage(currentIndex);
-  });
-
-  prevBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
-    showImage(currentIndex);
-  });
-}
-
-images.forEach((img, i) => {
-  img.addEventListener("click", () => {
-    currentIndex = i;
-    showImage(currentIndex);
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  GalleryManager.init();
+  AutoScrollManager.init();
 });
-
-
-// ===== Keyboard navigation (desktop) =====
-document.addEventListener("keydown", (e) => {
-  if (overlay.style.display === "flex") {
-    if (e.key === "ArrowRight") nextBtn?.click();
-    if (e.key === "ArrowLeft") prevBtn?.click();
-    if (e.key === "Escape") overlay.click();
-  }
-});
-
-
-// ===== END OF shop.js =====

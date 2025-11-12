@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Meta Tags -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Professional braids, locs, and hair styling services by Nu-Trendz." />
+  
+  <!-- Title -->
   <title>Nu-Trendz | Services</title>
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="services.css" />
+  <!-- External Stylesheets -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Local Stylesheets -->
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="services.css">
+  <link rel="stylesheet" href="footer.css">
+  
+  <!-- Inline Styles -->
+  <style>
+    body {
+      font-family: system-ui, Arial, sans-serif;
+    }
+  </style>
 </head>
 
 <body>
@@ -51,7 +62,7 @@
       <p>Explore professional braiding, locs, and hair styling services tailored to your unique look.</p>
     </header>
 
-    <!-- Search -->
+    <!-- Search Bar -->
     <div class="search-bar">
       <input 
         type="search" 
@@ -68,7 +79,7 @@
 
   <!-- ======= BASKET ICON ======= -->
   <button class="basket-icon" id="basketIcon" aria-label="Open basket">
-    <i class="fa-solid fa-basket-shopping"></i>
+    <span class="icon">🛍️</span>
     <span class="basket-count" id="basketCount">0</span>
   </button>
 
@@ -88,11 +99,52 @@
   </aside>
 
   <!-- ======= FOOTER ======= -->
-  <footer>
-    <p>&copy; 2025 Nu-Trendz. All Rights Reserved.</p>
+  <footer class="site-footer">
+    <div class="footer-content">
+      <!-- Left Section -->
+      <div class="footer-left">
+        <h2 class="footer-logo">NU-TRENDZ</h2>
+        <p class="footer-tagline">Redefining beauty, confidence & style.</p>
+      </div>
+
+      <!-- Center Links -->
+      <div class="footer-center">
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Right Social -->
+      <div class="footer-right">
+        <p>Follow us</p>
+        <div class="social-icons">
+          <a href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/" target="_blank" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://www.facebook.com/p/Nu-trendz-100037624576513/" target="_blank" aria-label="Facebook">
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a href="https://www.tiktok.com/@nu_trendz" target="_blank" aria-label="TikTok">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
+    </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- JavaScript Files -->
+  <script src="navbar.js"></script>
   <script src="services.js" defer></script>
+  <script src="reviews.js"></script>
+  <script src="footer.js"></script>
 </body>
 </html>

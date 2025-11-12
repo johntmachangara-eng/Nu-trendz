@@ -4,15 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NU-TRENDZ | Shop</title>
-  <link rel="stylesheet" href="shop.css" />
+
+  <!-- ===== CSS ===== -->
+  <link rel="stylesheet" href="footer.css" />
   <link rel="stylesheet" href="navbar.css" />
+  <link rel="stylesheet" href="shop.css" />
+  
+  <!-- ===== FONTS ===== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- ===== EXTERNAL LIBRARIES ===== -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
-<body>
 
-  <!-- ======= NAVBAR ======= -->
+<body>
+  <!-- ===== NAVBAR ===== -->
   <nav class="navbar" id="navbar">
     <div class="nav-content">
       <h1 class="logo">NU-TRENDZ</h1>
@@ -31,87 +40,77 @@
         <li><a href="reviews.html">Reviews</a></li>
         <li><a href="shop.html" class="active">Shop</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="profile.html">Profile</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- Floating Logo -->
-  <div class="floating-logo" id="floatingLogo">NU-TRENDZ</div>
-
-  <!-- ======= SHOP SECTION ======= -->
-  <section id="shop-section">
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="shop-section">
+    <!-- ===== HEADER ===== -->
     <div class="shop-header">
       <h1><span class="highlight">Inside</span> NU-TRENDZ</h1>
       <p>Step inside our shop and explore <span class="white-text">authentic hair care</span> and <span class="white-text">premium styles</span>.</p>
     </div>
 
+    <!-- ===== VIDEO 1: SHOP EXPERIENCE ===== -->
+    <div class="video-section">
+      <h2 class="highlight">Shop Experience</h2>
+      <p>Take a look inside our store — discover <span class="white-text">hair products</span>, wigs, and accessories.</p>
+      <div class="media-frame">
+        <iframe 
+          width="560" 
+          height="315"
+          src="https://www.youtube.com/embed/Oq5hfc4Jqcw?enablejsapi=1&rel=0&modestbranding=1&playsinline=1"
+          title="Nu-Trendz Shop Walkthrough"
+          frameborder="0"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
 
-<!-- ===== VIDEO 1 ===== -->
-<div class="video-section">
-  <h2 class="highlight">Shop Experience</h2>
-  <p>
-    Take a look inside our store — discover 
-    <span class="white-text">hair products</span>, wigs, and accessories.
-  </p>
-  <div class="media-frame">
-    <iframe 
-      width="560" height="315"
-      src="https://www.youtube.com/embed/Oq5hfc4Jqcw?rel=0&modestbranding=1&playsinline=1"
-      title="Nu-Trendz Shop Walkthrough"
-      frameborder="0"
-      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen>
-    </iframe>
-  </div>
-</div>
+    <!-- ===== VIDEO 2: PERSONAL ASSISTANCE ===== -->
+    <div class="video-section">
+      <h2 class="highlight">Personal Assistance</h2>
+      <p>Watch our stylists help customers find their <span class="white-text">perfect wig</span> or <span class="white-text">ideal product</span>.</p>
+      <div class="media-frame">
+        <iframe 
+          width="560" 
+          height="315"
+          src="https://www.youtube.com/embed/neqk3SqOjZQ?enablejsapi=1&rel=0&modestbranding=1&playsinline=1"
+          title="Nu-Trendz Customer Experience"
+          frameborder="0"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
 
-<!-- ===== VIDEO 2 ===== -->
-<div class="video-section">
-  <h2 class="highlight">Personal Assistance</h2>
-  <p>
-    Watch our stylists help customers find their 
-    <span class="white-text">perfect wig</span> or 
-    <span class="white-text">ideal product</span>.
-  </p>
-  <div class="media-frame">
-    <iframe 
-      width="560" height="315"
-      src="https://www.youtube.com/embed/neqk3SqOjZQ?rel=0&modestbranding=1&playsinline=1"
-      title="Nu-Trendz Customer Experience"
-      frameborder="0"
-      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen>
-    </iframe>
-  </div>
-</div>
+    <!-- ===== AUTO SCROLL GALLERY ===== -->
+    <div class="gallery-section">
+      <h2 class="highlight">Inside Our Store</h2>
+      <div class="scroll-gallery" id="scrollGallery">
+        <img src="images/shoppic7.jpg" alt="Customer Area" class="gallery-img" />
+        <img src="images/shoppic8.jpg" alt="Wig Wall" class="gallery-img" />
+        <img src="images/shoppic9.jpg" alt="Display" class="gallery-img" />
+        <img src="images/shoppic10.jpg" alt="Shop Interior" class="gallery-img" />
+        <img src="images/shoppic3.jpg" alt="Reception Area" class="gallery-img" />
+        <img src="images/shoppic4.jpg" alt="Entrance" class="gallery-img" />
+        <img src="images/shoppic1.jpg" alt="Store Front" class="gallery-img" />
+        <img src="images/shoppic2.jpg" alt="Hair Products" class="gallery-img" />
+        <img src="images/shoppic5.jpg" alt="Front Counter" class="gallery-img" />
+        <img src="images/shoppic6.jpg" alt="Products" class="gallery-img" />
+      </div>
+    </div>
 
-<!-- ======= AUTO SCROLL GALLERY ======= -->
-<div class="gallery-section">
-  <h2 class="highlight">Inside Our Store</h2>
-  <div class="scroll-gallery" id="scrollGallery">
-    <img src="images/shoppic7.jpg" alt="Customer Area" class="gallery-img" />
-    <img src="images/shoppic8.jpg" alt="Wig Wall" class="gallery-img" />
-    <img src="images/shoppic9.jpg" alt="Display" class="gallery-img" />
-    <img src="images/shoppic10.jpg" alt="Shop Interior" class="gallery-img" />
-    <img src="images/shoppic3.jpg" alt="Reception Area" class="gallery-img" />
-    <img src="images/shoppic4.jpg" alt="Entrance" class="gallery-img" />
-    <img src="images/shoppic1.jpg" alt="Store Front" class="gallery-img" />
-    <img src="images/shoppic2.jpg" alt="Hair Products" class="gallery-img" />
-    <img src="images/shoppic5.jpg" alt="Front Counter" class="gallery-img" />
-    <img src="images/shoppic6.jpg" alt="Products" class="gallery-img" />
-  </div>
-</div>
+    <!-- ===== MEDIA OVERLAY ===== -->
+    <div class="media-overlay" id="mediaOverlay">
+      <button class="nav-btn prev" id="prevBtn">&#10094;</button>
+      <div class="overlay-content" id="overlayContent"></div>
+      <button class="nav-btn next" id="nextBtn">&#10095;</button>
+    </div>
 
-<!-- ======= MEDIA OVERLAY ======= -->
-<div class="media-overlay" id="mediaOverlay">
-  <button class="nav-btn prev" id="prevBtn">&#10094;</button>
-  <div class="overlay-content" id="overlayContent"></div>
-  <button class="nav-btn next" id="nextBtn">&#10095;</button>
-</div>
-
-
-    <!-- Location -->
+    <!-- ===== LOCATION ===== -->
     <div class="shop-location">
       <h2 class="highlight">Find Us</h2>
       <p>Visit us at <strong class="white-text">43 St Botolph's St, Colchester CO2 7EA</strong>.</p>
@@ -123,13 +122,53 @@
         </iframe>
       </div>
     </div>
-  </section>
+  </main>
 
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <!-- LEFT -->
+      <div class="footer-left">
+        <h2 class="footer-logo">NU-TRENDZ</h2>
+        <p class="footer-tagline">Redefining beauty, confidence & style.</p>
+      </div>
+
+      <!-- CENTER LINKS -->
+      <div class="footer-center">
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- RIGHT SOCIAL -->
+      <div class="footer-right">
+        <p>Follow us</p>
+        <div class="social-icons">
+          <a href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/" target="_blank" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://www.facebook.com/p/Nu-trendz-100037624576513/" target="_blank" aria-label="Facebook">
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a href="https://www.tiktok.com/@nu_trendz" target="_blank" aria-label="TikTok">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
+    </div>
   </footer>
 
+  <!-- ===== JAVASCRIPT ===== -->
+  <script src="footer.js"></script>
   <script src="navbar.js"></script>
   <script src="shop.js"></script>
 </body>

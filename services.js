@@ -1,10 +1,14 @@
 // ============================================================
 // NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION BUILD
-// Fully enhanced, optimized, and scroll-safe
 // ============================================================
 
-// ---------- SERVICE DATA ----------
-const servicesData = {
+document.addEventListener("DOMContentLoaded", () => {
+  
+  // ============================================================
+  // DATA
+  // ============================================================
+  
+  const servicesData = {
   "Featured": [
     { name: "Cornrows with Design", time: "1 hour", price: "£30" },
     { name: "Wash Dry", time: "1 hour 30 mins", price: "£20" },
@@ -118,10 +122,13 @@ const servicesData = {
     { name: "Perm / Curls", time: "3 hours", price: "from £60" },
     { name: "Hot Oil Treatment", time: "30 mins", desc: "Stimulates scalp and hair growth through oil massage.", price: "£35" }
   ]
-};
+  };
 
-// ---------- DOM ELEMENTS ----------
-const els = {
+  // ============================================================
+  // DOM ELEMENTS
+  // ============================================================
+  
+  const els = {
   allServices: document.getElementById("all-services"),
   floatingCategories: document.getElementById("floatingCategories"),
   searchInput: document.getElementById("serviceSearch"),
@@ -133,25 +140,22 @@ const els = {
   basketCount: document.getElementById("basketCount"),
   basketTotal: document.getElementById("basketTotal"),
   proceedBooking: document.getElementById("proceedBooking"),
-};
+  menuToggle: document.getElementById("menu-toggle"),
+  navLinks: document.getElementById("nav-links")
+  };
 
-// ---------- MENU CLOSE ON MOBILE ----------
-const menuToggle = document.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-if (navLinks && menuToggle) {
-  navLinks.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => (menuToggle.checked = false));
-  });
-}
+  // ============================================================
+  // BASKET STATE & STORAGE
+  // ============================================================
+  
+  let basket = JSON.parse(localStorage.getItem("basket")) || [];
+  const saveBasket = () => localStorage.setItem("basket", JSON.stringify(basket));
 
-// ---------- BASKET ----------
-let basket = JSON.parse(localStorage.getItem("basket")) || [];
-
-function saveBasket() {
-  localStorage.setItem("basket", JSON.stringify(basket));
-}
-
-function updateBasket() {
+  // ============================================================
+  // BASKET FUNCTIONS
+  // ============================================================
+  
+  function updateBasket() {
   const { basketList, basketCount, basketTotal } = els;
   basketList.innerHTML = "";
   basketCount.textContent = basket.length;
@@ -163,38 +167,36 @@ function updateBasket() {
     return;
   }
 
-  // Disable already-added services on the page
-document.querySelectorAll(".book-btn").forEach(btn => {
-  const inBasket = basket.some(item => item.name === btn.dataset.name);
-  btn.disabled = inBasket;
-  btn.textContent = inBasket ? "In Basket ✓" : "Book Now";
-});
+  // Update button states
+  document.querySelectorAll(".book-btn").forEach(btn => {
+    const inBasket = basket.some(item => item.name === btn.dataset.name);
+    btn.disabled = inBasket;
+    btn.textContent = inBasket ? "In Basket ✓" : "Book Now";
+  });
 
+  // Calculate total and render items
   let total = 0;
   basket.forEach((item, i) => {
     const priceValue = parseFloat(item.price.replace(/[^\d.]/g, "")) || 0;
     total += priceValue;
+
     const div = document.createElement("div");
     div.className = "basket-item";
     div.innerHTML = `
-      <div class="basket-item-info">
-        <span class="basket-item-name">${item.name}</span>
-        <span class="basket-item-price">${item.price}</span>
-      </div>
-      <button class="basket-remove-btn" data-index="${i}">
-        <i class="fa-solid fa-trash-can"></i> Remove
-      </button>`;
+    <div class="basket-item-info">
+      <span class="basket-item-name">${item.name}</span>
+      <span class="basket-item-price">${item.price}</span>
+    </div>
+    <button class="basket-remove-btn" data-index="${i}">🗑 Remove</button>`;
     basketList.appendChild(div);
   });
 
   basketTotal.textContent = `£${total.toFixed(2)}`;
   saveBasket();
-}
+  }
 
-// ---------- BASKET PANEL CONTROL ----------
-function toggleBasket(open) {
+  function toggleBasket(open) {
   const panel = els.basketPanel;
-
   if (open) {
     panel.classList.add("open");
     document.body.classList.add("no-scroll");
@@ -204,77 +206,46 @@ function toggleBasket(open) {
     document.body.classList.remove("no-scroll");
     if (basket.length > 0) startBasketNudge();
   }
-}
-
-// ---------- SCROLL RESTORE ----------
-function restoreScroll() {
-  document.body.classList.remove("no-scroll");
-  document.body.style.position = "";
-  document.body.style.width = "";
-}
-
-// ---------- BASKET EVENTS ----------
-els.basketIcon.addEventListener("click", () => toggleBasket(true));
-els.closeBasket.addEventListener("click", () => toggleBasket(false));
-els.basketList.addEventListener("click", e => {
-  const btn = e.target.closest(".basket-remove-btn");
-  if (!btn) return;
-
-  const removedItem = basket[btn.dataset.index];
-  basket.splice(btn.dataset.index, 1);
-  updateBasket();
-
-  // ✅ Re-enable button for that service
-  const matchBtn = document.querySelector(`.book-btn[data-name="${removedItem.name}"]`);
-  if (matchBtn) {
-    matchBtn.disabled = false;
-    matchBtn.textContent = "Book Now";
   }
-});
 
-els.proceedBooking.addEventListener("click", () => {
-  if (!basket.length) return alert("Please select at least one service.");
-  window.location.href = "booking.html";
-});
+  // ============================================================
+  // BASKET NUDGE ANIMATION
+  // ============================================================
+  
+  let nudgeInterval = null;
 
-// Ensure close button exists
-document.addEventListener("DOMContentLoaded", () => {
-  if (!els.closeBasket) els.closeBasket = document.getElementById("closeBasket");
-  if (els.closeBasket) els.closeBasket.addEventListener("click", () => toggleBasket(false));
-});
-
-
-// ---------- SAFETY LISTENERS ----------
-window.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    els.basketPanel.classList.remove("open");
-    restoreScroll();
+  function triggerBasketNudge() {
+  if (basket.length && !els.basketPanel.classList.contains("open") && !document.hidden) {
+    els.basketIcon.classList.add("nudge");
+    setTimeout(() => els.basketIcon.classList.remove("nudge"), 700);
   }
-});
-window.addEventListener("resize", restoreScroll);
+  }
 
-// ---------- CATEGORY NAVIGATION ----------
-Object.keys(servicesData).forEach((category, index) => {
-  const btn = document.createElement("button");
-  btn.className = "category-btn" + (index === 0 ? " active" : "");
-  btn.textContent = category;
-  btn.addEventListener("click", () => {
-    const section = document.querySelector(`#cat-${category.replace(/\s+/g, "-")}`);
-    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-  els.floatingCategories.appendChild(btn);
-});
+  function startBasketNudge() {
+  if (nudgeInterval) return;
+  nudgeInterval = setInterval(triggerBasketNudge, 30000);
+  }
 
-// ---------- DISPLAY SERVICES ----------
-for (const [category, list] of Object.entries(servicesData)) {
-  const section = document.createElement("section");
-  section.className = "category-section";
-  section.id = `cat-${category.replace(/\s+/g, "-")}`;
-  section.innerHTML = `<h2>${category}</h2>`;
-  const grid = document.createElement("div");
-  grid.className = "service-grid";
+  function stopBasketNudge() {
+  clearInterval(nudgeInterval);
+  nudgeInterval = null;
+  }
 
-  list.forEach(service => {
+  // ============================================================
+  // RENDER SERVICES
+  // ============================================================
+  
+  function renderServices() {
+  for (const [category, list] of Object.entries(servicesData)) {
+    const section = document.createElement("section");
+    section.className = "category-section";
+    section.id = `cat-${category.replace(/\s+/g, "-")}`;
+    section.innerHTML = `<h2>${category}</h2>`;
+    
+    const grid = document.createElement("div");
+    grid.className = "service-grid";
+
+    list.forEach(service => {
     const card = document.createElement("div");
     card.className = "service-card";
     card.innerHTML = `
@@ -282,183 +253,209 @@ for (const [category, list] of Object.entries(servicesData)) {
       <p class="service-time">${service.time}</p>
       ${service.desc ? `<p class="service-desc">${service.desc}</p>` : ""}
       <p class="service-price">${service.price}</p>
-      <button class="book-btn" data-name="${service.name}" data-price="${service.price}" data-time="${service.time}">Book Now</button>`;
+      <button class="book-btn" 
+      data-name="${service.name}" 
+      data-price="${service.price}" 
+      data-time="${service.time}">Book Now</button>`;
     grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    els.allServices.appendChild(section);
+  }
+  }
+
+  // ============================================================
+  // CATEGORY NAVIGATION
+  // ============================================================
+  
+  function initCategoryButtons() {
+  Object.keys(servicesData).forEach((category, i) => {
+    const btn = document.createElement("button");
+    btn.className = "category-btn" + (i === 0 ? " active" : "");
+    btn.textContent = category;
+    els.floatingCategories.appendChild(btn);
+  });
+  }
+
+  function initCategoryScroll() {
+  const buttons = Array.from(document.querySelectorAll(".category-btn"));
+  const sections = Array.from(document.querySelectorAll(".category-section"));
+  let manualScrollLock = false;
+
+  // Button click scroll
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+    manualScrollLock = true;
+    buttons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const target = document.getElementById("cat-" + btn.textContent.replace(/\s+/g, "-"));
+    if (target) {
+      const offset = els.floatingCategories.offsetHeight + 120;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+    setTimeout(() => (manualScrollLock = false), 900);
+    });
   });
 
-  section.appendChild(grid);
-  els.allServices.appendChild(section);
-}
+  // Auto-highlight on scroll
+  window.addEventListener("scroll", () => {
+    if (manualScrollLock) return;
+    const scrollY = window.scrollY + els.floatingCategories.offsetHeight + 100;
+    let activeId = "";
 
-// ---------- ADD TO BASKET ----------
-document.addEventListener("click", e => {
-  const btn = e.target.closest(".book-btn");
-  if (!btn) return;
+    for (const sec of sections) {
+    const top = sec.offsetTop;
+    const bottom = top + sec.offsetHeight;
+    if (scrollY >= top && scrollY < bottom) {
+      activeId = sec.id;
+      break;
+    }
+    }
 
-  const { name, price, time } = btn.dataset;
+    if (!activeId) return;
 
-  // ✅ Check if service already exists in basket
-  const alreadyAdded = basket.some(item => item.name === name);
-  if (alreadyAdded) {
-    btn.textContent = "In Basket ✓";
-    btn.disabled = true;
-    return;
+    const activeName = activeId.replace("cat-", "").replace(/-/g, " ").toLowerCase();
+    buttons.forEach(btn => {
+    const match = btn.textContent.toLowerCase() === activeName;
+    btn.classList.toggle("active", match);
+    if (match) btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    });
+  }, { passive: true });
   }
 
-  // Add new service
-  basket.push({ name, price, time });
-  updateBasket();
-  btn.textContent = "Added ✓";
-  btn.disabled = true;
+  // ============================================================
+  // SEARCH FUNCTIONALITY
+  // ============================================================
+  
+  function initSearch() {
+  els.searchInput.addEventListener("input", () => {
+    const term = els.searchInput.value.toLowerCase().trim();
+    document.querySelector("#search-results")?.remove();
 
-  // Keep it disabled while in basket
-  setTimeout(() => {
-    btn.textContent = "In Basket ✓";
-  }, 700);
+    const sections = document.querySelectorAll(".category-section");
+    if (!term) return sections.forEach(s => (s.style.display = "block"));
 
-  startBasketNudge();
-});
+    sections.forEach(s => (s.style.display = "none"));
+    const resultDiv = document.createElement("div");
+    resultDiv.id = "search-results";
+    resultDiv.className = "category-section";
+    const grid = document.createElement("div");
+    grid.className = "service-grid";
+    let found = 0;
 
-// ---------- SEARCH ----------
-els.searchInput.addEventListener("input", () => {
-  const term = els.searchInput.value.toLowerCase().trim();
-  document.querySelector("#search-results")?.remove();
-
-  const sections = document.querySelectorAll(".category-section");
-  if (!term) {
-    sections.forEach(s => (s.style.display = "block"));
-    return;
-  }
-
-  sections.forEach(s => (s.style.display = "none"));
-  const resultDiv = document.createElement("div");
-  resultDiv.id = "search-results";
-  resultDiv.className = "category-section";
-  const grid = document.createElement("div");
-  grid.className = "service-grid";
-  let found = 0;
-
-  Object.values(servicesData).flat().forEach(service => {
+    Object.values(servicesData).flat().forEach(service => {
     const { name, desc = "", time, price } = service;
     if (name.toLowerCase().includes(term) || desc.toLowerCase().includes(term)) {
       const card = document.createElement("div");
       card.className = "service-card";
       card.innerHTML = `
-        <h3>${name}</h3>
-        <p class="service-time">${time}</p>
-        ${desc ? `<p class="service-desc">${desc}</p>` : ""}
-        <p class="service-price">${price}</p>
-        <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
+      <h3>${name}</h3>
+      <p class="service-time">${time}</p>
+      ${desc ? `<p class="service-desc">${desc}</p>` : ""}
+      <p class="service-price">${price}</p>
+      <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
       grid.appendChild(card);
       found++;
     }
-  });
+    });
 
-  resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
-  resultDiv.appendChild(found ? grid : Object.assign(document.createElement("p"), {
+    resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
+    resultDiv.appendChild(found ? grid : Object.assign(document.createElement("p"), {
     className: "no-services",
     textContent: "No matching services found."
-  }));
-  els.allServices.prepend(resultDiv);
-});
+    }));
+    els.allServices.prepend(resultDiv);
+  });
+  }
 
-// ---------- CATEGORY AUTO-HIGHLIGHT (fixed manual + auto) ----------
-let manualScrollLock = false;
-
-window.addEventListener("DOMContentLoaded", () => {
-  const sections = Array.from(document.querySelectorAll(".category-section"));
-  const buttons = Array.from(document.querySelectorAll(".category-btn"));
-  const categoryBar = els.floatingCategories;
-
-  // --- Manual click (scroll + highlight immediately) ---
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      manualScrollLock = true;
-
-      // Remove previous highlight
-      buttons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      // Find section and scroll
-      const id = "cat-" + btn.textContent.replace(/\s+/g, "-");
-      const target = document.getElementById(id);
-      if (target) {
-        const headerOffset = window.innerWidth < 768 ? categoryBar.offsetHeight + 40 : categoryBar.offsetHeight + 60;
-        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
-        window.scrollTo({ top, behavior: "smooth" });
-      }
-
-      // Keep lock briefly, then resume auto updates
-      setTimeout(() => (manualScrollLock = false), 900);
-    });
+  // ============================================================
+  // EVENT LISTENERS
+  // ============================================================
+  
+  function initEventListeners() {
+  // Basket toggle
+  els.basketIcon.addEventListener("click", () => toggleBasket(true));
+  els.closeBasket.addEventListener("click", () => toggleBasket(false));
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") toggleBasket(false);
   });
 
-  // --- Scroll-based auto highlight ---
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (manualScrollLock) return;
+  // Remove from basket
+  els.basketList.addEventListener("click", e => {
+    const btn = e.target.closest(".basket-remove-btn");
+    if (!btn) return;
+    const removedItem = basket[btn.dataset.index];
+    basket.splice(btn.dataset.index, 1);
+    updateBasket();
 
-      const scrollY = window.scrollY + categoryBar.offsetHeight + 100;
-      let activeId = "";
+    const matchBtn = document.querySelector(`.book-btn[data-name="${removedItem.name}"]`);
+    if (matchBtn) {
+    matchBtn.disabled = false;
+    matchBtn.textContent = "Book Now";
+    }
+  });
 
-      for (const sec of sections) {
-        const top = sec.offsetTop;
-        const bottom = top + sec.offsetHeight;
-        if (scrollY >= top && scrollY < bottom) {
-          activeId = sec.id;
-          break;
-        }
-      }
+  // Proceed to booking
+  els.proceedBooking.addEventListener("click", () => {
+    if (!basket.length) return alert("Please select at least one service.");
+    window.location.href = "booking.html";
+  });
 
-      if (!activeId) return;
+  // Add to basket
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".book-btn");
+    if (!btn) return;
 
-      const name = activeId.replace("cat-", "").replace(/-/g, " ").toLowerCase();
+    const { name, price, time } = btn.dataset;
+    if (basket.some(item => item.name === name)) {
+    btn.textContent = "In Basket ✓";
+    btn.disabled = true;
+    return;
+    }
 
-      buttons.forEach(btn => {
-        const match = btn.textContent.toLowerCase() === name;
-        btn.classList.toggle("active", match);
-        if (match) {
-          btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-        }
-      });
-    },
-    { passive: true }
-  );
-});
+    basket.push({ name, price, time });
+    updateBasket();
+    btn.textContent = "Added ✓";
+    btn.disabled = true;
+    setTimeout(() => (btn.textContent = "In Basket ✓"), 700);
+    startBasketNudge();
+  });
 
+  // Navbar shrink on scroll
+  window.addEventListener("scroll", () => {
+    els.navbar.classList.toggle("shrink", window.scrollY > 50);
+  });
 
+  // Nudge visibility control
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopBasketNudge();
+    else if (basket.length) startBasketNudge();
+  });
 
-// ---------- NAVBAR SHRINK ----------
-let lastScroll = 0;
-window.addEventListener("scroll", () => {
-  const y = window.scrollY;
-  if (y > lastScroll + 20) els.navbar.classList.add("shrink");
-  else if (y < lastScroll - 20 || y === 0) els.navbar.classList.remove("shrink");
-  lastScroll = Math.max(y, 0);
-});
-
-// ---------- BASKET NUDGE ----------
-let nudgeInterval = null;
-function triggerBasketNudge() {
-  if (basket.length && !els.basketPanel.classList.contains("open") && !document.hidden) {
-    els.basketIcon.classList.add("nudge");
-    setTimeout(() => els.basketIcon.classList.remove("nudge"), 700);
+  // Mobile nav close
+  if (els.navLinks && els.menuToggle) {
+    els.navLinks.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", () => (els.menuToggle.checked = false));
+    });
   }
-}
-function startBasketNudge() {
-  if (nudgeInterval) return;
-  nudgeInterval = setInterval(triggerBasketNudge, 30000);
-}
-function stopBasketNudge() {
-  clearInterval(nudgeInterval);
-  nudgeInterval = null;
-}
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) stopBasketNudge();
-  else if (basket.length) startBasketNudge();
-});
+  }
 
-// ---------- INIT ----------
-updateBasket();
-if (basket.length) startBasketNudge();
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
+  
+  function init() {
+  initCategoryButtons();
+  renderServices();
+  initCategoryScroll();
+  initSearch();
+  initEventListeners();
+  updateBasket();
+  if (basket.length) startBasketNudge();
+  }
+
+  init();
+});

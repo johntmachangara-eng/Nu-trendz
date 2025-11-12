@@ -1,30 +1,81 @@
-const form = document.getElementById("contactForm");
-const statusText = document.getElementById("form-status");
+// ============================================================
+// NU-TRENDZ CONTACT FORM — FUNCTIONAL + ANIMATED
+// ============================================================
 
-form.addEventListener("submit", async (e) => {
+// Configuration
+const CONFIG = {
+  emailJsPublicKey: "Lgg9FCMDk-lwWnNxZ",
+  serviceId: "service_63ezrdn",
+  templateId: "template_5kd1bxc",
+};
+
+// DOM Elements
+let form, formContainer, thankYou, status;
+
+// Initialize DOM references
+function initElements() {
+  form = document.getElementById("contactForm");
+  formContainer = document.getElementById("form-container");
+  thankYou = document.getElementById("thankyou-message");
+  status = document.getElementById("form-status");
+}
+
+// Update status message
+function updateStatus(message, color) {
+  status.style.color = color;
+  status.textContent = message;
+}
+
+// Show thank you message
+function showThankYouMessage() {
+  formContainer.style.opacity = "0";
+  formContainer.style.transform = "translateY(-15px)";
+  
+  setTimeout(() => {
+    formContainer.style.display = "none";
+    thankYou.classList.remove("hidden");
+    
+    setTimeout(() => {
+      thankYou.classList.add("visible");
+    }, 100);
+  }, 500);
+}
+
+// Handle form submission
+async function handleSubmit(e) {
   e.preventDefault();
-  statusText.textContent = "Sending...";
-  statusText.style.color = "#ff9800";
+  updateStatus("Sending your message...", "#ff9800");
 
-  const data = new FormData(form);
+  const formData = {
+    from_name: form.name.value.trim(),
+    reply_to: form.email.value.trim(),
+    message: form.message.value.trim(),
+  };
 
   try {
-    const response = await fetch(form.action, {
-      method: form.method,
-      body: data,
-      headers: { Accept: "application/json" }
-    });
-
-    if (response.ok) {
-      statusText.textContent = "✅ Message sent successfully!";
-      statusText.style.color = "#00ff99";
-      form.reset();
-    } else {
-      statusText.textContent = "⚠️ Oops! Something went wrong.";
-      statusText.style.color = "red";
-    }
+    await emailjs.send(
+      CONFIG.serviceId,
+      CONFIG.templateId,
+      formData,
+      CONFIG.emailJsPublicKey
+    );
+    showThankYouMessage();
   } catch (error) {
-    statusText.textContent = "❌ Network error. Please try again later.";
-    statusText.style.color = "red";
+    console.error("EmailJS Error:", error);
+    updateStatus("❌ Failed to send message. Please try again later.", "red");
   }
-});
+}
+
+// Initialize application
+function init() {
+  initElements();
+  emailjs.init(CONFIG.emailJsPublicKey);
+  form.addEventListener("submit", handleSubmit);
+}
+
+// Start when DOM is ready
+document.addEventListener("DOMContentLoaded", init);
+
+// ============================================================
+// END OF CONTACT FORM SCRIPT
+// ============================================================
