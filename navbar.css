@@ -99,7 +99,8 @@
   width: 30px;
   height: 21px;
   cursor: pointer;
-  z-index: 1101;
+  z-index: 10000; /* ✅ higher than nav-links */
+  position: relative; /* ensure z-index works */
 }
 
 .bar {
@@ -122,6 +123,8 @@
   transform: rotate(-45deg) translate(6px, -6px);
   background: var(--orange);
 }
+
+
 
 /* ================================================
   UTILITY & CLEANUP

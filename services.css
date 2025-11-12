@@ -183,21 +183,6 @@ body.no-scroll::before {
   transition: var(--transition-fast);
 }
 
-#menu-toggle {
-  display: none;
-}
-
-#menu-toggle:checked + .menu-icon .bar:nth-child(1) {
-  transform: rotate(45deg) translateY(8px);
-}
-
-#menu-toggle:checked + .menu-icon .bar:nth-child(2) {
-  opacity: 0;
-}
-
-#menu-toggle:checked + .menu-icon .bar:nth-child(3) {
-  transform: rotate(-45deg) translateY(-8px);
-}
 
 /* ============================================================
   5. FLOATING CATEGORIES
@@ -575,26 +560,61 @@ footer {
   }
 }
 
+/* MOBILE: bottom-sheet basket that isn't covered on iPhone */
 @media (max-width: 768px) {
   .basket-panel {
-   width: 80vw;
-   right: -80vw;
-   max-width: none;
-   border-left: 2px solid var(--orange);
-   background: rgba(17, 17, 17, 0.95);
-   backdrop-filter: blur(8px);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;                 /* override desktop top:0 */
+    width: 100%;
+    /* Use new iOS viewport units when available, fall back to vh */
+    height: 80svh;
+    max-height: 80svh;
+    /* Fallback for older browsers */
+    height: min(80vh, 80svh);
+    max-height: min(80vh, 80svh);
+
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 3px solid var(--orange);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.6);
+
+    /* Make sure desktop right-slide is neutralized */
+    right: 0;                  /* override right:-400px / -80vw */
+    border-left: none;         /* we’re not sliding from the side on mobile */
+
+    /* Bottom-sheet animation */
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+
+    z-index: 9500;
+    padding: 16px 20px calc(env(safe-area-inset-bottom, 0) + 20px);
+    overflow-y: auto;
+    overscroll-behavior: contain;   /* prevent background scroll bleed */
+    -webkit-overflow-scrolling: touch;
+
+    pointer-events: none;      /* don’t block page when hidden */
   }
 
   .basket-panel.open {
-   right: 0;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
+  /* Tidy the floating fab on mobile */
   .basket-icon {
-   width: 55px;
-   height: 55px;
-   font-size: 1.5rem;
+    bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
+    right: 24px;
+    width: 55px;
+    height: 55px;
+    font-size: 1.5rem;
   }
 }
+
 
 @media (max-width: 600px) {
   .search-bar input {

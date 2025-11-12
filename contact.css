@@ -31,6 +31,10 @@ body {
   min-height: 100vh;
 }
 
+body.menu-open {
+  overflow: hidden;
+}
+
 /* ============================================================
   NAVIGATION
 ============================================================ */
@@ -41,7 +45,7 @@ body {
   height: 80px;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -94,13 +98,18 @@ body {
   border-radius: 3px;
 }
 
-/* --- Mobile Menu (Hamburger) --- */
+/* --- Mobile Menu Toggle --- */
+#menu-toggle {
+  display: none;
+}
+
 .menu-icon {
   display: none;
   flex-direction: column;
   gap: 5px;
   cursor: pointer;
-  z-index: 1100;
+  position: relative;
+  z-index: 10000;
 }
 
 .bar {
@@ -282,10 +291,6 @@ footer {
 
   #menu-toggle:checked ~ .nav-links {
    right: 0;
-  }
-
-  body.menu-open {
-   overflow: hidden;
   }
 
   .nav-links a {
