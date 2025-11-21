@@ -166,6 +166,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // 🔸 NEW: flag to know when search is active
+  let searchActive = false;
+
   // ============================================================
   // BASKET STATE & STORAGE
   // ============================================================
@@ -303,193 +306,206 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-function initCategoryScroll() {
-  const buttons = Array.from(document.querySelectorAll(".category-btn"));
-  const sections = Array.from(document.querySelectorAll(".category-section"));
-  let manualScrollLock = false;
+  function initCategoryScroll() {
+    const buttons = Array.from(document.querySelectorAll(".category-btn"));
+    const sections = Array.from(document.querySelectorAll(".category-section"));
+    let manualScrollLock = false;
 
-  if (!buttons.length || !sections.length) return;
+    if (!buttons.length || !sections.length) return;
 
-  // Button click scroll
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      // 🔄 If search is active, clear it and restore all categories
-      const searchVal = els.searchInput.value.trim();
-      const searchResults = document.getElementById("search-results");
-      if (searchVal || searchResults) {
-        els.searchInput.value = "";
-        if (searchResults) searchResults.remove();
-        document
-          .querySelectorAll(".category-section")
-          .forEach(sec => (sec.style.display = "block"));
-      }
+    // Button click scroll
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        // 🔄 If search is active, clear it and restore all categories
+        const searchVal = els.searchInput.value.trim();
+        const searchResults = document.getElementById("search-results");
+        if (searchVal || searchResults) {
+          els.searchInput.value = "";
+          if (searchResults) searchResults.remove();
+          document
+            .querySelectorAll(".category-section")
+            .forEach(sec => (sec.style.display = "block"));
+        }
 
-      manualScrollLock = true;
-      buttons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+        // 🔸 leaving search mode when clicking a category
+        searchActive = false;
 
-      const target = document.getElementById(
-        "cat-" + btn.textContent.replace(/\s+/g, "-")
-      );
+        manualScrollLock = true;
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
 
-      if (target) {
+        const target = document.getElementById(
+          "cat-" + btn.textContent.replace(/\s+/g, "-")
+        );
+
+        if (target) {
+          const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
+          const catHeight = els.floatingCategories
+            ? els.floatingCategories.offsetHeight
+            : 0;
+
+          const offset = navHeight + catHeight + 50;
+          const top =
+            target.getBoundingClientRect().top + window.scrollY - offset;
+
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+
+        setTimeout(() => (manualScrollLock = false), 600);
+      });
+    });
+
+    // Auto-highlight on scroll (more stable, never "no active")
+    window.addEventListener(
+      "scroll",
+      () => {
+        // 🔸 Do NOT highlight while in search mode
+        if (manualScrollLock || searchActive) return;
+
         const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
         const catHeight = els.floatingCategories
           ? els.floatingCategories.offsetHeight
           : 0;
 
-        const offset = navHeight + catHeight + 50;
-        const top =
-          target.getBoundingClientRect().top + window.scrollY - offset;
+        // Trigger line just under navbar + category bar
+        const triggerLine = window.scrollY + navHeight + catHeight + 20;
+        let activeId = "";
 
-        window.scrollTo({ top, behavior: "smooth" });
-      }
+        // Find the section that contains the trigger line
+        for (let i = 0; i < sections.length; i++) {
+          const sec = sections[i];
+          const top = sec.offsetTop;
+          const bottom = top + sec.offsetHeight;
 
-      setTimeout(() => (manualScrollLock = false), 600);
-    });
-  });
-
-  // Auto-highlight on scroll (more stable, never "no active")
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (manualScrollLock) return;
-
-      const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
-      const catHeight = els.floatingCategories
-        ? els.floatingCategories.offsetHeight
-        : 0;
-
-      // Trigger line just under navbar + category bar
-      const triggerLine = window.scrollY + navHeight + catHeight + 20;
-      let activeId = "";
-
-      // Find the section that contains the trigger line
-      for (let i = 0; i < sections.length; i++) {
-        const sec = sections[i];
-        const top = sec.offsetTop;
-        const bottom = top + sec.offsetHeight;
-
-        if (triggerLine >= top && triggerLine < bottom) {
-          activeId = sec.id;
-          break;
+          if (triggerLine >= top && triggerLine < bottom) {
+            activeId = sec.id;
+            break;
+          }
         }
-      }
 
-      // If we didn't find any section (e.g. very top or very bottom),
-      // clamp to the first or last section so it never gets "stuck"
-      if (!activeId && sections.length) {
-        const first = sections[0];
-        const last = sections[sections.length - 1];
-        const firstTop = first.offsetTop;
-        const lastTop = last.offsetTop;
-        const lastBottom = lastTop + last.offsetHeight;
+        // If we didn't find any section (e.g. very top or very bottom),
+        // clamp to the first or last section so it never gets "stuck"
+        if (!activeId && sections.length) {
+          const first = sections[0];
+          const last = sections[sections.length - 1];
+          const firstTop = first.offsetTop;
+          const lastTop = last.offsetTop;
+          const lastBottom = lastTop + last.offsetHeight;
 
-        if (triggerLine < firstTop) {
-          activeId = first.id;
-        } else if (triggerLine >= lastBottom) {
-          activeId = last.id;
+          if (triggerLine < firstTop) {
+            activeId = first.id;
+          } else if (triggerLine >= lastBottom) {
+            activeId = last.id;
+          }
         }
-      }
 
-      if (!activeId) return;
+        if (!activeId) return;
 
-      const activeName = activeId
-        .replace("cat-", "")
-        .replace(/-/g, " ")
-        .toLowerCase();
+        const activeName = activeId
+          .replace("cat-", "")
+          .replace(/-/g, " ")
+          .toLowerCase();
 
-      buttons.forEach(btn => {
-        const match = btn.textContent.toLowerCase() === activeName;
-        btn.classList.toggle("active", match);
-        if (match) {
-          // no smooth here, avoids jitter while user is still scrolling fast
-          btn.scrollIntoView({
-            behavior: "auto",
-            inline: "center",
-            block: "nearest"
-          });
-        }
-      });
-    },
-    { passive: true }
-  );
-}
-
+        buttons.forEach(btn => {
+          const match = btn.textContent.toLowerCase() === activeName;
+          btn.classList.toggle("active", match);
+          if (match) {
+            btn.scrollIntoView({
+              behavior: "auto",
+              inline: "center",
+              block: "nearest"
+            });
+          }
+        });
+      },
+      { passive: true }
+    );
+  }
 
   // ============================================================
   // SEARCH FUNCTIONALITY
   // ============================================================
   
-function initSearch() {
-  els.searchInput.addEventListener("input", () => {
-    const term = els.searchInput.value.toLowerCase().trim();
-    document.querySelector("#search-results")?.remove();
+  function initSearch() {
+    els.searchInput.addEventListener("input", () => {
+      const term = els.searchInput.value.toLowerCase().trim();
+      document.querySelector("#search-results")?.remove();
 
-    const sections = document.querySelectorAll(".category-section");
+      const sections = document.querySelectorAll(".category-section");
 
-    if (!term) {
-      sections.forEach(s => (s.style.display = "block"));
-      return;
-    }
+      if (!term) {
+        // 🔸 search turned off
+        searchActive = false;
+        sections.forEach(s => (s.style.display = "block"));
+        return;
+      }
 
-    sections.forEach(s => (s.style.display = "none"));
+      // 🔸 search turned on
+      searchActive = true;
 
-    const resultDiv = document.createElement("div");
-    resultDiv.id = "search-results";
-    resultDiv.className = "category-section";
+      // 🔸 remove all category highlights while searching
+      document.querySelectorAll(".category-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
 
-    const grid = document.createElement("div");
-    grid.className = "service-grid";
+      // Hide all category sections when searching
+      sections.forEach(s => (s.style.display = "none"));
 
-    let found = 0;
-    const seenNames = new Set();
+      const resultDiv = document.createElement("div");
+      resultDiv.id = "search-results";
+      resultDiv.className = "category-section";
 
-    Object.values(servicesData).flat().forEach(service => {
-      const { name, desc = "", time, price } = service;
-      const lowerName = name.toLowerCase();
-      const lowerDesc = desc.toLowerCase();
+      const grid = document.createElement("div");
+      grid.className = "service-grid";
 
-      const matches =
-        lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
-      if (!matches) return;
+      let found = 0;
+      const seenNames = new Set();
 
-      if (seenNames.has(lowerName)) return;
-      seenNames.add(lowerName);
+      Object.values(servicesData).flat().forEach(service => {
+        const { name, desc = "", time, price } = service;
+        const lowerName = name.toLowerCase();
+        const lowerDesc = desc.toLowerCase();
 
-      const card = document.createElement("div");
-      card.className = "service-card";
-      card.innerHTML = `
-        <h3>${name}</h3>
-        <p class="service-time">${time}</p>
-        ${desc ? `<p class="service-desc">${desc}</p>` : ""}
-        <p class="service-price">${price}</p>
-        <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
-      grid.appendChild(card);
-      found++;
+        const matches =
+          lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
+        if (!matches) return;
+
+        if (seenNames.has(lowerName)) return;
+        seenNames.add(lowerName);
+
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML = `
+          <h3>${name}</h3>
+          <p class="service-time">${time}</p>
+          ${desc ? `<p class="service-desc">${desc}</p>` : ""}
+          <p class="service-price">${price}</p>
+          <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
+        grid.appendChild(card);
+        found++;
+      });
+
+      resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
+      if (found) {
+        resultDiv.appendChild(grid);
+      } else {
+        const p = document.createElement("p");
+        p.className = "no-services";
+        p.textContent = "No matching services found.";
+        resultDiv.appendChild(p);
+      }
+
+      els.allServices.prepend(resultDiv);
     });
 
-    resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
-    if (found) {
-      resultDiv.appendChild(grid);
-    } else {
-      const p = document.createElement("p");
-      p.className = "no-services";
-      p.textContent = "No matching services found.";
-      resultDiv.appendChild(p);
-    }
-
-    els.allServices.prepend(resultDiv);
-  });
-
-  // 💡 Hide keyboard on mobile when pressing "search"/"enter"
-  els.searchInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      e.target.blur();
-    }
-  });
-}
+    // 💡 Hide keyboard on mobile when pressing "search"/"enter"
+    els.searchInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.target.blur();
+      }
+    });
+  }
 
   // ============================================================
   // EVENT LISTENERS
