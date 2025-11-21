@@ -3,20 +3,6 @@
   ============================================================ */
 
 /* ============================================================
-  TABLE OF CONTENTS
-  1. Root Variables
-  2. Base & Reset Styles
-  3. Scrollbar
-  4. Navigation
-  5. Floating Categories
-  6. Services Section
-  7. Basket
-  8. Footer
-  9. Animations
-  10. Media Queries
-  ============================================================ */
-
-/* ============================================================
   1. ROOT VARIABLES
   ============================================================ */
 :root {
@@ -38,7 +24,7 @@
 }
 
 /* ============================================================
-  2. BASE & RESET STYLES
+  2. BASE & RESET
   ============================================================ */
 * {
   box-sizing: border-box;
@@ -58,8 +44,13 @@ body {
   line-height: 1.6;
 }
 
-body.no-scroll {
+/* Body States */
+body.no-scroll,
+body.menu-open {
   overflow: hidden;
+}
+
+body.no-scroll {
   height: 100%;
   touch-action: none;
 }
@@ -67,21 +58,12 @@ body.no-scroll {
 body.no-scroll::before {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.4);
   z-index: 9400;
 }
 
-body.menu-open {
-  overflow: hidden;
-}
-
-/* ============================================================
-  3. SCROLLBAR
-  ============================================================ */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -96,7 +78,7 @@ body.menu-open {
 }
 
 /* ============================================================
-  4. NAVIGATION
+  3. NAVIGATION
   ============================================================ */
 .navbar {
   position: fixed;
@@ -126,6 +108,7 @@ body.menu-open {
   align-items: center;
 }
 
+/* Logo */
 .logo {
   color: var(--orange);
   font-weight: 800;
@@ -139,6 +122,7 @@ body.menu-open {
   text-shadow: var(--shadow-glow);
 }
 
+/* Nav Links */
 .nav-links {
   list-style: none;
   display: flex;
@@ -169,6 +153,7 @@ body.menu-open {
   border-radius: 3px;
 }
 
+/* Mobile Menu Icon */
 .menu-icon {
   display: none;
   flex-direction: column;
@@ -188,7 +173,7 @@ body.menu-open {
 }
 
 /* ============================================================
-  5. FLOATING CATEGORIES
+  4. FLOATING CATEGORIES
   ============================================================ */
 .floating-categories {
   position: sticky;
@@ -214,6 +199,7 @@ body.menu-open {
   white-space: nowrap;
 }
 
+/* Category Buttons */
 .category-btn {
   background: var(--bg-dark);
   border: 1px solid var(--border-light);
@@ -242,12 +228,13 @@ body.menu-open {
 }
 
 /* ============================================================
-  6. SERVICES SECTION
+  5. SERVICES SECTION
   ============================================================ */
 #services-section {
   padding: 180px 20px 100px;
 }
 
+/* Header */
 .services-header {
   text-align: center;
   margin-bottom: 60px;
@@ -266,6 +253,7 @@ body.menu-open {
   margin-top: 10px;
 }
 
+/* Search Bar */
 .search-bar {
   text-align: center;
   margin-bottom: 40px;
@@ -288,6 +276,7 @@ body.menu-open {
   box-shadow: var(--shadow-glow);
 }
 
+/* Category Section */
 .category-section {
   margin-bottom: 80px;
   scroll-margin-top: 150px;
@@ -301,6 +290,7 @@ body.menu-open {
   text-transform: uppercase;
 }
 
+/* Service Grid */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -309,6 +299,7 @@ body.menu-open {
   margin: 0 auto;
 }
 
+/* Service Card */
 .service-card {
   background: var(--bg-light);
   border: 1px solid var(--border-light);
@@ -352,6 +343,7 @@ body.menu-open {
   margin-top: 20px;
 }
 
+/* Book Button */
 .book-btn {
   margin-top: 10px;
   background: var(--orange);
@@ -371,8 +363,9 @@ body.menu-open {
 }
 
 /* ============================================================
-  7. BASKET
+  6. BASKET
   ============================================================ */
+/* Basket Icon */
 .basket-icon {
   position: fixed;
   bottom: 30px;
@@ -402,6 +395,7 @@ body.menu-open {
   animation: basket-nudge 0.7s ease;
 }
 
+/* Basket Panel */
 .basket-panel {
   position: fixed;
   top: 0;
@@ -446,6 +440,7 @@ body.menu-open {
   transform: scale(1.2);
 }
 
+/* Basket List */
 .basket-list {
   flex: 1;
   overflow-y: auto;
@@ -493,6 +488,7 @@ body.menu-open {
   transform: scale(1.05);
 }
 
+/* Basket Footer */
 .basket-footer {
   border-top: 1px solid #333;
   padding-top: 15px;
@@ -516,6 +512,7 @@ body.menu-open {
   transform: scale(1.05);
 }
 
+/* Basket Overlay */
 .basket-overlay {
   position: fixed;
   inset: 0;
@@ -532,7 +529,7 @@ body.menu-open {
 }
 
 /* ============================================================
-  8. FOOTER
+  7. FOOTER
   ============================================================ */
 footer {
   background: #000;
@@ -544,7 +541,7 @@ footer {
 }
 
 /* ============================================================
-  9. ANIMATIONS
+  8. ANIMATIONS
   ============================================================ */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -571,8 +568,9 @@ footer {
 }
 
 /* ============================================================
-  10. MEDIA QUERIES
+  9. MEDIA QUERIES
   ============================================================ */
+/* Tablets & Below (992px) */
 @media (max-width: 992px) {
   .menu-icon {
     display: flex;
@@ -611,6 +609,7 @@ footer {
   }
 }
 
+/* Mobile (768px) */
 @media (max-width: 768px) {
   .basket-icon {
     bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
@@ -654,6 +653,7 @@ footer {
   }
 }
 
+/* Small Mobile (600px) */
 @media (max-width: 600px) {
   .logo {
     font-size: 1.3rem;
