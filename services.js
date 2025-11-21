@@ -421,78 +421,75 @@ function initCategoryScroll() {
   // SEARCH FUNCTIONALITY
   // ============================================================
   
-  function initSearch() {
-    els.searchInput.addEventListener("input", () => {
-      const term = els.searchInput.value.toLowerCase().trim();
-      document.querySelector("#search-results")?.remove();
+function initSearch() {
+  els.searchInput.addEventListener("input", () => {
+    const term = els.searchInput.value.toLowerCase().trim();
+    document.querySelector("#search-results")?.remove();
 
-        // 💡 Hide mobile keyboard when user taps "search"/"enter"
-  els.searchInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();      // don't submit a form / reload
-      e.target.blur();         // remove focus → keyboard hides on mobile
+    const sections = document.querySelectorAll(".category-section");
+
+    if (!term) {
+      sections.forEach(s => (s.style.display = "block"));
+      return;
     }
+
+    sections.forEach(s => (s.style.display = "none"));
+
+    const resultDiv = document.createElement("div");
+    resultDiv.id = "search-results";
+    resultDiv.className = "category-section";
+
+    const grid = document.createElement("div");
+    grid.className = "service-grid";
+
+    let found = 0;
+    const seenNames = new Set();
+
+    Object.values(servicesData).flat().forEach(service => {
+      const { name, desc = "", time, price } = service;
+      const lowerName = name.toLowerCase();
+      const lowerDesc = desc.toLowerCase();
+
+      const matches =
+        lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
+      if (!matches) return;
+
+      if (seenNames.has(lowerName)) return;
+      seenNames.add(lowerName);
+
+      const card = document.createElement("div");
+      card.className = "service-card";
+      card.innerHTML = `
+        <h3>${name}</h3>
+        <p class="service-time">${time}</p>
+        ${desc ? `<p class="service-desc">${desc}</p>` : ""}
+        <p class="service-price">${price}</p>
+        <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
+      grid.appendChild(card);
+      found++;
+    });
+
+    resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
+    if (found) {
+      resultDiv.appendChild(grid);
+    } else {
+      const p = document.createElement("p");
+      p.className = "no-services";
+      p.textContent = "No matching services found.";
+      resultDiv.appendChild(p);
+    }
+
+    els.allServices.prepend(resultDiv);
   });
 
-
-      const sections = document.querySelectorAll(".category-section");
-
-      // If search is cleared, show all sections again
-      if (!term) {
-        sections.forEach(s => (s.style.display = "block"));
-        return;
-      }
-
-      // Hide all category sections when searching
-      sections.forEach(s => (s.style.display = "none"));
-
-      const resultDiv = document.createElement("div");
-      resultDiv.id = "search-results";
-      resultDiv.className = "category-section";
-
-      const grid = document.createElement("div");
-      grid.className = "service-grid";
-
-      let found = 0;
-      const seenNames = new Set(); // prevent duplicate services in search
-
-      Object.values(servicesData).flat().forEach(service => {
-        const { name, desc = "", time, price } = service;
-        const lowerName = name.toLowerCase();
-        const lowerDesc = desc.toLowerCase();
-
-        const matches =
-          lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
-        if (!matches) return;
-
-        if (seenNames.has(lowerName)) return;
-        seenNames.add(lowerName);
-
-        const card = document.createElement("div");
-        card.className = "service-card";
-        card.innerHTML = `
-          <h3>${name}</h3>
-          <p class="service-time">${time}</p>
-          ${desc ? `<p class="service-desc">${desc}</p>` : ""}
-          <p class="service-price">${price}</p>
-          <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
-        grid.appendChild(card);
-        found++;
-      });
-
-      resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
-      if (found) {
-        resultDiv.appendChild(grid);
-      } else {
-        const p = document.createElement("p");
-        p.className = "no-services";
-        p.textContent = "No matching services found.";
-        resultDiv.appendChild(p);
-      }
-
-      els.allServices.prepend(resultDiv);
-    });
-  }
+  // 💡 Hide keyboard on mobile when pressing "search"/"enter"
+  els.searchInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+}
 
   // ============================================================
   // EVENT LISTENERS
