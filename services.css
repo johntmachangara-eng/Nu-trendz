@@ -220,13 +220,19 @@ body.no-scroll::before {
   transition: var(--transition-fast);
 }
 
-.category-btn:hover,
+.category-btn:hover:not(.active),
+.category-btn:focus:not(.active),
+.category-btn:active:not(.active) {
+  border-color: var(--orange);
+}
+
 .category-btn.active {
-  background: var(--orange);
-  color: var(--bg-dark);
+  background: var(--orange) !important;
+  color: var(--bg-dark) !important;
+  border-color: var(--orange) !important;
   font-weight: 700;
-  transform: scale(1.1);
-  box-shadow: var(--shadow-glow);
+  transform: scale(1.05) !important;
+  box-shadow: var(--shadow-glow) !important;
 }
 
 /* ============================================================
@@ -386,6 +392,10 @@ body.no-scroll::before {
   color: #111;
 }
 
+.basket-icon.nudge {
+  animation: basket-nudge 0.7s ease;
+}
+
 .basket-panel {
   position: fixed;
   top: 0;
@@ -444,6 +454,17 @@ body.no-scroll::before {
   padding: 10px 0;
 }
 
+.basket-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.basket-item-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .basket-item-price {
   color: var(--orange);
   font-size: 0.9rem;
@@ -489,18 +510,6 @@ body.no-scroll::before {
   transform: scale(1.05);
 }
 
-.basket-item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.basket-item-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-/* CLICK-AWAY OVERLAY FOR BASKET */
 .basket-overlay {
   position: fixed;
   inset: 0;
@@ -514,18 +523,6 @@ body.no-scroll::before {
 .basket-overlay.show {
   opacity: 1;
   pointer-events: auto;
-}
-
-.basket-icon.nudge {
-  animation: basket-nudge 0.7s ease;
-}
-
-@keyframes basket-nudge {
-  0%   { transform: scale(1) translateY(0); }
-  25%  { transform: scale(1.05) translateY(-4px); }
-  50%  { transform: scale(1) translateY(0); }
-  75%  { transform: scale(1.05) translateY(-2px); }
-  100% { transform: scale(1) translateY(0); }
 }
 
 /* ============================================================
@@ -557,6 +554,14 @@ footer {
    opacity: 1; 
    transform: translateY(0); 
   }
+}
+
+@keyframes basket-nudge {
+  0%   { transform: scale(1) translateY(0); }
+  25%  { transform: scale(1.05) translateY(-4px); }
+  50%  { transform: scale(1) translateY(0); }
+  75%  { transform: scale(1.05) translateY(-2px); }
+  100% { transform: scale(1) translateY(0); }
 }
 
 /* ============================================================
@@ -604,7 +609,6 @@ footer {
   }
 }
 
-/* MOBILE: bottom-sheet basket that isn't covered on iPhone */
 @media (max-width: 768px) {
   .basket-panel {
     position: fixed;
@@ -612,37 +616,25 @@ footer {
     right: 0;
     bottom: 0;
     top: auto;
-
     width: 100%;
-
-    /* Fallback for older browsers */
     height: 80vh;
     max-height: 80vh;
-
-    /* Use new viewport units when available (iOS 16+ etc.) */
     height: 80svh;
     max-height: 80svh;
-
     background: rgba(17, 17, 17, 0.95);
     backdrop-filter: blur(8px);
     border-top: 3px solid var(--orange);
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     box-shadow: 0 -5px 25px rgba(0,0,0,0.6);
-
-    right: 0;
     border-left: none;
-
-    /* Bottom-sheet animation */
     transform: translateY(100%);
     transition: transform 0.4s ease;
-
     z-index: 9500;
     padding: 16px 20px calc(env(safe-area-inset-bottom, 0) + 20px);
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-
     pointer-events: none;
   }
 
