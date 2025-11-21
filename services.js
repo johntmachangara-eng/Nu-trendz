@@ -426,6 +426,15 @@ function initCategoryScroll() {
       const term = els.searchInput.value.toLowerCase().trim();
       document.querySelector("#search-results")?.remove();
 
+        // 💡 Hide mobile keyboard when user taps "search"/"enter"
+  els.searchInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();      // don't submit a form / reload
+      e.target.blur();         // remove focus → keyboard hides on mobile
+    }
+  });
+
+
       const sections = document.querySelectorAll(".category-section");
 
       // If search is cleared, show all sections again
