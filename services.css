@@ -335,6 +335,13 @@ body.no-scroll::before {
   font-weight: bold;
 }
 
+.no-services {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 20px;
+}
+
+
 .book-btn {
   margin-top: 10px;
   background: var(--orange);

@@ -1,12 +1,13 @@
 // ============================================================
-// NU-TRENDZ SERVICES PAGE – ROBUST BUILD
+// NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION BUILD
 // ============================================================
-"use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================================
-  //  DATA
-  // ==========================================================
+  
+  // ============================================================
+  // DATA
+  // ============================================================
+  
   const servicesData = {
     "Featured": [
       { name: "Cornrows with Design", time: "1 hour", price: "£30" },
@@ -123,9 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ]
   };
 
-  // ==========================================================
-  //  DOM ELEMENTS (with basic safety)
-  // ==========================================================
+  // ============================================================
+  // DOM ELEMENTS
+  // ============================================================
+  
   const els = {
     allServices: document.getElementById("all-services"),
     floatingCategories: document.getElementById("floatingCategories"),
@@ -138,16 +140,10 @@ document.addEventListener("DOMContentLoaded", () => {
     basketCount: document.getElementById("basketCount"),
     basketTotal: document.getElementById("basketTotal"),
     proceedBooking: document.getElementById("proceedBooking"),
-    basketOverlay: document.getElementById("basketOverlay")   
+    menuToggle: document.getElementById("menu-toggle"),
+    navLinks: document.getElementById("nav-links"),
+    basketOverlay: document.getElementById("basketOverlay") 
   };
-
-  function assertElement(key, el) {
-    if (!el) {
-      console.error(`[Services] Missing DOM element: ${key}`);
-      return false;
-    }
-    return true;
-  }
 
   const requiredKeys = [
     "allServices",
@@ -163,71 +159,24 @@ document.addEventListener("DOMContentLoaded", () => {
     "proceedBooking",
     "basketOverlay"
   ];
-
-  const domOk = requiredKeys.every(key => assertElement(key, els[key]));
-  if (!domOk) {
-    console.error("[Services] Required DOM structure not found. Aborting init.");
-    return;
-  }
-
-  // ==========================================================
-  //  BASKET STATE & HELPERS
-  // ==========================================================
-  let basket = loadBasket();
-
-  function loadBasket() {
-    try {
-      const raw = localStorage.getItem("basket");
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      console.warn("[Services] Failed to parse basket from localStorage:", e);
-      return [];
+  for (const key of requiredKeys) {
+    if (!els[key]) {
+      console.error(`Missing required DOM element: ${key}`);
+      return;
     }
   }
 
-  function saveBasket() {
-    try {
-      localStorage.setItem("basket", JSON.stringify(basket));
-    } catch (e) {
-      console.warn("[Services] Failed to save basket to localStorage:", e);
-    }
-  }
+  // ============================================================
+  // BASKET STATE & STORAGE
+  // ============================================================
+  
+  let basket = JSON.parse(localStorage.getItem("basket")) || [];
+  const saveBasket = () => localStorage.setItem("basket", JSON.stringify(basket));
 
-  function getNumericPrice(priceString) {
-    const value = parseFloat(priceString.replace(/[^\d.]/g, ""));
-    return isNaN(value) ? 0 : value;
-  }
-
-  // ==========================================================
-  //  DOM HELPERS
-  // ==========================================================
-  function createServiceCard(service) {
-    const { name, time, desc = "", price } = service;
-
-    const card = document.createElement("div");
-    card.className = "service-card";
-    card.innerHTML = `
-      <h3>${name}</h3>
-      <p class="service-time">${time}</p>
-      ${desc ? `<p class="service-desc">${desc}</p>` : ""}
-      <p class="service-price">${price}</p>
-      <button class="book-btn"
-              data-name="${name}"
-              data-price="${price}"
-              data-time="${time}">
-        Book Now
-      </button>
-    `;
-    return card;
-  }
-
-  function getAllServicesFlat() {
-    return Object.values(servicesData).flat();
-  }
-
-  // ==========================================================
-  //  BASKET RENDERING & INTERACTIONS
-  // ==========================================================
+  // ============================================================
+  // BASKET FUNCTIONS
+  // ============================================================
+  
   function updateBasket() {
     const { basketList, basketCount, basketTotal } = els;
     basketList.innerHTML = "";
@@ -240,17 +189,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Update all book buttons to reflect basket state
+    // Update button states
     document.querySelectorAll(".book-btn").forEach(btn => {
       const inBasket = basket.some(item => item.name === btn.dataset.name);
       btn.disabled = inBasket;
       btn.textContent = inBasket ? "In Basket ✓" : "Book Now";
     });
 
-    // Calculate total and render basket items
+    // Calculate total and render items
     let total = 0;
     basket.forEach((item, i) => {
-      total += getNumericPrice(item.price);
+      const priceValue = parseFloat(item.price.replace(/[^\d.]/g, "")) || 0;
+      total += priceValue;
 
       const div = document.createElement("div");
       div.className = "basket-item";
@@ -259,8 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="basket-item-name">${item.name}</span>
           <span class="basket-item-price">${item.price}</span>
         </div>
-        <button class="basket-remove-btn" data-index="${i}">🗑 Remove</button>
-      `;
+        <button class="basket-remove-btn" data-index="${i}">🗑 Remove</button>`;
       basketList.appendChild(div);
     });
 
@@ -268,33 +217,30 @@ document.addEventListener("DOMContentLoaded", () => {
     saveBasket();
   }
 
-function toggleBasket(open) {
-  const panel = els.basketPanel;
-  const overlay = els.basketOverlay;
+  // 🔧 UPDATED: add overlay show/hide, remove body.no-scroll (no layout shift)
+  function toggleBasket(open) {
+    const panel = els.basketPanel;
+    const overlay = els.basketOverlay;
 
-  if (open) {
-    panel.classList.add("open");
-    if (overlay) overlay.classList.add("show");
-    stopBasketNudge();
-  } else {
-    panel.classList.remove("open");
-    if (overlay) overlay.classList.remove("show");
-    if (basket.length > 0) startBasketNudge();
+    if (open) {
+      panel.classList.add("open");
+      if (overlay) overlay.classList.add("show");
+      stopBasketNudge();
+    } else {
+      panel.classList.remove("open");
+      if (overlay) overlay.classList.remove("show");
+      if (basket.length > 0) startBasketNudge();
+    }
   }
-}
 
-
-  // ==========================================================
-  //  BASKET NUDGE ANIMATION
-  // ==========================================================
+  // ============================================================
+  // BASKET NUDGE ANIMATION
+  // ============================================================
+  
   let nudgeInterval = null;
 
   function triggerBasketNudge() {
-    if (
-      basket.length &&
-      !els.basketPanel.classList.contains("open") &&
-      !document.hidden
-    ) {
+    if (basket.length && !els.basketPanel.classList.contains("open") && !document.hidden) {
       els.basketIcon.classList.add("nudge");
       setTimeout(() => els.basketIcon.classList.remove("nudge"), 700);
     }
@@ -306,26 +252,37 @@ function toggleBasket(open) {
   }
 
   function stopBasketNudge() {
-    if (!nudgeInterval) return;
     clearInterval(nudgeInterval);
     nudgeInterval = null;
   }
 
-  // ==========================================================
-  //  RENDER SERVICES
-  // ==========================================================
+  // ============================================================
+  // RENDER SERVICES
+  // ============================================================
+  
   function renderServices() {
     for (const [category, list] of Object.entries(servicesData)) {
       const section = document.createElement("section");
       section.className = "category-section";
       section.id = `cat-${category.replace(/\s+/g, "-")}`;
       section.innerHTML = `<h2>${category}</h2>`;
-
+      
       const grid = document.createElement("div");
       grid.className = "service-grid";
 
       list.forEach(service => {
-        grid.appendChild(createServiceCard(service));
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML = `
+          <h3>${service.name}</h3>
+          <p class="service-time">${service.time}</p>
+          ${service.desc ? `<p class="service-desc">${service.desc}</p>` : ""}
+          <p class="service-price">${service.price}</p>
+          <button class="book-btn" 
+            data-name="${service.name}" 
+            data-price="${service.price}" 
+            data-time="${service.time}">Book Now</button>`;
+        grid.appendChild(card);
       });
 
       section.appendChild(grid);
@@ -333,9 +290,10 @@ function toggleBasket(open) {
     }
   }
 
-  // ==========================================================
-  //  CATEGORY NAVIGATION BUTTONS
-  // ==========================================================
+  // ============================================================
+  // CATEGORY NAVIGATION
+  // ============================================================
+  
   function initCategoryButtons() {
     Object.keys(servicesData).forEach((category, i) => {
       const btn = document.createElement("button");
@@ -345,100 +303,102 @@ function toggleBasket(open) {
     });
   }
 
-  // ==========================================================
-  //  CATEGORY NAVIGATION (SCROLL-SYNCED)
-  // ==========================================================
   function initCategoryScroll() {
     const buttons = Array.from(document.querySelectorAll(".category-btn"));
     const sections = Array.from(document.querySelectorAll(".category-section"));
+    let manualScrollLock = false;
 
-    if (!buttons.length || !sections.length) return;
-
-    function getSectionIdFromButton(btn) {
-      return "cat-" + btn.textContent.replace(/\s+/g, "-");
-    }
-
-    let lastActiveId = null;
-    function setActiveSection(sectionId) {
-      if (!sectionId) return;
-      const normalized = sectionId.toLowerCase();
-      if (normalized === lastActiveId) return;
-      lastActiveId = normalized;
-
-      buttons.forEach(btn => {
-        const btnId = getSectionIdFromButton(btn).toLowerCase();
-        const isActive = btnId === lastActiveId;
-
-        btn.classList.toggle("active", isActive);
-
-        if (isActive) {
-          btn.scrollIntoView({
-            behavior: "auto",
-            inline: "center",
-            block: "nearest"
-          });
+    // Button click scroll
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        // 🔄 If search is active, clear it and restore all categories
+        const searchVal = els.searchInput.value.trim();
+        const searchResults = document.getElementById("search-results");
+        if (searchVal || searchResults) {
+          els.searchInput.value = "";
+          if (searchResults) searchResults.remove();
+          document
+            .querySelectorAll(".category-section")
+            .forEach(sec => (sec.style.display = "block"));
         }
+
+        manualScrollLock = true;
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const target = document.getElementById(
+          "cat-" + btn.textContent.replace(/\s+/g, "-")
+        );
+
+        if (target) {
+          // use navbar + category bar height so heading is fully visible
+          const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
+          const catHeight = els.floatingCategories
+            ? els.floatingCategories.offsetHeight
+            : 0;
+
+          const offset = navHeight + catHeight + 50;
+          const top =
+            target.getBoundingClientRect().top + window.scrollY - offset;
+
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+
+        setTimeout(() => (manualScrollLock = false), 900);
       });
-    }
+    });
 
-    
-    const barHeight =
-      (els.floatingCategories && els.floatingCategories.offsetHeight) || 80;
+    // Auto-highlight on scroll
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (manualScrollLock) return;
 
-    const observer = new IntersectionObserver(
-      entries => {
-        let bestEntry = null;
+        const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
+        const catHeight = els.floatingCategories
+          ? els.floatingCategories.offsetHeight
+          : 0;
 
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
-            bestEntry = entry;
+        // line just under the bars
+        const triggerLine = window.scrollY + navHeight + catHeight + 120;
+        let activeId = "";
+
+        for (const sec of sections) {
+          const top = sec.offsetTop;
+          const bottom = top + sec.offsetHeight;
+          if (triggerLine >= top && triggerLine < bottom) {
+            activeId = sec.id;
+            break;
+          }
+        }
+
+        if (!activeId) return;
+
+        const activeName = activeId
+          .replace("cat-", "")
+          .replace(/-/g, " ")
+          .toLowerCase();
+
+        buttons.forEach(btn => {
+          const match = btn.textContent.toLowerCase() === activeName;
+          btn.classList.toggle("active", match);
+          if (match) {
+            btn.scrollIntoView({
+              behavior: "smooth",
+              inline: "center",
+              block: "nearest"
+            });
           }
         });
-
-        if (!bestEntry || !bestEntry.target || !bestEntry.target.id) return;
-        setActiveSection(bestEntry.target.id);
       },
-      {
-        root: null,
-        rootMargin: `-${barHeight + 10}px 0px -60% 0px`,
-        threshold: [0.1, 0.25, 0.5, 0.75]
-      }
+      { passive: true }
     );
-
-    sections.forEach(sec => observer.observe(sec));
-
-    buttons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const targetId = getSectionIdFromButton(btn);
-    const target = document.getElementById(targetId);
-    if (!target) return;
-
-    // A bit smaller offset on mobile so it doesn't over-scroll
-    const extraOffset = window.innerWidth <= 768 ? 80 : 120;
-    const offset = barHeight + extraOffset;
-
-    const rawTop =
-      target.getBoundingClientRect().top + window.scrollY - offset;
-
-    // 🚫 Don't let it try to scroll past the bottom of the page
-    const maxScroll =
-      document.documentElement.scrollHeight - window.innerHeight;
-    const scrollTarget = Math.max(0, Math.min(rawTop, maxScroll));
-
-    window.scrollTo({
-      top: scrollTarget,
-      behavior: "smooth"
-    });
-  });
-});
-
-    
   }
 
-  // ==========================================================
-  //  SEARCH FUNCTIONALITY (de-duplicated)
-  // ==========================================================
+  // ============================================================
+  // SEARCH FUNCTIONALITY
+  // ============================================================
+  
   function initSearch() {
     els.searchInput.addEventListener("input", () => {
       const term = els.searchInput.value.toLowerCase().trim();
@@ -446,11 +406,13 @@ function toggleBasket(open) {
 
       const sections = document.querySelectorAll(".category-section");
 
+      // If search is cleared, show all sections again
       if (!term) {
         sections.forEach(s => (s.style.display = "block"));
         return;
       }
 
+      // Hide all category sections when searching
       sections.forEach(s => (s.style.display = "none"));
 
       const resultDiv = document.createElement("div");
@@ -461,18 +423,29 @@ function toggleBasket(open) {
       grid.className = "service-grid";
 
       let found = 0;
-      const seenNames = new Set();
+      const seenNames = new Set(); // prevent duplicate services in search
 
-      getAllServicesFlat().forEach(service => {
-        const { name, desc = "" } = service;
+      Object.values(servicesData).flat().forEach(service => {
+        const { name, desc = "", time, price } = service;
         const lowerName = name.toLowerCase();
         const lowerDesc = desc.toLowerCase();
 
-        if (!lowerName.includes(term) && !lowerDesc.includes(term)) return;
+        const matches =
+          lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
+        if (!matches) return;
+
         if (seenNames.has(lowerName)) return;
         seenNames.add(lowerName);
 
-        grid.appendChild(createServiceCard(service));
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML = `
+          <h3>${name}</h3>
+          <p class="service-time">${time}</p>
+          ${desc ? `<p class="service-desc">${desc}</p>` : ""}
+          <p class="service-price">${price}</p>
+          <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
+        grid.appendChild(card);
         found++;
       });
 
@@ -487,55 +460,47 @@ function toggleBasket(open) {
       }
 
       els.allServices.prepend(resultDiv);
-
-      updateBasket();
     });
   }
 
-  // ==========================================================
-  //  EVENT LISTENERS
-  // ==========================================================
-
+  // ============================================================
+  // EVENT LISTENERS
+  // ============================================================
   
-function initEventListeners() {
-  // Basket toggle
-  els.basketIcon.addEventListener("click", () => toggleBasket(true));
-  els.closeBasket.addEventListener("click", () => toggleBasket(false));
+  function initEventListeners() {
+    // Basket toggle
+    els.basketIcon.addEventListener("click", () => toggleBasket(true));
+    els.closeBasket.addEventListener("click", () => toggleBasket(false));
 
-  // CLICK AWAY: close when clicking outside the basket (on overlay)
-  els.basketOverlay.addEventListener("click", () => toggleBasket(false));
+    // click-away to close basket
+    if (els.basketOverlay) {
+      els.basketOverlay.addEventListener("click", () => toggleBasket(false));
+    }
 
-  window.addEventListener("keydown", e => {
-    if (e.key === "Escape") toggleBasket(false);
-  });
+    window.addEventListener("keydown", e => {
+      if (e.key === "Escape") toggleBasket(false);
+    });
 
     // Remove from basket
     els.basketList.addEventListener("click", e => {
       const btn = e.target.closest(".basket-remove-btn");
       if (!btn) return;
-      const index = Number(btn.dataset.index);
-      if (isNaN(index)) return;
-
-      const removedItem = basket[index];
-      basket.splice(index, 1);
+      const removedItem = basket[btn.dataset.index];
+      basket.splice(btn.dataset.index, 1);
       updateBasket();
 
-      if (removedItem && removedItem.name) {
-        document
-          .querySelectorAll(`.book-btn[data-name="${removedItem.name}"]`)
-          .forEach(matchBtn => {
-            matchBtn.disabled = false;
-            matchBtn.textContent = "Book Now";
-          });
+      const matchBtn = document.querySelector(
+        `.book-btn[data-name="${removedItem.name}"]`
+      );
+      if (matchBtn) {
+        matchBtn.disabled = false;
+        matchBtn.textContent = "Book Now";
       }
     });
 
     // Proceed to booking
     els.proceedBooking.addEventListener("click", () => {
-      if (!basket.length) {
-        alert("Please select at least one service.");
-        return;
-      }
+      if (!basket.length) return alert("Please select at least one service.");
       window.location.href = "booking.html";
     });
 
@@ -545,8 +510,6 @@ function initEventListeners() {
       if (!btn) return;
 
       const { name, price, time } = btn.dataset;
-      if (!name) return;
-
       if (basket.some(item => item.name === name)) {
         btn.textContent = "In Basket ✓";
         btn.disabled = true;
@@ -557,9 +520,7 @@ function initEventListeners() {
       updateBasket();
       btn.textContent = "Added ✓";
       btn.disabled = true;
-      setTimeout(() => {
-        btn.textContent = "In Basket ✓";
-      }, 700);
+      setTimeout(() => (btn.textContent = "In Basket ✓"), 700);
       startBasketNudge();
     });
 
@@ -573,24 +534,30 @@ function initEventListeners() {
       if (document.hidden) stopBasketNudge();
       else if (basket.length) startBasketNudge();
     });
+
+    // Mobile nav close
+    if (els.navLinks && els.menuToggle) {
+      els.navLinks.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => (els.menuToggle.checked = false));
+      });
+    }
   }
 
-  // ==========================================================
-  //  INITIALIZATION
-  // ==========================================================
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
+  
   function init() {
-    initCategoryButtons();   // create pills
-    renderServices();        // create sections/cards
-    initCategoryScroll();    // wire scroll sync
+    initCategoryButtons();
+    renderServices();
+    initCategoryScroll();
     initSearch();
     initEventListeners();
     updateBasket();
     if (basket.length) startBasketNudge();
   }
 
-  try {
-    init();
-  } catch (err) {
-    console.error("[Services] Unhandled error during init:", err);
-  }
+  init();
 });
+// ============================================================
+// END OF NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION BUILD
