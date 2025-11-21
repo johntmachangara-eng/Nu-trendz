@@ -303,97 +303,119 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function initCategoryScroll() {
-    const buttons = Array.from(document.querySelectorAll(".category-btn"));
-    const sections = Array.from(document.querySelectorAll(".category-section"));
-    let manualScrollLock = false;
+function initCategoryScroll() {
+  const buttons = Array.from(document.querySelectorAll(".category-btn"));
+  const sections = Array.from(document.querySelectorAll(".category-section"));
+  let manualScrollLock = false;
 
-    // Button click scroll
-    buttons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        // 🔄 If search is active, clear it and restore all categories
-        const searchVal = els.searchInput.value.trim();
-        const searchResults = document.getElementById("search-results");
-        if (searchVal || searchResults) {
-          els.searchInput.value = "";
-          if (searchResults) searchResults.remove();
-          document
-            .querySelectorAll(".category-section")
-            .forEach(sec => (sec.style.display = "block"));
-        }
+  if (!buttons.length || !sections.length) return;
 
-        manualScrollLock = true;
-        buttons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+  // Button click scroll
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // 🔄 If search is active, clear it and restore all categories
+      const searchVal = els.searchInput.value.trim();
+      const searchResults = document.getElementById("search-results");
+      if (searchVal || searchResults) {
+        els.searchInput.value = "";
+        if (searchResults) searchResults.remove();
+        document
+          .querySelectorAll(".category-section")
+          .forEach(sec => (sec.style.display = "block"));
+      }
 
-        const target = document.getElementById(
-          "cat-" + btn.textContent.replace(/\s+/g, "-")
-        );
+      manualScrollLock = true;
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
 
-        if (target) {
-          // use navbar + category bar height so heading is fully visible
-          const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
-          const catHeight = els.floatingCategories
-            ? els.floatingCategories.offsetHeight
-            : 0;
+      const target = document.getElementById(
+        "cat-" + btn.textContent.replace(/\s+/g, "-")
+      );
 
-          const offset = navHeight + catHeight + 50;
-          const top =
-            target.getBoundingClientRect().top + window.scrollY - offset;
-
-          window.scrollTo({ top, behavior: "smooth" });
-        }
-
-        setTimeout(() => (manualScrollLock = false), 900);
-      });
-    });
-
-    // Auto-highlight on scroll
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (manualScrollLock) return;
-
+      if (target) {
         const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
         const catHeight = els.floatingCategories
           ? els.floatingCategories.offsetHeight
           : 0;
 
-        // line just under the bars
-        const triggerLine = window.scrollY + navHeight + catHeight + 120;
-        let activeId = "";
+        const offset = navHeight + catHeight + 50;
+        const top =
+          target.getBoundingClientRect().top + window.scrollY - offset;
 
-        for (const sec of sections) {
-          const top = sec.offsetTop;
-          const bottom = top + sec.offsetHeight;
-          if (triggerLine >= top && triggerLine < bottom) {
-            activeId = sec.id;
-            break;
-          }
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+
+      setTimeout(() => (manualScrollLock = false), 600);
+    });
+  });
+
+  // Auto-highlight on scroll (more stable, never "no active")
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (manualScrollLock) return;
+
+      const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
+      const catHeight = els.floatingCategories
+        ? els.floatingCategories.offsetHeight
+        : 0;
+
+      // Trigger line just under navbar + category bar
+      const triggerLine = window.scrollY + navHeight + catHeight + 20;
+      let activeId = "";
+
+      // Find the section that contains the trigger line
+      for (let i = 0; i < sections.length; i++) {
+        const sec = sections[i];
+        const top = sec.offsetTop;
+        const bottom = top + sec.offsetHeight;
+
+        if (triggerLine >= top && triggerLine < bottom) {
+          activeId = sec.id;
+          break;
         }
+      }
 
-        if (!activeId) return;
+      // If we didn't find any section (e.g. very top or very bottom),
+      // clamp to the first or last section so it never gets "stuck"
+      if (!activeId && sections.length) {
+        const first = sections[0];
+        const last = sections[sections.length - 1];
+        const firstTop = first.offsetTop;
+        const lastTop = last.offsetTop;
+        const lastBottom = lastTop + last.offsetHeight;
 
-        const activeName = activeId
-          .replace("cat-", "")
-          .replace(/-/g, " ")
-          .toLowerCase();
+        if (triggerLine < firstTop) {
+          activeId = first.id;
+        } else if (triggerLine >= lastBottom) {
+          activeId = last.id;
+        }
+      }
 
-        buttons.forEach(btn => {
-          const match = btn.textContent.toLowerCase() === activeName;
-          btn.classList.toggle("active", match);
-          if (match) {
-            btn.scrollIntoView({
-              behavior: "smooth",
-              inline: "center",
-              block: "nearest"
-            });
-          }
-        });
-      },
-      { passive: true }
-    );
-  }
+      if (!activeId) return;
+
+      const activeName = activeId
+        .replace("cat-", "")
+        .replace(/-/g, " ")
+        .toLowerCase();
+
+      buttons.forEach(btn => {
+        const match = btn.textContent.toLowerCase() === activeName;
+        btn.classList.toggle("active", match);
+        if (match) {
+          // no smooth here, avoids jitter while user is still scrolling fast
+          btn.scrollIntoView({
+            behavior: "auto",
+            inline: "center",
+            block: "nearest"
+          });
+        }
+      });
+    },
+    { passive: true }
+  );
+}
+
 
   // ============================================================
   // SEARCH FUNCTIONALITY
