@@ -75,6 +75,10 @@ body.no-scroll::before {
   z-index: 9400;
 }
 
+body.menu-open {
+  overflow: hidden;
+}
+
 /* ============================================================
   3. SCROLLBAR
   ============================================================ */
@@ -223,7 +227,9 @@ body.no-scroll::before {
 .category-btn:hover:not(.active),
 .category-btn:focus:not(.active),
 .category-btn:active:not(.active) {
-  border-color: var(--orange);
+  border-color: var(--border-light);
+  outline: none;
+  box-shadow: none;
 }
 
 .category-btn.active {
@@ -547,12 +553,12 @@ footer {
 
 @keyframes fadeInUp {
   from { 
-   opacity: 0; 
-   transform: translateY(20px); 
+    opacity: 0; 
+    transform: translateY(20px); 
   }
   to { 
-   opacity: 1; 
-   transform: translateY(0); 
+    opacity: 1; 
+    transform: translateY(0); 
   }
 }
 
@@ -600,16 +606,20 @@ footer {
     font-size: 1.5rem;
   }
 
-  body.menu-open {
-    overflow: hidden;
-  }
-
   .search-bar input {
     width: 80%;
   }
 }
 
 @media (max-width: 768px) {
+  .basket-icon {
+    bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
+    right: 24px;
+    width: 55px;
+    height: 55px;
+    font-size: 1.5rem;
+  }
+
   .basket-panel {
     position: fixed;
     left: 0;
@@ -626,7 +636,7 @@ footer {
     border-top: 3px solid var(--orange);
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
-    box-shadow: 0 -5px 25px rgba(0,0,0,0.6);
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.6);
     border-left: none;
     transform: translateY(100%);
     transition: transform 0.4s ease;
@@ -642,23 +652,15 @@ footer {
     transform: translateY(0);
     pointer-events: auto;
   }
-
-  .basket-icon {
-    bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
-    right: 24px;
-    width: 55px;
-    height: 55px;
-    font-size: 1.5rem;
-  }
 }
 
 @media (max-width: 600px) {
-  .search-bar input {
-    width: 90%;
-  }
-
   .logo {
     font-size: 1.3rem;
+  }
+
+  .search-bar input {
+    width: 90%;
   }
 
   footer {
