@@ -137,7 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
     basketList: document.getElementById("basketList"),
     basketCount: document.getElementById("basketCount"),
     basketTotal: document.getElementById("basketTotal"),
-    proceedBooking: document.getElementById("proceedBooking")
+    proceedBooking: document.getElementById("proceedBooking"),
+    basketOverlay: document.getElementById("basketOverlay")   
   };
 
   function assertElement(key, el) {
@@ -159,7 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "basketList",
     "basketCount",
     "basketTotal",
-    "proceedBooking"
+    "proceedBooking",
+    "basketOverlay"
   ];
 
   const domOk = requiredKeys.every(key => assertElement(key, els[key]));
@@ -192,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getNumericPrice(priceString) {
-    // "from £50" → 50, "£75" → 75
     const value = parseFloat(priceString.replace(/[^\d.]/g, ""));
     return isNaN(value) ? 0 : value;
   }
@@ -221,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getAllServicesFlat() {
-    // returns a flat array of all service objects
     return Object.values(servicesData).flat();
   }
 
@@ -268,18 +268,21 @@ document.addEventListener("DOMContentLoaded", () => {
     saveBasket();
   }
 
-  function toggleBasket(open) {
-    const panel = els.basketPanel;
-    if (open) {
-      panel.classList.add("open");
-      document.body.classList.add("no-scroll");
-      stopBasketNudge();
-    } else {
-      panel.classList.remove("open");
-      document.body.classList.remove("no-scroll");
-      if (basket.length > 0) startBasketNudge();
-    }
+function toggleBasket(open) {
+  const panel = els.basketPanel;
+  const overlay = els.basketOverlay;
+
+  if (open) {
+    panel.classList.add("open");
+    if (overlay) overlay.classList.add("show");
+    stopBasketNudge();
+  } else {
+    panel.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
+    if (basket.length > 0) startBasketNudge();
   }
+}
+
 
   // ==========================================================
   //  BASKET NUDGE ANIMATION
@@ -331,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ==========================================================
-  //  CATEGORY NAVIGATION
+  //  CATEGORY NAVIGATION BUTTONS
   // ==========================================================
   function initCategoryButtons() {
     Object.keys(servicesData).forEach((category, i) => {
@@ -342,78 +345,80 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ==========================================================
+  //  CATEGORY NAVIGATION (SCROLL-SYNCED)
+  // ==========================================================
   function initCategoryScroll() {
     const buttons = Array.from(document.querySelectorAll(".category-btn"));
     const sections = Array.from(document.querySelectorAll(".category-section"));
-    let manualScrollLock = false;
 
-    // Button click scroll
-    buttons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        manualScrollLock = true;
-        buttons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+    if (!buttons.length || !sections.length) return;
 
-        const target = document.getElementById(
-          "cat-" + btn.textContent.replace(/\s+/g, "-")
-        );
-        if (target) {
-          const offset = els.floatingCategories.offsetHeight + 120;
-          const top =
-            target.getBoundingClientRect().top + window.scrollY - offset;
-          window.scrollTo({ top, behavior: "smooth" });
-        }
-        setTimeout(() => {
-          manualScrollLock = false;
-        }, 900);
-      });
-    });
+    function getSectionIdFromButton(btn) {
+      return "cat-" + btn.textContent.replace(/\s+/g, "-");
+    }
 
-  // Auto-highlight on scroll (trigger earlier)
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (manualScrollLock) return;
-
-      // Line where we decide which section is active:
-      // use the TOP of the floating bar, not the bottom
-      const triggerY =
-        els.floatingCategories.getBoundingClientRect().top + 140;
-
-      let activeId = "";
-
-      for (const sec of sections) {
-        const rect = sec.getBoundingClientRect();
-
-        // Section is active if it crosses this trigger line
-        if (rect.top <= triggerY && rect.bottom > triggerY) {
-          activeId = sec.id;
-          break;
-        }
-      }
-
-      if (!activeId) return;
-
-      const activeName = activeId
-        .replace("cat-", "")
-        .replace(/-/g, " ")
-        .toLowerCase();
+    let lastActiveId = null;
+    function setActiveSection(sectionId) {
+      if (!sectionId) return;
+      const normalized = sectionId.toLowerCase();
+      if (normalized === lastActiveId) return;
+      lastActiveId = normalized;
 
       buttons.forEach(btn => {
-        const match = btn.textContent.toLowerCase() === activeName;
-        btn.classList.toggle("active", match);
-        if (match) {
+        const btnId = getSectionIdFromButton(btn).toLowerCase();
+        const isActive = btnId === lastActiveId;
+
+        btn.classList.toggle("active", isActive);
+
+        if (isActive) {
           btn.scrollIntoView({
-            behavior: "smooth",
+            behavior: "auto",
             inline: "center",
             block: "nearest"
           });
         }
       });
-    },
-    { passive: true }
-  );
+    }
 
+    const barHeight =
+      (els.floatingCategories && els.floatingCategories.offsetHeight) || 80;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        let bestEntry = null;
+
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
+            bestEntry = entry;
+          }
+        });
+
+        if (!bestEntry || !bestEntry.target || !bestEntry.target.id) return;
+        setActiveSection(bestEntry.target.id);
+      },
+      {
+        root: null,
+        rootMargin: `-${barHeight + 10}px 0px -60% 0px`,
+        threshold: [0.1, 0.25, 0.5, 0.75]
+      }
+    );
+
+    sections.forEach(sec => observer.observe(sec));
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetId = getSectionIdFromButton(btn);
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        const offset = barHeight + 120;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({ top, behavior: "smooth" });
+      });
+    });
   }
 
   // ==========================================================
@@ -426,13 +431,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const sections = document.querySelectorAll(".category-section");
 
-      // If search is empty, show all normal sections again
       if (!term) {
         sections.forEach(s => (s.style.display = "block"));
         return;
       }
 
-      // Hide normal category sections while searching
       sections.forEach(s => (s.style.display = "none"));
 
       const resultDiv = document.createElement("div");
@@ -450,10 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const lowerName = name.toLowerCase();
         const lowerDesc = desc.toLowerCase();
 
-        // Only match if name/description contain the term
         if (!lowerName.includes(term) && !lowerDesc.includes(term)) return;
-
-        // Avoid duplicate cards for same service name
         if (seenNames.has(lowerName)) return;
         seenNames.add(lowerName);
 
@@ -473,7 +473,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       els.allServices.prepend(resultDiv);
 
-      // Keep search result buttons in sync with basket
       updateBasket();
     });
   }
@@ -481,13 +480,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================
   //  EVENT LISTENERS
   // ==========================================================
-  function initEventListeners() {
-    // Basket toggle
-    els.basketIcon.addEventListener("click", () => toggleBasket(true));
-    els.closeBasket.addEventListener("click", () => toggleBasket(false));
-    window.addEventListener("keydown", e => {
-      if (e.key === "Escape") toggleBasket(false);
-    });
+
+  
+function initEventListeners() {
+  // Basket toggle
+  els.basketIcon.addEventListener("click", () => toggleBasket(true));
+  els.closeBasket.addEventListener("click", () => toggleBasket(false));
+
+  // CLICK AWAY: close when clicking outside the basket (on overlay)
+  els.basketOverlay.addEventListener("click", () => toggleBasket(false));
+
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") toggleBasket(false);
+  });
 
     // Remove from basket
     els.basketList.addEventListener("click", e => {
@@ -500,7 +505,6 @@ document.addEventListener("DOMContentLoaded", () => {
       basket.splice(index, 1);
       updateBasket();
 
-      // Re-enable any matching buttons (rendered in categories or search)
       if (removedItem && removedItem.name) {
         document
           .querySelectorAll(`.book-btn[data-name="${removedItem.name}"]`)
@@ -560,9 +564,9 @@ document.addEventListener("DOMContentLoaded", () => {
   //  INITIALIZATION
   // ==========================================================
   function init() {
-    initCategoryButtons();
-    renderServices();
-    initCategoryScroll();
+    initCategoryButtons();   // create pills
+    renderServices();        // create sections/cards
+    initCategoryScroll();    // wire scroll sync
     initSearch();
     initEventListeners();
     updateBasket();

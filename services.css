@@ -495,6 +495,22 @@ body.no-scroll::before {
   font-weight: 600;
 }
 
+/* CLICK-AWAY OVERLAY FOR BASKET */
+.basket-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 9400; /* under basket-panel (9500) */
+}
+
+.basket-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 
 
 .basket-icon.nudge {
