@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     basketCount: document.getElementById("basketCount"),
     basketTotal: document.getElementById("basketTotal"),
     proceedBooking: document.getElementById("proceedBooking"),
-    basketOverlay: document.getElementById("basketOverlay")
+    basketOverlay: document.getElementById("basketOverlay")   
   };
 
   function assertElement(key, el) {
@@ -268,20 +268,21 @@ document.addEventListener("DOMContentLoaded", () => {
     saveBasket();
   }
 
-  function toggleBasket(open) {
-    const panel = els.basketPanel;
-    const overlay = els.basketOverlay;
+function toggleBasket(open) {
+  const panel = els.basketPanel;
+  const overlay = els.basketOverlay;
 
-    if (open) {
-      panel.classList.add("open");
-      if (overlay) overlay.classList.add("show");
-      stopBasketNudge();
-    } else {
-      panel.classList.remove("open");
-      if (overlay) overlay.classList.remove("show");
-      if (basket.length > 0) startBasketNudge();
-    }
+  if (open) {
+    panel.classList.add("open");
+    if (overlay) overlay.classList.add("show");
+    stopBasketNudge();
+  } else {
+    panel.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
+    if (basket.length > 0) startBasketNudge();
   }
+}
+
 
   // ==========================================================
   //  BASKET NUDGE ANIMATION
@@ -380,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    
     const barHeight =
       (els.floatingCategories && els.floatingCategories.offsetHeight) || 80;
 
@@ -406,34 +408,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sections.forEach(sec => observer.observe(sec));
 
-    // Smooth scroll when clicking category buttons, clamped at bottom
     buttons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const targetId = getSectionIdFromButton(btn);
-        const target = document.getElementById(targetId);
-        if (!target) return;
+  btn.addEventListener("click", () => {
+    const targetId = getSectionIdFromButton(btn);
+    const target = document.getElementById(targetId);
+    if (!target) return;
 
-        // Smaller offset on mobile so it doesn't over-scroll
-        const extraOffset = window.innerWidth <= 768 ? 80 : 120;
-        const offset = barHeight + extraOffset;
+    // A bit smaller offset on mobile so it doesn't over-scroll
+    const extraOffset = window.innerWidth <= 768 ? 80 : 120;
+    const offset = barHeight + extraOffset;
 
-        const rawTop =
-          target.getBoundingClientRect().top + window.scrollY - offset;
+    const rawTop =
+      target.getBoundingClientRect().top + window.scrollY - offset;
 
-        const maxScroll =
-          document.documentElement.scrollHeight - window.innerHeight;
-        const scrollTarget = Math.max(0, Math.min(rawTop, maxScroll));
+    // 🚫 Don't let it try to scroll past the bottom of the page
+    const maxScroll =
+      document.documentElement.scrollHeight - window.innerHeight;
+    const scrollTarget = Math.max(0, Math.min(rawTop, maxScroll));
 
-        window.scrollTo({
-          top: scrollTarget,
-          behavior: "smooth"
-        });
-      });
+    window.scrollTo({
+      top: scrollTarget,
+      behavior: "smooth"
     });
+  });
+});
+
+    
   }
 
   // ==========================================================
-  //  SEARCH FUNCTIONALITY
+  //  SEARCH FUNCTIONALITY (de-duplicated)
   // ==========================================================
   function initSearch() {
     els.searchInput.addEventListener("input", () => {
@@ -491,17 +495,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================
   //  EVENT LISTENERS
   // ==========================================================
-  function initEventListeners() {
-    // Basket toggle
-    els.basketIcon.addEventListener("click", () => toggleBasket(true));
-    els.closeBasket.addEventListener("click", () => toggleBasket(false));
 
-    // CLICK AWAY: close when clicking on overlay
-    els.basketOverlay.addEventListener("click", () => toggleBasket(false));
+  
+function initEventListeners() {
+  // Basket toggle
+  els.basketIcon.addEventListener("click", () => toggleBasket(true));
+  els.closeBasket.addEventListener("click", () => toggleBasket(false));
 
-    window.addEventListener("keydown", e => {
-      if (e.key === "Escape") toggleBasket(false);
-    });
+  // CLICK AWAY: close when clicking outside the basket (on overlay)
+  els.basketOverlay.addEventListener("click", () => toggleBasket(false));
+
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") toggleBasket(false);
+  });
 
     // Remove from basket
     els.basketList.addEventListener("click", e => {
@@ -573,9 +579,9 @@ document.addEventListener("DOMContentLoaded", () => {
   //  INITIALIZATION
   // ==========================================================
   function init() {
-    initCategoryButtons();
-    renderServices();
-    initCategoryScroll();
+    initCategoryButtons();   // create pills
+    renderServices();        // create sections/cards
+    initCategoryScroll();    // wire scroll sync
     initSearch();
     initEventListeners();
     updateBasket();

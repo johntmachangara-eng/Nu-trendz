@@ -47,6 +47,9 @@
   font-family: system-ui, Arial, sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background: var(--bg-dark);
