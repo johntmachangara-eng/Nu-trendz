@@ -159,9 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
     "proceedBooking",
     "basketOverlay"
   ];
-  for (const key of requiredKeys) {
+  for (let i = 0; i < requiredKeys.length; i++) {
+    const key = requiredKeys[i];
     if (!els[key]) {
-      console.error(`Missing required DOM element: ${key}`);
+      console.error("Missing required DOM element: " + key);
       return;
     }
   }
@@ -181,42 +182,48 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   
   function updateBasket() {
-    const { basketList, basketCount, basketTotal } = els;
+    const basketList = els.basketList;
+    const basketCount = els.basketCount;
+    const basketTotal = els.basketTotal;
+
     basketList.innerHTML = "";
     basketCount.textContent = basket.length;
 
     if (!basket.length) {
-      basketList.innerHTML = `<p style="color:#aaa;text-align:center;">No services selected.</p>`;
+      basketList.innerHTML = '<p style="color:#aaa;text-align:center;">No services selected.</p>';
       basketTotal.textContent = "£0";
       saveBasket();
       return;
     }
 
     // Update button states
-    document.querySelectorAll(".book-btn").forEach(btn => {
+    const bookBtns = document.querySelectorAll(".book-btn");
+    for (let i = 0; i < bookBtns.length; i++) {
+      const btn = bookBtns[i];
       const inBasket = basket.some(item => item.name === btn.dataset.name);
       btn.disabled = inBasket;
       btn.textContent = inBasket ? "In Basket ✓" : "Book Now";
-    });
+    }
 
     // Calculate total and render items
     let total = 0;
-    basket.forEach((item, i) => {
+    for (let i = 0; i < basket.length; i++) {
+      const item = basket[i];
       const priceValue = parseFloat(item.price.replace(/[^\d.]/g, "")) || 0;
       total += priceValue;
 
       const div = document.createElement("div");
       div.className = "basket-item";
-      div.innerHTML = `
-        <div class="basket-item-info">
-          <span class="basket-item-name">${item.name}</span>
-          <span class="basket-item-price">${item.price}</span>
-        </div>
-        <button class="basket-remove-btn" data-index="${i}">🗑 Remove</button>`;
+      div.innerHTML = '' +
+        '<div class="basket-item-info">' +
+          '<span class="basket-item-name">' + item.name + '</span>' +
+          '<span class="basket-item-price">' + item.price + '</span>' +
+        '</div>' +
+        '<button class="basket-remove-btn" data-index="' + i + '">🗑 Remove</button>';
       basketList.appendChild(div);
-    });
+    }
 
-    basketTotal.textContent = `£${total.toFixed(2)}`;
+    basketTotal.textContent = "£" + total.toFixed(2);
     saveBasket();
   }
 
@@ -255,6 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function stopBasketNudge() {
+    if (!nudgeInterval) return;
     clearInterval(nudgeInterval);
     nudgeInterval = null;
   }
@@ -264,32 +272,38 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   
   function renderServices() {
-    for (const [category, list] of Object.entries(servicesData)) {
+    const allServices = els.allServices;
+
+    for (const category in servicesData) {
+      if (!Object.prototype.hasOwnProperty.call(servicesData, category)) continue;
+      const list = servicesData[category];
+
       const section = document.createElement("section");
       section.className = "category-section";
-      section.id = `cat-${category.replace(/\s+/g, "-")}`;
-      section.innerHTML = `<h2>${category}</h2>`;
+      section.id = "cat-" + category.replace(/\s+/g, "-");
+      section.innerHTML = "<h2>" + category + "</h2>";
       
       const grid = document.createElement("div");
       grid.className = "service-grid";
 
-      list.forEach(service => {
+      for (let i = 0; i < list.length; i++) {
+        const service = list[i];
         const card = document.createElement("div");
         card.className = "service-card";
-        card.innerHTML = `
-          <h3>${service.name}</h3>
-          <p class="service-time">${service.time}</p>
-          ${service.desc ? `<p class="service-desc">${service.desc}</p>` : ""}
-          <p class="service-price">${service.price}</p>
-          <button class="book-btn" 
-            data-name="${service.name}" 
-            data-price="${service.price}" 
-            data-time="${service.time}">Book Now</button>`;
+        card.innerHTML =
+          "<h3>" + service.name + "</h3>" +
+          '<p class="service-time">' + service.time + "</p>" +
+          (service.desc ? '<p class="service-desc">' + service.desc + "</p>" : "") +
+          '<p class="service-price">' + service.price + "</p>" +
+          '<button class="book-btn" ' +
+            'data-name="' + service.name + '" ' +
+            'data-price="' + service.price + '" ' +
+            'data-time="' + service.time + '">Book Now</button>';
         grid.appendChild(card);
-      });
+      }
 
       section.appendChild(grid);
-      els.allServices.appendChild(section);
+      allServices.appendChild(section);
     }
   }
 
@@ -298,17 +312,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   
   function initCategoryButtons() {
-    Object.keys(servicesData).forEach((category, i) => {
+    const floatingCategories = els.floatingCategories;
+
+    let index = 0;
+    for (const category in servicesData) {
+      if (!Object.prototype.hasOwnProperty.call(servicesData, category)) continue;
+
       const btn = document.createElement("button");
-      btn.className = "category-btn" + (i === 0 ? " active" : "");
+      btn.className = "category-btn" + (index === 0 ? " active" : "");
       btn.textContent = category;
-      els.floatingCategories.appendChild(btn);
-    });
+      floatingCategories.appendChild(btn);
+      index++;
+    }
   }
 
   function initCategoryScroll() {
-    const buttons = Array.from(document.querySelectorAll(".category-btn"));
-    const sections = Array.from(document.querySelectorAll(".category-section"));
+    const buttons = Array.prototype.slice.call(document.querySelectorAll(".category-btn"));
+    const sections = Array.prototype.slice.call(document.querySelectorAll(".category-section"));
     let manualScrollLock = false;
 
     if (!buttons.length || !sections.length) return;
@@ -316,62 +336,51 @@ document.addEventListener("DOMContentLoaded", () => {
     // Button click scroll
     buttons.forEach(btn => {
       btn.addEventListener("click", () => {
-        // 🔄 If search is active, clear it and restore all categories
         const searchVal = els.searchInput.value.trim();
         const searchResults = document.getElementById("search-results");
         if (searchVal || searchResults) {
           els.searchInput.value = "";
           if (searchResults) searchResults.remove();
-          document
-            .querySelectorAll(".category-section")
-            .forEach(sec => (sec.style.display = "block"));
+          const allSections = document.querySelectorAll(".category-section");
+          allSections.forEach(sec => (sec.style.display = "block"));
         }
 
-        // 🔸 leaving search mode when clicking a category
+        // leaving search mode when clicking a category
         searchActive = false;
 
         manualScrollLock = true;
         buttons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
-        const target = document.getElementById(
-          "cat-" + btn.textContent.replace(/\s+/g, "-")
-        );
+        const target = document.getElementById("cat-" + btn.textContent.replace(/\s+/g, "-"));
 
         if (target) {
           const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
-          const catHeight = els.floatingCategories
-            ? els.floatingCategories.offsetHeight
-            : 0;
+          const catHeight = els.floatingCategories ? els.floatingCategories.offsetHeight : 0;
 
           const offset = navHeight + catHeight + 50;
-          const top =
-            target.getBoundingClientRect().top + window.scrollY - offset;
+          const rect = target.getBoundingClientRect();
+          const top = rect.top + window.scrollY - offset;
 
-          window.scrollTo({ top, behavior: "smooth" });
+          window.scrollTo({ top: top, behavior: "smooth" });
         }
 
         setTimeout(() => (manualScrollLock = false), 600);
       });
     });
 
-    // Auto-highlight on scroll (more stable, never "no active")
+    // Auto-highlight on scroll
     window.addEventListener(
       "scroll",
       () => {
-        // 🔸 Do NOT highlight while in search mode
         if (manualScrollLock || searchActive) return;
 
         const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
-        const catHeight = els.floatingCategories
-          ? els.floatingCategories.offsetHeight
-          : 0;
+        const catHeight = els.floatingCategories ? els.floatingCategories.offsetHeight : 0;
 
-        // Trigger line just under navbar + category bar
         const triggerLine = window.scrollY + navHeight + catHeight + 20;
         let activeId = "";
 
-        // Find the section that contains the trigger line
         for (let i = 0; i < sections.length; i++) {
           const sec = sections[i];
           const top = sec.offsetTop;
@@ -383,8 +392,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // If we didn't find any section (e.g. very top or very bottom),
-        // clamp to the first or last section so it never gets "stuck"
         if (!activeId && sections.length) {
           const first = sections[0];
           const last = sections[sections.length - 1];
@@ -427,24 +434,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   
   function initSearch() {
-    els.searchInput.addEventListener("input", () => {
-      const term = els.searchInput.value.toLowerCase().trim();
-      document.querySelector("#search-results")?.remove();
+    const searchInput = els.searchInput;
+
+    searchInput.addEventListener("input", () => {
+      const term = searchInput.value.toLowerCase().trim();
+      const existingResults = document.getElementById("search-results");
+      if (existingResults) existingResults.remove();
 
       const sections = document.querySelectorAll(".category-section");
 
       if (!term) {
-        // 🔸 search turned off
         searchActive = false;
         sections.forEach(s => (s.style.display = "block"));
         return;
       }
 
-      // 🔸 search turned on
       searchActive = true;
 
-      // 🔸 remove all category highlights while searching
-      document.querySelectorAll(".category-btn").forEach(btn => {
+      // remove all category highlights while searching
+      const catBtns = document.querySelectorAll(".category-btn");
+      catBtns.forEach(btn => {
         btn.classList.remove("active");
       });
 
@@ -459,33 +468,44 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.className = "service-grid";
 
       let found = 0;
-      const seenNames = new Set();
+      const seenNames = {};
 
-      Object.values(servicesData).flat().forEach(service => {
-        const { name, desc = "", time, price } = service;
-        const lowerName = name.toLowerCase();
-        const lowerDesc = desc.toLowerCase();
+      for (const key in servicesData) {
+        if (!Object.prototype.hasOwnProperty.call(servicesData, key)) continue;
+        const list = servicesData[key];
 
-        const matches =
-          lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
-        if (!matches) return;
+        for (let i = 0; i < list.length; i++) {
+          const service = list[i];
+          const name = service.name;
+          const desc = service.desc || "";
+          const time = service.time;
+          const price = service.price;
 
-        if (seenNames.has(lowerName)) return;
-        seenNames.add(lowerName);
+          const lowerName = name.toLowerCase();
+          const lowerDesc = desc.toLowerCase();
 
-        const card = document.createElement("div");
-        card.className = "service-card";
-        card.innerHTML = `
-          <h3>${name}</h3>
-          <p class="service-time">${time}</p>
-          ${desc ? `<p class="service-desc">${desc}</p>` : ""}
-          <p class="service-price">${price}</p>
-          <button class="book-btn" data-name="${name}" data-price="${price}" data-time="${time}">Book Now</button>`;
-        grid.appendChild(card);
-        found++;
-      });
+          const matches =
+            lowerName.includes(term) || (lowerDesc && lowerDesc.includes(term));
+          if (!matches) continue;
 
-      resultDiv.innerHTML = `<h2>Search Results for "${term}"</h2>`;
+          if (seenNames[lowerName]) continue;
+          seenNames[lowerName] = true;
+
+          const card = document.createElement("div");
+          card.className = "service-card";
+          card.innerHTML =
+            "<h3>" + name + "</h3>" +
+            '<p class="service-time">' + time + "</p>" +
+            (desc ? '<p class="service-desc">' + desc + "</p>" : "") +
+            '<p class="service-price">' + price + "</p>" +
+            '<button class="book-btn" data-name="' + name +
+            '" data-price="' + price + '" data-time="' + time + '">Book Now</button>';
+          grid.appendChild(card);
+          found++;
+        }
+      }
+
+      resultDiv.innerHTML = '<h2>Search Results for "' + term + '"</h2>';
       if (found) {
         resultDiv.appendChild(grid);
       } else {
@@ -498,8 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
       els.allServices.prepend(resultDiv);
     });
 
-    // 💡 Hide keyboard on mobile when pressing "search"/"enter"
-    els.searchInput.addEventListener("keydown", e => {
+    // Hide keyboard on mobile when pressing "search"/"enter"
+    searchInput.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         e.preventDefault();
         e.target.blur();
@@ -529,12 +549,13 @@ document.addEventListener("DOMContentLoaded", () => {
     els.basketList.addEventListener("click", e => {
       const btn = e.target.closest(".basket-remove-btn");
       if (!btn) return;
-      const removedItem = basket[btn.dataset.index];
-      basket.splice(btn.dataset.index, 1);
+      const index = parseInt(btn.dataset.index, 10);
+      const removedItem = basket[index];
+      basket.splice(index, 1);
       updateBasket();
 
       const matchBtn = document.querySelector(
-        `.book-btn[data-name="${removedItem.name}"]`
+        '.book-btn[data-name="' + removedItem.name.replace(/"/g, '\\"') + '"]'
       );
       if (matchBtn) {
         matchBtn.disabled = false;
@@ -544,7 +565,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Proceed to booking
     els.proceedBooking.addEventListener("click", () => {
-      if (!basket.length) return alert("Please select at least one service.");
+      if (!basket.length) {
+        alert("Please select at least one service.");
+        return;
+      }
       window.location.href = "booking.html";
     });
 
@@ -553,7 +577,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const btn = e.target.closest(".book-btn");
       if (!btn) return;
 
-      const { name, price, time } = btn.dataset;
+      const name = btn.dataset.name;
+      const price = btn.dataset.price;
+      const time = btn.dataset.time;
+
       if (basket.some(item => item.name === name)) {
         btn.textContent = "In Basket ✓";
         btn.disabled = true;
@@ -570,6 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Navbar shrink on scroll
     window.addEventListener("scroll", () => {
+      if (!els.navbar) return;
       els.navbar.classList.toggle("shrink", window.scrollY > 50);
     });
 
@@ -579,9 +607,10 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (basket.length) startBasketNudge();
     });
 
-    // Mobile nav close
+    // Mobile nav close (if using checkbox-based menu)
     if (els.navLinks && els.menuToggle) {
-      els.navLinks.querySelectorAll("a").forEach(link => {
+      const navLinks = els.navLinks.querySelectorAll("a");
+      navLinks.forEach(link => {
         link.addEventListener("click", () => (els.menuToggle.checked = false));
       });
     }
@@ -603,5 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   init();
 });
+
 // ============================================================
 // END OF NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION BUILD
+// dont remove any features if the features are wrong fix them but dont change anything

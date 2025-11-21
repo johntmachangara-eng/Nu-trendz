@@ -183,7 +183,6 @@ body.no-scroll::before {
   transition: var(--transition-fast);
 }
 
-
 /* ============================================================
   5. FLOATING CATEGORIES
   ============================================================ */
@@ -340,7 +339,6 @@ body.no-scroll::before {
   color: var(--text-muted);
   margin-top: 20px;
 }
-
 
 .book-btn {
   margin-top: 10px;
@@ -510,15 +508,13 @@ body.no-scroll::before {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  z-index: 9400; /* under basket-panel (9500) */
+  z-index: 9400;
 }
 
 .basket-overlay.show {
   opacity: 1;
   pointer-events: auto;
 }
-
-
 
 .basket-icon.nudge {
   animation: basket-nudge 0.7s ease;
@@ -531,7 +527,6 @@ body.no-scroll::before {
   75%  { transform: scale(1.05) translateY(-2px); }
   100% { transform: scale(1) translateY(0); }
 }
-
 
 /* ============================================================
   8. FOOTER
@@ -569,43 +564,43 @@ footer {
   ============================================================ */
 @media (max-width: 992px) {
   .menu-icon {
-   display: flex;
+    display: flex;
   }
 
   .nav-links {
-   position: fixed;
-   inset: 0;
-   height: 100vh;
-   width: 100%;
-   background: rgba(0, 0, 0, 0.95);
-   backdrop-filter: blur(12px);
-   flex-direction: column;
-   justify-content: center;
-   align-items: center;
-   gap: 35px;
-   transform: translateY(-100%);
-   opacity: 0;
-   pointer-events: none;
-   transition: all 0.35s ease;
-   z-index: 9999;
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(12px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 35px;
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.35s ease;
+    z-index: 9999;
   }
 
   .nav-links.show {
-   transform: translateY(0);
-   opacity: 1;
-   pointer-events: auto;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .nav-links a {
-   font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 
   body.menu-open {
-   overflow: hidden;
+    overflow: hidden;
   }
 
   .search-bar input {
-   width: 80%;
+    width: 80%;
   }
 }
 
@@ -616,14 +611,17 @@ footer {
     left: 0;
     right: 0;
     bottom: 0;
-    top: auto;                 /* override desktop top:0 */
+    top: auto;
+
     width: 100%;
-    /* Use new iOS viewport units when available, fall back to vh */
+
+    /* Fallback for older browsers */
+    height: 80vh;
+    max-height: 80vh;
+
+    /* Use new viewport units when available (iOS 16+ etc.) */
     height: 80svh;
     max-height: 80svh;
-    /* Fallback for older browsers */
-    height: min(80vh, 80svh);
-    max-height: min(80vh, 80svh);
 
     background: rgba(17, 17, 17, 0.95);
     backdrop-filter: blur(8px);
@@ -632,9 +630,8 @@ footer {
     border-top-right-radius: 20px;
     box-shadow: 0 -5px 25px rgba(0,0,0,0.6);
 
-    /* Make sure desktop right-slide is neutralized */
-    right: 0;                  /* override right:-400px / -80vw */
-    border-left: none;         /* we’re not sliding from the side on mobile */
+    right: 0;
+    border-left: none;
 
     /* Bottom-sheet animation */
     transform: translateY(100%);
@@ -643,10 +640,10 @@ footer {
     z-index: 9500;
     padding: 16px 20px calc(env(safe-area-inset-bottom, 0) + 20px);
     overflow-y: auto;
-    overscroll-behavior: contain;   /* prevent background scroll bleed */
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 
-    pointer-events: none;      /* don’t block page when hidden */
+    pointer-events: none;
   }
 
   .basket-panel.open {
@@ -654,7 +651,6 @@ footer {
     pointer-events: auto;
   }
 
-  /* Tidy the floating fab on mobile */
   .basket-icon {
     bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
     right: 24px;
@@ -664,17 +660,16 @@ footer {
   }
 }
 
-
 @media (max-width: 600px) {
   .search-bar input {
-   width: 90%;
+    width: 90%;
   }
 
   .logo {
-   font-size: 1.3rem;
+    font-size: 1.3rem;
   }
 
   footer {
-   font-size: 0.8rem;
+    font-size: 0.8rem;
   }
 }
