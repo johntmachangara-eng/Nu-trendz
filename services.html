@@ -9,6 +9,11 @@
   <!-- Title -->
   <title>Nu-Trendz | Services</title>
 
+  <!-- Google Fonts for Logo / Headings -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+
   <!-- External Stylesheets -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   
@@ -22,9 +27,11 @@
   <!-- ======= NAVBAR ======= -->
   <nav class="navbar" id="navbar" role="navigation">
     <div class="nav-content">
-      <a href="index.html" class="logo" aria-label="Nu-Trendz Home">NU-TRENDZ</a>
+      <a href="index.html" class="logo" aria-label="Nu-Trendz Home">
+        <span class="logo-text">NU-TRENDZ</span>
+      </a>
 
-      <!-- Menu Icon -->
+      <!-- Menu Icon (toggle handled in navbar.js) -->
       <div class="menu-icon" aria-label="Toggle menu" role="button" tabindex="0">
         <span class="bar"></span>
         <span class="bar"></span>
@@ -53,8 +60,28 @@
     <!-- Page Header -->
     <header class="services-header">
       <h1>Our Services</h1>
-      <p>Explore professional braiding, locs, and hair styling services tailored to your unique look.</p>
+      <p>Choose your style, add to your selection, and book in a few taps.</p>
     </header>
+
+    <!-- Steps Strip (4 steps) -->
+    <section class="steps-strip" aria-label="How booking works">
+      <div class="step step--active" data-step="1">
+        <span>1</span>
+        <p>Select services</p>
+      </div>
+      <div class="step" data-step="2">
+        <span>2</span>
+        <p>Review selection</p>
+      </div>
+      <div class="step" data-step="3">
+        <span>3</span>
+        <p>Details &amp; date</p>
+      </div>
+      <div class="step" data-step="4">
+        <span>4</span>
+        <p>Payment &amp; confirmation</p>
+      </div>
+    </section>
 
     <!-- Search Bar -->
     <div class="search-bar">
@@ -71,32 +98,60 @@
     <div id="all-services"></div>
   </main>
 
-  <!-- ======= BASKET ICON ======= -->
-  <button class="basket-icon" id="basketIcon" aria-label="Open basket">
-    <span class="icon">🛍️</span>
-    <span class="basket-count" id="basketCount">0</span>
-  </button>
+  <!-- ======= BOTTOM BAR (BLACK + ORANGE, WITH PROCEED) ======= -->
+  <div
+    class="basket-bar"
+    id="basketBar"
+    role="button"
+    tabindex="0"
+    aria-expanded="false"
+    aria-controls="basketPanel"
+  >
+    <div class="basket-bar-content">
+      <div class="basket-bar-left">
+        <span id="basketBarSummary">No services selected yet</span>
+      </div>
+      <div class="basket-bar-right">
+        <span class="basket-bar-caret">▲</span>
+        <button
+          type="button"
+          id="basketBarProceed"
+          class="basket-bar-proceed"
+        >
+          Proceed
+        </button>
+      </div>
+    </div>
+  </div>
 
-  <!-- ======= BASKET PANEL ======= -->
-  <aside class="basket-panel" id="basketPanel" aria-label="Basket panel">
+  <!-- ======= BOTTOM PANEL (SELECTION PANEL) ======= -->
+  <aside class="basket-panel" id="basketPanel" aria-label="Selected services panel">
     <!-- Basket Header -->
     <div class="basket-header">
-      <h3>Your Basket</h3>
-      <button id="closeBasket" aria-label="Close basket">&times;</button>
+      <h3>Your Selection</h3>
+      <button id="closeBasket" aria-label="Close selection panel">&times;</button>
     </div>
 
     <!-- Basket Items -->
     <div class="basket-list" id="basketList"></div>
 
-    <!-- Basket Footer -->
+    <!-- Basket Footer (TOTAL ONLY – no proceed button in panel) -->
     <div class="basket-footer">
-      <p>Total: <span id="basketTotal">£0</span></p>
-      <button class="proceed-btn" id="proceedBooking">Proceed to Booking</button>
+      <p>
+        <span id="basketFooterLabel">Total:</span>
+        <span id="basketTotal">£0</span>
+      </p>
     </div>
   </aside>
 
-  <!-- Basket Overlay -->
+  <!-- Overlay for dimming background & blocking interaction -->
   <div class="basket-overlay" id="basketOverlay"></div>
+
+  <!-- Toast Notification -->
+  <div id="basketToast" class="basket-toast" aria-live="polite"></div>
+
+  <!-- Screenreader Live Region -->
+  <div id="basketStatus" class="visually-hidden" aria-live="polite"></div>
 
   <!-- ======= FOOTER ======= -->
   <footer class="site-footer">

@@ -1,5 +1,5 @@
 // ============================================================
-// NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION BUILD
+// NU-TRENDZ SERVICES PAGE – IMPROVED PRODUCTION BUILD
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -130,7 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let basket = JSON.parse(localStorage.getItem("basket")) || [];
   let searchActive = false;
-  let nudgeInterval = null;
 
   const saveBasket = function () {
     localStorage.setItem("basket", JSON.stringify(basket));
@@ -145,22 +144,24 @@ document.addEventListener("DOMContentLoaded", function () {
     floatingCategories: document.getElementById("floatingCategories"),
     searchInput: document.getElementById("serviceSearch"),
     navbar: document.getElementById("navbar"),
-    basketIcon: document.getElementById("basketIcon"),
+    basketBar: document.getElementById("basketBar"),
+    basketBarSummary: document.getElementById("basketBarSummary"),
+    basketBarProceed: document.getElementById("basketBarProceed"),
     basketPanel: document.getElementById("basketPanel"),
     closeBasket: document.getElementById("closeBasket"),
     basketList: document.getElementById("basketList"),
-    basketCount: document.getElementById("basketCount"),
     basketTotal: document.getElementById("basketTotal"),
-    proceedBooking: document.getElementById("proceedBooking"),
-    menuToggle: document.getElementById("menu-toggle"),
+    basketFooterLabel: document.getElementById("basketFooterLabel"),
     navLinks: document.getElementById("nav-links"),
-    basketOverlay: document.getElementById("basketOverlay")
+    basketOverlay: document.getElementById("basketOverlay"),
+    basketToast: document.getElementById("basketToast"),
+    basketStatus: document.getElementById("basketStatus")
   };
 
   const requiredKeys = [
     "allServices", "floatingCategories", "searchInput", "navbar",
-    "basketIcon", "basketPanel", "closeBasket", "basketList",
-    "basketCount", "basketTotal", "proceedBooking", "basketOverlay"
+    "basketBar", "basketPanel", "closeBasket", "basketList",
+    "basketTotal", "basketOverlay"
   ];
 
   for (let i = 0; i < requiredKeys.length; i++) {
@@ -170,7 +171,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // helper to read scroll position in a cross-browser way
   function getScrollY() {
     return window.scrollY ||
            window.pageYOffset ||
@@ -179,17 +179,98 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ============================================================
+  // 3a. HELPERS
+  // ============================================================
+
+  function showToast(message) {
+    if (!els.basketToast) return;
+    els.basketToast.textContent = message;
+    els.basketToast.classList.add("show");
+    setTimeout(function () {
+      if (!els.basketToast) return;
+      els.basketToast.classList.remove("show");
+    }, 1500);
+  }
+
+  function announceBasket(message) {
+    if (!els.basketStatus) return;
+    els.basketStatus.textContent = message;
+  }
+
+  function debounce(fn, delay) {
+    let t;
+    return function () {
+      const args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function () {
+        fn.apply(null, args);
+      }, delay);
+    };
+  }
+
+  function formatPrice(priceStr) {
+    if (!priceStr) return "";
+    if (/^from\s+/i.test(priceStr)) {
+      const numberPart = priceStr.replace(/^from\s+/i, "");
+      return '<span class="from-label">From</span>' + numberPart;
+    }
+    return priceStr;
+  }
+
+  function highlightTerm(text, term) {
+    if (!term) return text;
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp("(" + escaped + ")", "ig");
+    return text.replace(regex, "<mark>$1</mark>");
+  }
+
+  // Steps controller – we only move the first 2 on this page
+  function updateSteps() {
+    const steps = document.querySelectorAll(".steps-strip .step");
+    if (!steps.length) return;
+
+    steps.forEach(function (step) {
+      step.classList.remove("step--active", "step--complete");
+    });
+
+    if (basket.length === 0) {
+      if (steps[0]) steps[0].classList.add("step--active");
+    } else {
+      if (steps[0]) steps[0].classList.add("step--complete");
+      if (steps[1]) steps[1].classList.add("step--active");
+    }
+  }
+
+  // ============================================================
   // 4. BASKET FUNCTIONALITY
   // ============================================================
 
+  function updateBasketBarSummary(total, hasFrom) {
+    if (!els.basketBarSummary) return;
+    if (!basket.length) {
+      els.basketBarSummary.textContent = "No services selected yet";
+      return;
+    }
+    const label = hasFrom ? "Estimated" : "Total";
+    const countText = basket.length === 1
+      ? "1 service selected"
+      : basket.length + " services selected";
+    els.basketBarSummary.textContent =
+      countText + " • " + label + " £" + total.toFixed(2);
+  }
+
   function updateBasket() {
     els.basketList.innerHTML = "";
-    els.basketCount.textContent = basket.length;
 
     if (!basket.length) {
       els.basketList.innerHTML = '<p style="color:#aaa;text-align:center;">No services selected.</p>';
       els.basketTotal.textContent = "£0";
+      if (els.basketFooterLabel) {
+        els.basketFooterLabel.textContent = "Total:";
+      }
+      updateBasketBarSummary(0, false);
       saveBasket();
+      updateSteps();
       return;
     }
 
@@ -204,10 +285,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     let total = 0;
+    let hasFromPrice = false;
+
     for (let i = 0; i < basket.length; i++) {
       const item = basket[i];
-      const priceValue = parseFloat(item.price.replace(/[^\d.]/g, "")) || 0;
+      const priceStr = item.price || "";
+      const priceValue = parseFloat(priceStr.replace(/[^\d.]/g, "")) || 0;
       total += priceValue;
+      if (/^from\s+/i.test(priceStr)) {
+        hasFromPrice = true;
+      }
 
       const div = document.createElement("div");
       div.className = "basket-item";
@@ -221,18 +308,45 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     els.basketTotal.textContent = "£" + total.toFixed(2);
+    if (els.basketFooterLabel) {
+      els.basketFooterLabel.textContent = hasFromPrice ? "Estimated total:" : "Total:";
+    }
+
+    updateBasketBarSummary(total, hasFromPrice);
     saveBasket();
+    updateSteps();
   }
 
+  // 🔒 Freeze page scroll when basket is open (no layout shift)
   function toggleBasket(open) {
     if (open) {
       els.basketPanel.classList.add("open");
       if (els.basketOverlay) els.basketOverlay.classList.add("show");
-      stopBasketNudge();
+
+      // Lock body scroll without layout jump (desktop)
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollBarWidth > 0) {
+        document.body.style.paddingRight = scrollBarWidth + "px";
+      }
+      document.body.classList.add("no-scroll");
+
+      if (els.basketBar) {
+        els.basketBar.setAttribute("aria-expanded", "true");
+        const caret = els.basketBar.querySelector(".basket-bar-caret");
+        if (caret) caret.textContent = "▼";
+      }
     } else {
       els.basketPanel.classList.remove("open");
       if (els.basketOverlay) els.basketOverlay.classList.remove("show");
-      if (basket.length > 0) startBasketNudge();
+
+      document.body.classList.remove("no-scroll");
+      document.body.style.paddingRight = "";
+
+      if (els.basketBar) {
+        els.basketBar.setAttribute("aria-expanded", "false");
+        const caret = els.basketBar.querySelector(".basket-bar-caret");
+        if (caret) caret.textContent = "▲";
+      }
     }
   }
 
@@ -242,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     basket.push({ name: name, price: price, time: time });
     updateBasket();
-    startBasketNudge();
+    announceBasket(name + " added to selection. " + basket.length + " services selected.");
     return true;
   }
 
@@ -257,36 +371,12 @@ document.addEventListener("DOMContentLoaded", function () {
       matchBtn.disabled = false;
       matchBtn.textContent = "Book Now";
     }
+
+    announceBasket(removedItem.name + " removed from selection. " + basket.length + " services selected.");
   }
 
   // ============================================================
-  // 5. BASKET NUDGE ANIMATION
-  // ============================================================
-
-  function triggerBasketNudge() {
-    if (basket.length &&
-        !els.basketPanel.classList.contains("open") &&
-        !document.hidden) {
-      els.basketIcon.classList.add("nudge");
-      setTimeout(function () {
-        els.basketIcon.classList.remove("nudge");
-      }, 700);
-    }
-  }
-
-  function startBasketNudge() {
-    if (nudgeInterval) return;
-    nudgeInterval = setInterval(triggerBasketNudge, 30000);
-  }
-
-  function stopBasketNudge() {
-    if (!nudgeInterval) return;
-    clearInterval(nudgeInterval);
-    nudgeInterval = null;
-  }
-
-  // ============================================================
-  // 6. RENDER SERVICES
+  // 5. RENDER SERVICES
   // ============================================================
 
   function renderServices() {
@@ -307,10 +397,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const card = document.createElement("div");
         card.className = "service-card";
         card.innerHTML =
+          '<div class="service-meta">' +
+            '<span class="service-tag">' + category + '</span>' +
+          '</div>' +
           "<h3>" + service.name + "</h3>" +
           '<p class="service-time">' + service.time + "</p>" +
           (service.desc ? '<p class="service-desc">' + service.desc + "</p>" : "") +
-          '<p class="service-price">' + service.price + "</p>" +
+          '<p class="service-price">' + formatPrice(service.price) + "</p>" +
           '<button class="book-btn" ' +
             'data-name="' + service.name + '" ' +
             'data-price="' + service.price + '" ' +
@@ -324,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ============================================================
-  // 7. CATEGORY NAVIGATION
+  // 6. CATEGORY NAVIGATION
   // ============================================================
 
   function initCategoryButtons() {
@@ -332,7 +425,6 @@ document.addEventListener("DOMContentLoaded", function () {
     for (const category in servicesData) {
       if (!Object.prototype.hasOwnProperty.call(servicesData, category)) continue;
       const btn = document.createElement("button");
-      // first one starts active; scroll handler will keep it in sync
       btn.className = "category-btn" + (index === 0 ? " active" : "");
       btn.textContent = category;
       els.floatingCategories.appendChild(btn);
@@ -340,218 +432,209 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-function initCategoryScroll() {
-  const buttons = Array.prototype.slice.call(
-    document.querySelectorAll(".category-btn")
-  );
-  const sections = Array.prototype.slice.call(
-    document.querySelectorAll(".category-section")
-  );
+  function initCategoryScroll() {
+    const buttons = Array.prototype.slice.call(
+      document.querySelectorAll(".category-btn")
+    );
+    const sections = Array.prototype.slice.call(
+      document.querySelectorAll(".category-section")
+    );
 
-  if (!buttons.length || !sections.length) return;
+    if (!buttons.length || !sections.length) return;
 
-  // flag to ignore scroll-based updates while we're auto-scrolling
-  let isAutoScrolling = false;
-  let autoScrollTimeout = null;
+    let isAutoScrolling = false;
+    let autoScrollTimeout = null;
 
-  // helper: ensure ONLY one button has .active, based on section id
-  function setActiveBySectionId(id) {
-    const activeName = id
-      .replace("cat-", "")
-      .replace(/-/g, " ")
-      .toLowerCase();
+    function setActiveBySectionId(id) {
+      const activeName = id
+        .replace("cat-", "")
+        .replace(/-/g, " ")
+        .toLowerCase();
 
-    for (let i = 0; i < buttons.length; i++) {
-      const btn = buttons[i];
-      const match = btn.textContent.toLowerCase() === activeName;
-      if (match) {
-        btn.classList.add("active");
-        // keep the active pill centered horizontally
-        btn.scrollIntoView({
-          behavior: "auto",
-          inline: "center",
-          block: "nearest"
-        });
-      } else {
-        btn.classList.remove("active");
+      for (let i = 0; i < buttons.length; i++) {
+        const btn = buttons[i];
+        const match = btn.textContent.toLowerCase() === activeName;
+        if (match) {
+          btn.classList.add("active");
+          btn.scrollIntoView({
+            behavior: "auto",
+            inline: "center",
+            block: "nearest"
+          });
+        } else {
+          btn.classList.remove("active");
+        }
       }
     }
-  }
 
-  // ---------- CLICK: highlight immediately + scroll ----------
-  buttons.forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      // Clear search mode if active
-      const searchVal = els.searchInput.value.trim();
-      const searchResults = document.getElementById("search-results");
-      if (searchVal || searchResults) {
-        els.searchInput.value = "";
-        if (searchResults) searchResults.remove();
-        const allSections = document.querySelectorAll(".category-section");
-        allSections.forEach(function (sec) {
-          sec.style.display = "block";
-        });
-      }
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const searchVal = els.searchInput.value.trim();
+        const searchResults = document.getElementById("search-results");
+        if (searchVal || searchResults) {
+          els.searchInput.value = "";
+          if (searchResults) searchResults.remove();
+          const allSections = document.querySelectorAll(".category-section");
+          allSections.forEach(function (sec) {
+            sec.style.display = "block";
+          });
+        }
 
-      searchActive = false;
+        searchActive = false;
 
-      const targetId = "cat-" + btn.textContent.replace(/\s+/g, "-");
-      const target = document.getElementById(targetId);
-      if (!target) return;
+        const targetId = "cat-" + btn.textContent.replace(/\s+/g, "-");
+        const target = document.getElementById(targetId);
+        if (!target) return;
 
-      // 1) immediately highlight the clicked category
-      setActiveBySectionId(targetId);
+        setActiveBySectionId(targetId);
 
-      // 2) scroll to the section
-      const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
-      const catHeight = els.floatingCategories ? els.floatingCategories.offsetHeight : 0;
-      const offset = navHeight + catHeight + 50;
-      const rect = target.getBoundingClientRect();
-      const scrollY = getScrollY();
-      const top = rect.top + scrollY - offset;
+        const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
+        const catHeight = els.floatingCategories ? els.floatingCategories.offsetHeight : 0;
+        const offset = navHeight + catHeight + 50;
+        const rect = target.getBoundingClientRect();
+        const scrollY = getScrollY();
+        const top = rect.top + scrollY - offset;
 
-      isAutoScrolling = true;
-      if (typeof window.scrollTo === "function") {
-        try {
-          window.scrollTo({ top: top, behavior: "smooth" });
-        } catch (e) {
-          // older browsers without smooth option
+        isAutoScrolling = true;
+        if (typeof window.scrollTo === "function") {
+          try {
+            window.scrollTo({ top: top, behavior: "smooth" });
+          } catch (e) {
+            window.scrollTo(0, top);
+          }
+        } else {
           window.scrollTo(0, top);
         }
-      } else {
-        window.scrollTo = top;
-      }
 
-      // 3) after ~600ms, let scroll handler take over again
-      if (autoScrollTimeout) {
-        clearTimeout(autoScrollTimeout);
-      }
-      autoScrollTimeout = setTimeout(function () {
-        isAutoScrolling = false;
-      }, 600);
+        if (autoScrollTimeout) clearTimeout(autoScrollTimeout);
+        autoScrollTimeout = setTimeout(function () {
+          isAutoScrolling = false;
+        }, 600);
+      });
     });
-  });
 
-  // ---------- SCROLL: decide which section is “active” ----------
-  window.addEventListener(
-    "scroll",
-    function () {
-      // don't fight with search mode or our own smooth scroll
-      if (searchActive || isAutoScrolling) return;
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (searchActive || isAutoScrolling) return;
 
-      const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
-      const catHeight = els.floatingCategories ? els.floatingCategories.offsetHeight : 0;
-      const scrollY = getScrollY();
+        const navHeight = els.navbar ? els.navbar.offsetHeight : 0;
+        const catHeight = els.floatingCategories ? els.floatingCategories.offsetHeight : 0;
+        const scrollY = getScrollY();
+        const viewLine = scrollY + navHeight + catHeight + 40;
 
-      // pick the section whose middle is closest to this line
-      const viewLine = scrollY + navHeight + catHeight + 40;
+        let closestId = sections[0].id;
+        let closestDelta = Infinity;
 
-      let closestId = sections[0].id;
-      let closestDelta = Infinity;
+        for (let i = 0; i < sections.length; i++) {
+          const sec = sections[i];
+          const top = sec.offsetTop;
+          const bottom = top + sec.offsetHeight;
+          const middle = (top + bottom) / 2;
+          const delta = Math.abs(viewLine - middle);
 
-      for (let i = 0; i < sections.length; i++) {
-        const sec = sections[i];
-        const top = sec.offsetTop;
-        const bottom = top + sec.offsetHeight;
-        const middle = (top + bottom) / 2;
-        const delta = Math.abs(viewLine - middle);
-
-        if (delta < closestDelta) {
-          closestDelta = delta;
-          closestId = sec.id;
+          if (delta < closestDelta) {
+            closestDelta = delta;
+            closestId = sec.id;
+          }
         }
+
+        setActiveBySectionId(closestId);
+      },
+      { passive: true }
+    );
+  }
+
+  // ============================================================
+  // 7. SEARCH FUNCTIONALITY
+  // ============================================================
+
+  function handleSearchInput() {
+    const termRaw = els.searchInput.value;
+    const term = termRaw.toLowerCase().trim();
+    const existingResults = document.getElementById("search-results");
+    if (existingResults) existingResults.remove();
+
+    const sections = document.querySelectorAll(".category-section");
+
+    if (!term) {
+      searchActive = false;
+      sections.forEach(function (s) {
+        s.style.display = "block";
+      });
+      return;
+    }
+
+    searchActive = true;
+
+    const catBtns = document.querySelectorAll(".category-btn");
+    catBtns.forEach(function (btn) {
+      btn.classList.remove("active");
+    });
+
+    sections.forEach(function (s) {
+      s.style.display = "none";
+    });
+
+    const resultDiv = document.createElement("div");
+    resultDiv.id = "search-results";
+    resultDiv.className = "category-section";
+
+    const grid = document.createElement("div");
+    grid.className = "service-grid";
+
+    let found = 0;
+    const seenNames = {};
+
+    for (const category in servicesData) {
+      if (!Object.prototype.hasOwnProperty.call(servicesData, category)) continue;
+      const list = servicesData[category];
+
+      for (let i = 0; i < list.length; i++) {
+        const service = list[i];
+        const lowerName = service.name.toLowerCase();
+        const lowerDesc = (service.desc || "").toLowerCase();
+
+        const matches = lowerName.includes(term) || lowerDesc.includes(term);
+        if (!matches || seenNames[lowerName]) continue;
+
+        seenNames[lowerName] = true;
+
+        const titleHtml = highlightTerm(service.name, termRaw.trim());
+        const descHtml = service.desc ? highlightTerm(service.desc, termRaw.trim()) : "";
+
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML =
+          '<div class="service-meta">' +
+            '<span class="service-tag">' + category + '</span>' +
+          '</div>' +
+          "<h3>" + titleHtml + "</h3>" +
+          '<p class="service-time">' + service.time + "</p>" +
+          (descHtml ? '<p class="service-desc">' + descHtml + "</p>" : "") +
+          '<p class="service-price">' + formatPrice(service.price) + "</p>" +
+          '<button class="book-btn" data-name="' + service.name +
+          '" data-price="' + service.price + '" data-time="' + service.time + '">Book Now</button>';
+        grid.appendChild(card);
+        found++;
       }
+    }
 
-      setActiveBySectionId(closestId);
-    },
-    { passive: true }
-  );
-}
+    resultDiv.innerHTML = '<h2>Search Results for "' + termRaw.replace(/"/g, "&quot;") + '"</h2>';
+    if (found) {
+      resultDiv.appendChild(grid);
+    } else {
+      const p = document.createElement("p");
+      p.className = "no-services";
+      p.textContent = "No matching services found.";
+      resultDiv.appendChild(p);
+    }
 
-
-  // ============================================================
-  // 8. SEARCH FUNCTIONALITY
-  // ============================================================
+    els.allServices.prepend(resultDiv);
+  }
 
   function initSearch() {
-    els.searchInput.addEventListener("input", function () {
-      const term = els.searchInput.value.toLowerCase().trim();
-      const existingResults = document.getElementById("search-results");
-      if (existingResults) existingResults.remove();
-
-      const sections = document.querySelectorAll(".category-section");
-
-      if (!term) {
-        searchActive = false;
-        sections.forEach(function (s) {
-          s.style.display = "block";
-        });
-        return;
-      }
-
-      searchActive = true;
-
-      // Remove all category highlights while searching
-      const catBtns = document.querySelectorAll(".category-btn");
-      catBtns.forEach(function (btn) {
-        btn.classList.remove("active");
-      });
-
-      // Hide all category sections when searching
-      sections.forEach(function (s) {
-        s.style.display = "none";
-      });
-
-      const resultDiv = document.createElement("div");
-      resultDiv.id = "search-results";
-      resultDiv.className = "category-section";
-
-      const grid = document.createElement("div");
-      grid.className = "service-grid";
-
-      let found = 0;
-      const seenNames = {};
-
-      for (const key in servicesData) {
-        if (!Object.prototype.hasOwnProperty.call(servicesData, key)) continue;
-        const list = servicesData[key];
-
-        for (let i = 0; i < list.length; i++) {
-          const service = list[i];
-          const lowerName = service.name.toLowerCase();
-          const lowerDesc = (service.desc || "").toLowerCase();
-
-          const matches = lowerName.includes(term) || lowerDesc.includes(term);
-          if (!matches || seenNames[lowerName]) continue;
-
-          seenNames[lowerName] = true;
-
-          const card = document.createElement("div");
-          card.className = "service-card";
-          card.innerHTML =
-            "<h3>" + service.name + "</h3>" +
-            '<p class="service-time">' + service.time + "</p>" +
-            (service.desc ? '<p class="service-desc">' + service.desc + "</p>" : "") +
-            '<p class="service-price">' + service.price + "</p>" +
-            '<button class="book-btn" data-name="' + service.name +
-            '" data-price="' + service.price + '" data-time="' + service.time + '">Book Now</button>';
-          grid.appendChild(card);
-          found++;
-        }
-      }
-
-      resultDiv.innerHTML = '<h2>Search Results for "' + term + '"</h2>';
-      if (found) {
-        resultDiv.appendChild(grid);
-      } else {
-        const p = document.createElement("p");
-        p.className = "no-services";
-        p.textContent = "No matching services found.";
-        resultDiv.appendChild(p);
-      }
-
-      els.allServices.prepend(resultDiv);
-    });
+    els.searchInput.addEventListener("input", debounce(handleSearchInput, 200));
 
     els.searchInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
@@ -562,22 +645,52 @@ function initCategoryScroll() {
   }
 
   // ============================================================
-  // 9. EVENT LISTENERS
+  // 8. EVENT LISTENERS
   // ============================================================
 
   function initEventListeners() {
-    // Basket controls
-    els.basketIcon.addEventListener("click", function () {
-      toggleBasket(true);
-    });
+    // Bottom bar toggle (click anywhere except Proceed)
+    if (els.basketBar) {
+      els.basketBar.addEventListener("click", function (e) {
+        if (e.target && e.target.id === "basketBarProceed") return;
+        const isOpen = els.basketPanel.classList.contains("open");
+        toggleBasket(!isOpen);
+      });
+
+      els.basketBar.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const isOpen = els.basketPanel.classList.contains("open");
+          toggleBasket(!isOpen);
+        }
+      });
+    }
+
+    // Proceed button on bar
+    if (els.basketBarProceed) {
+      els.basketBarProceed.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (!basket.length) {
+          alert("Please select at least one service.");
+          return;
+        }
+        window.location.href = "booking.html";
+      });
+    }
+
+    // Close button
     els.closeBasket.addEventListener("click", function () {
       toggleBasket(false);
     });
+
+    // Overlay click closes basket & blocks background interaction
     if (els.basketOverlay) {
       els.basketOverlay.addEventListener("click", function () {
         toggleBasket(false);
       });
     }
+
+    // Escape closes basket
     window.addEventListener("keydown", function (e) {
       if (e.key === "Escape") toggleBasket(false);
     });
@@ -588,16 +701,7 @@ function initCategoryScroll() {
       if (btn) removeFromBasket(parseInt(btn.dataset.index, 10));
     });
 
-    // Proceed to booking
-    els.proceedBooking.addEventListener("click", function () {
-      if (!basket.length) {
-        alert("Please select at least one service.");
-        return;
-      }
-      window.location.href = "booking.html";
-    });
-
-    // Add to basket
+    // Add to basket from cards
     document.addEventListener("click", function (e) {
       const btn = e.target.closest(".book-btn");
       if (!btn) return;
@@ -615,38 +719,29 @@ function initCategoryScroll() {
       if (addToBasket(name, price, time)) {
         btn.textContent = "Added ✓";
         btn.disabled = true;
+        showToast(name + " added to selection");
         setTimeout(function () {
           btn.textContent = "In Basket ✓";
         }, 700);
       }
     });
 
-    // Navbar shrink on scroll
+    // Navbar shrink on scroll (desktop only to avoid mobile jitter)
     window.addEventListener("scroll", function () {
-      if (els.navbar) {
-        els.navbar.classList.toggle("shrink", getScrollY() > 50);
+      if (!els.navbar) return;
+
+      // Disable shrink effect on small screens (mobile) to stop logo shaking
+      if (window.innerWidth <= 768) {
+        els.navbar.classList.remove("shrink");
+        return;
       }
-    });
 
-    // Nudge visibility control
-    document.addEventListener("visibilitychange", function () {
-      if (document.hidden) stopBasketNudge();
-      else if (basket.length) startBasketNudge();
+      els.navbar.classList.toggle("shrink", getScrollY() > 50);
     });
-
-    // Mobile nav close (if you use a checkbox menu)
-    if (els.navLinks && els.menuToggle) {
-      const navLinks = els.navLinks.querySelectorAll("a");
-      navLinks.forEach(function (link) {
-        link.addEventListener("click", function () {
-          els.menuToggle.checked = false;
-        });
-      });
-    }
   }
 
   // ============================================================
-  // 10. INITIALIZATION
+  // 9. INITIALIZATION
   // ============================================================
 
   function init() {
@@ -656,12 +751,12 @@ function initCategoryScroll() {
     initSearch();
     initEventListeners();
     updateBasket();
-    if (basket.length) startBasketNudge();
+    updateSteps();
   }
 
   init();
 });
 
 // ============================================================
-// END OF NU-TRENDZ SERVICES PAGE – FINAL PRODUCTION BUILD
+// END OF NU-TRENDZ SERVICES PAGE – IMPROVED PRODUCTION BUILD
 // ============================================================
