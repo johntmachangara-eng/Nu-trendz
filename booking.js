@@ -106,10 +106,20 @@ function parseDurationFromText(text) {
   return minutes || 60;
 }
 
+// simple “signature” of the basket to detect a new booking
+function getBasketSignature() {
+  if (!basket || !basket.length) return "";
+  const parts = basket.map(s =>
+    `${s.name || ""}|${s.time || ""}|${s.price || ""}`
+  );
+  parts.sort();
+  return parts.join("||");
+}
+
 function setStep(stepNum) {
   currentStep = stepNum;
 
-  // 🔸 save current step so refresh keeps it
+  // save current step so refresh keeps it (for this basket)
   localStorage.setItem("bookingCurrentStep", String(stepNum));
 
   // show / hide step panels
@@ -646,7 +656,11 @@ async function saveBooking(e) {
       bookingId: bookingData.id
     };
     localStorage.setItem("lastBooking", JSON.stringify(lastBookingSummary));
+
+    // clear booking flow state so next booking starts fresh
     localStorage.removeItem("basket");
+    localStorage.removeItem("bookingCurrentStep");
+    localStorage.removeItem("bookingBasketSig");
 
     // go to confirmation page
     window.location.href = "booking-confirmation.html";
@@ -687,18 +701,34 @@ document.addEventListener("DOMContentLoaded", () => {
   finalTotalLabelEl = document.getElementById("finalTotalLabel");
 
   loadBasket();
+
+  // decide whether to restore last step or start fresh
+  const signatureNow = getBasketSignature();
+  const savedSignature = localStorage.getItem("bookingBasketSig");
+  const savedStep = Number(localStorage.getItem("bookingCurrentStep") || "1");
+
+  if (!signatureNow) {
+    // no services → always fresh, step 1
+    localStorage.removeItem("bookingBasketSig");
+    localStorage.removeItem("bookingCurrentStep");
+    currentStep = 1;
+  } else if (!savedSignature || savedSignature !== signatureNow) {
+    // basket changed → treat as NEW booking
+    localStorage.setItem("bookingBasketSig", signatureNow);
+    localStorage.removeItem("bookingCurrentStep");
+    currentStep = 1;
+  } else {
+    // same basket → restore step
+    if (savedStep >= 1 && savedStep <= 3) {
+      currentStep = savedStep;
+    } else {
+      currentStep = 1;
+    }
+  }
+
   renderServicesSummary();
   renderStylistControls();
   limitDateInput();
-
-  // 🔸 read saved step from localStorage (default to 1)
-  const savedStep = Number(localStorage.getItem("bookingCurrentStep") || "1");
-
-  if (savedStep >= 1 && savedStep <= 3) {
-    setStep(savedStep);
-  } else {
-    setStep(1);
-  }
 
   // stylist mode switch
   document.querySelectorAll("input[name='stylistMode']").forEach(radio => {
@@ -757,4 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // initial step
+  setStep(currentStep);
 });

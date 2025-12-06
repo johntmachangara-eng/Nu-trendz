@@ -23,6 +23,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-text-size-adjust: 100%;
 }
 
 #booking-page {
@@ -232,6 +233,15 @@ body {
   font-size: 0.9rem;
 }
 
+/* Make date input behave nicely on iOS and small screens */
+.form-group input[type="date"] {
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+}
+
+
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -429,5 +439,18 @@ body {
 @media (max-width: 600px) {
   .booking-card {
     padding: 18px 14px 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .booking-card {
+    padding: 18px 14px 22px;
+  }
+
+  /* prevent iOS from zooming when typing */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px;
   }
 }
