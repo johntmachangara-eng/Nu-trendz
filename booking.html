@@ -5,16 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nu-Trendz | Booking</title>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="footer.css">
-  <link rel="stylesheet" href="booking.css">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+  >
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Styles -->
+  <link rel="stylesheet" href="footer.css" />
+  <link rel="stylesheet" href="booking.css" />
+
+  <style>
+    body {
+      font-family: "Poppins", system-ui, sans-serif;
+      margin: 0;
+    }
+  </style>
+
+  <!-- 🔥 Firebase v8 (global firebase object) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- ✉️ EmailJS (optional – only if you want email confirmations) -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBshg3uKI9UK043ItARQhPf4kw4fDqDnkc",
+      authDomain: "database-93ee7.firebaseapp.com",
+      projectId: "database-93ee7",
+      storageBucket: "database-93ee7-firebasestorage.app",
+      messagingSenderId: "512064197430",
+      appId: "1:512064197430:web:62ca518c67d20f82001997",
+      measurementId: "G-Z3MPD1RWMD",
+      databaseURL: "https://database-93ee7-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      try {
+        firebase.analytics();
+      } catch (e) {
+        console.warn("Analytics not configured (ok to ignore):", e);
+      }
+    }
+    window.rtdb = firebase.database();
+    if (window.emailjs) {
+      emailjs.init("Lgg9FCMDk-lwWnNxZ");
+    }
+  </script>
 </head>
+
 <body>
   <main id="booking-page">
-    <!-- Header + steps -->
+    <!-- HEADER + STEPS -->
     <section class="booking-header">
       <h1>Book <span>Your Appointment</span></h1>
       <p>Follow the steps below to choose your services, time and details.</p>
@@ -35,7 +86,7 @@
     <!-- ========== STEP 1: SUMMARY + STYLISTS ========== -->
     <section class="booking-step" data-step-panel="1">
       <div class="booking-layout">
-        <!-- Left: services summary -->
+        <!-- LEFT: SERVICES SUMMARY -->
         <section class="booking-card">
           <h2>Your services</h2>
           <div id="servicesSummary"></div>
@@ -47,15 +98,23 @@
             </p>
           </div>
 
-          <a href="services.html" class="back-link">← Change services</a>
+          <p class="small-note">
+            These services come from your basket. If you want to change them, go back to the Services page.
+          </p>
+
+          <div class="step-buttons">
+            <a href="services.html" class="secondary-btn" id="changeServicesBtn">
+              ← Change services
+            </a>
+          </div>
         </section>
 
-        <!-- Right: stylist options -->
+        <!-- RIGHT: STYLISTS -->
         <section class="booking-card">
-          <h2>Choose stylists</h2>
-
-          <p class="booking-form-intro">
-            You can use one stylist for everything or pick a stylist for each service.
+          <h2>Choose your stylist</h2>
+          <p class="booking-help">
+            You can use <strong>one stylist</strong> for all services, or choose
+            a stylist for each service separately.
           </p>
 
           <div class="stylist-mode">
@@ -74,15 +133,17 @@
             <select id="stylistAll"></select>
           </div>
 
-          <div id="stylistPerServiceWrapper" class="per-service-stylists hidden">
-            <!-- per-service dropdowns will be injected here -->
-          </div>
+          <div
+            id="stylistPerServiceWrapper"
+            class="per-service-stylists hidden"
+          ></div>
 
           <div class="step-buttons">
             <button type="button" id="toStep2" class="primary-btn">
               Next: Choose date &amp; time
             </button>
           </div>
+
           <p id="step1Error" class="step-error" aria-live="polite"></p>
         </section>
       </div>
@@ -93,29 +154,45 @@
       <div class="booking-layout single-column">
         <section class="booking-card">
           <h2>Date &amp; time</h2>
-          <p class="booking-form-intro">
-            Nu-Trendz opening hours: <strong>Monday – Saturday, 09:00 to 18:00</strong>.
-            Sundays are closed.
+          <p class="booking-help">
+            Pick a date and time that works for you. The salon is open from
+            <strong>09:00</strong> to <strong>18:30</strong>.
           </p>
 
+          <!-- Date + popup calendar trigger -->
           <div class="form-group">
-            <label for="bookingDate">Choose a day</label>
-            <input type="date" id="bookingDate" />
-            <small class="note">
-              Past days and Sundays are not available for booking.
-            </small>
+            <label for="bookingDateButton">Choose a date</label>
+
+            <button
+              type="button"
+              id="bookingDateButton"
+              class="date-button"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <span class="material-symbols-outlined calendar-icon">
+                calendar_month
+              </span>
+              <span id="bookingDateLabel">Select a date</span>
+            </button>
+
+            <!-- Hidden native input (for min/max and data only) -->
+            <input type="date" id="bookingDate" class="hidden-date-input">
+
+            <p id="dateStatus" class="small-note" aria-live="polite"></p>
           </div>
 
           <div class="form-group">
             <label>Available times</label>
             <div id="timeSlots" class="time-slots">
-              <!-- time buttons injected here -->
+              <!-- time-slot buttons injected by JS -->
             </div>
-            <p id="dateStatus" class="step-error" aria-live="polite"></p>
           </div>
 
           <div class="step-buttons">
-            <button type="button" class="secondary-btn" id="backTo1">← Back</button>
+            <button type="button" class="secondary-btn" id="backTo1">
+              ← Back
+            </button>
             <button type="button" class="primary-btn" id="toStep3">
               Next: Your details
             </button>
@@ -124,45 +201,95 @@
       </div>
     </section>
 
-    <!-- ========== STEP 3: DETAILS & CONFIRM ========== -->
+    <!-- ========== STEP 3: YOUR DETAILS ========== -->
     <section class="booking-step hidden" data-step-panel="3">
       <div class="booking-layout">
+        <!-- LEFT: FORM -->
         <section class="booking-card">
           <h2>Your details</h2>
+          <p class="booking-help">
+            Tell us who the booking is for and how to contact you.
+          </p>
 
-          <form id="detailsForm">
+          <form id="detailsForm" novalidate>
             <div class="form-row">
               <div class="form-group">
-                <label for="fullName">Full name</label>
-                <input type="text" id="fullName" required />
+                <label for="firstName">First name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  placeholder="First name"
+                  autocomplete="given-name"
+                  required
+                >
               </div>
+
               <div class="form-group">
-                <label for="email">Email address</label>
-                <input type="email" id="email" required />
+                <label for="lastName">Last name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  placeholder="Last name"
+                  autocomplete="family-name"
+                  required
+                >
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="phone">Phone number</label>
-                <input type="tel" id="phone" required />
-              </div>
+            <input
+              type="hidden"
+              id="fullName"
+              autocomplete="name"
+            >
+
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input
+                type="email"
+                id="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Mobile number</label>
+              <input
+                type="tel"
+                id="phone"
+                placeholder="07..."
+                autocomplete="tel"
+                required
+              >
             </div>
 
             <div class="form-group">
               <label for="notes">Extra notes (optional)</label>
-              <textarea id="notes" rows="4"
-                placeholder="Hair length, past styles, allergies, anything we should know."></textarea>
+              <textarea
+                id="notes"
+                rows="4"
+                placeholder="Hair length, past styles, allergies, anything we should know."
+              ></textarea>
             </div>
 
             <h3 class="subheading">How would you like to pay?</h3>
             <div class="payment-options">
               <label>
-                <input type="radio" name="paymentMethod" value="pay_at_venue" checked>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="pay_at_venue"
+                  checked
+                >
                 Pay at the salon
               </label>
               <label>
-                <input type="radio" name="paymentMethod" value="pay_later">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="pay_later"
+                >
                 Decide payment later (we will contact you)
               </label>
             </div>
@@ -173,54 +300,109 @@
             </p>
 
             <div class="step-buttons">
-              <button type="button" class="secondary-btn" id="backTo2">← Back</button>
-              <button type="submit" class="primary-btn" id="confirmBooking">
-                Confirm my booking
+              <button type="button" class="secondary-btn" id="backTo2">
+                ← Back
+              </button>
+              <button type="submit" class="primary-btn">
+                Confirm booking
               </button>
             </div>
-            <p id="finalStatus" class="step-status" aria-live="polite" role="status"></p>
-          </form>
 
-          <div id="thankYou" class="thankyou hidden">
-            <h2>Your appointment request has been sent ✅</h2>
-            <p>
-              Thank you. Your booking is now saved in our system.
-              We will contact you by phone, text or email to confirm the time
-              and talk about payment if needed.
-            </p>
-            <ul>
-              <li><strong>Step 1:</strong> Check your email for a booking summary.</li>
-              <li><strong>Step 2:</strong> Wait for a message or call from Nu-Trendz.</li>
-              <li><strong>Step 3:</strong> Arrive a little early for your appointment.</li>
-            </ul>
-            <a href="index.html" class="back-link">← Back to home</a>
-          </div>
+            <p id="finalStatus" class="step-error" aria-live="polite"></p>
+          </form>
         </section>
 
+        <!-- RIGHT: FINAL SUMMARY -->
         <section class="booking-card">
           <h2>Summary</h2>
           <div id="finalSummary"></div>
+
           <div class="booking-total-row">
             <p>
               <span id="finalTotalLabel">Estimated total:</span>
               <span id="finalTotal">£0</span>
             </p>
           </div>
+
           <p class="small-note">
             Times and availability are checked against existing bookings in our system.
           </p>
+
+          <ul class="small-note">
+            <li>We’ll also send a confirmation email (if email is working).</li>
+            <li>If you need to change anything, contact Nu-Trendz directly.</li>
+          </ul>
+
+          <a href="index.html" class="back-link">← Back to home</a>
         </section>
       </div>
     </section>
   </main>
 
-  <!-- Simple footer for brand only -->
+  <!-- POPUP CALENDAR (overlays page like a normal calendar) -->
+  <div
+    id="bookingCalendar"
+    class="booking-calendar"
+    aria-hidden="true"
+  >
+    <div
+      class="calendar-inner"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Select a date"
+    >
+      <div class="calendar-header">
+        <button
+          type="button"
+          id="calendarPrev"
+          class="calendar-nav"
+          aria-label="Previous month"
+        >
+          ‹
+        </button>
+        <span id="calendarMonthLabel" class="calendar-month-label"></span>
+        <button
+          type="button"
+          id="calendarNext"
+          class="calendar-nav"
+          aria-label="Next month"
+        >
+          ›
+        </button>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="calendar-row calendar-row--header">
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+          <span>Sun</span>
+        </div>
+        <div id="calendarDays" class="calendar-days">
+          <!-- days injected by booking.js -->
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="calendarClose"
+        class="secondary-btn calendar-close-btn"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-bottom">
       <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
     </div>
   </footer>
 
-  <script type="module" src="booking.js"></script>
+  <script src="booking.js"></script>
 </body>
 </html>

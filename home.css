@@ -1,12 +1,20 @@
 /* ============================================================
   HOME PAGE STYLES — NU-TRENDZ
-  ============================================================ */
+============================================================ */
+
+/* ===== ROOT VARIABLES (match the rest of the site) ===== */
+:root {
+  --orange: #ff9800;
+  --orange-light: #ffb84d;
+  --border-light: #333;
+  --transition-fast: all 0.3s ease;
+}
 
 /* ===== HERO SECTION ===== */
 #home-banner {
   background-image:
-   linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.35)),
-   url('images/home_bgi.jpg');
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.35)),
+    url('images/home_bgi.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -22,7 +30,7 @@
 
 /* ===== HERO CONTENT ===== */
 .hero-content {
-  margin-top: 80px;
+  margin-top: 80px; /* leaves space under fixed navbar */
 }
 
 .hero-content h1 {
@@ -55,7 +63,10 @@
 }
 
 .cta-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: 280px;
   max-width: 90%;
   padding: 14px 0;
@@ -67,13 +78,18 @@
   text-decoration: none;
   border-radius: 30px;
   box-shadow: 0 0 12px rgba(255, 152, 0, 0.25);
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: var(--transition-fast);
 }
 
 .cta-btn:hover {
   background-color: var(--orange-light);
   transform: scale(1.05);
   box-shadow: 0 0 25px rgba(255, 152, 0, 0.4);
+}
+
+/* ===== ensure Google icons sit nicely in CTAs ===== */
+.cta-btn .material-symbols-outlined {
+  font-size: 1.3rem;
 }
 
 /* ===== FEATURED SECTION ===== */
@@ -122,12 +138,12 @@
 /* ===== RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
   .cta-buttons {
-   gap: 14px;
+    gap: 14px;
   }
 
   .cta-btn {
-   width: 80%;
-   max-width: 280px;
-   font-size: 1rem;
+    width: 80%;
+    max-width: 280px;
+    font-size: 1rem;
   }
 }

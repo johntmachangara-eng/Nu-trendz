@@ -3,28 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nu-Trendz | Booking confirmation</title>
+  <title>Nu-Trendz | Booking Confirmation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Icons (optional) -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+  >
+
+  <!-- Styles (reuse booking + footer styles) -->
+  <link rel="stylesheet" href="footer.css" />
   <link rel="stylesheet" href="booking.css" />
+
+  <style>
+    body {
+      font-family: "Poppins", system-ui, sans-serif;
+      margin: 0;
+    }
+    .confirm-header h1 span {
+      color: #f59e0b;
+    }
+    .confirm-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #16a34a;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .confirm-badge .material-symbols-outlined {
+      font-size: 16px;
+    }
+    .no-booking-message {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
   <main id="booking-page">
-    <section class="booking-header">
+    <section class="booking-header confirm-header">
       <h1>Booking <span>confirmed</span></h1>
-      <p>Here is a simple summary of your appointment.</p>
+      <p>Here is a summary of your appointment.</p>
     </section>
 
     <section class="booking-step" data-step-panel="1">
       <div class="booking-layout single-column">
         <section class="booking-card">
+          <div class="confirm-badge">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Your booking has been saved</span>
+          </div>
+
           <h2>Your appointment</h2>
+
           <p id="confirmName"></p>
           <p id="confirmDateTime"></p>
           <p id="confirmPayment"></p>
 
-          <h3 class="subheading" style="margin-top:12px;">Services</h3>
+          <h3 class="subheading" style="margin-top:16px;">Services</h3>
           <div id="confirmServices"></div>
 
-          <div class="booking-total-row">
+          <div class="booking-total-row" style="margin-top:10px;">
             <p>
               <span>Total:</span>
               <span id="confirmTotal">£0</span>
@@ -47,17 +100,24 @@
           <p class="small-note" style="margin-top:10px;">
             Tip: Add this appointment to your phone calendar so you don't forget.
           </p>
+
+          <p id="noBookingMessage" class="no-booking-message" style="display:none; margin-top:16px;">
+            We couldn't find your booking details. This can happen if the page was opened directly,
+            or if your browser cleared its storage. Please return to the homepage or make a new booking.
+          </p>
         </section>
       </div>
     </section>
   </main>
 
+  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-bottom">
       <p>&copy; 2025 NU-TRENDZ. All Rights Reserved.</p>
     </div>
   </footer>
 
+  <!-- Logic -->
   <script src="booking-confirmation.js"></script>
 </body>
 </html>

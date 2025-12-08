@@ -1,11 +1,12 @@
-// ===============================
-// NU-TRENDZ FOOTER FADE-IN
-// ===============================
+// ======================================
+// NU-TRENDZ FOOTER VISIBILITY ANIMATION
+// ======================================
+
 document.addEventListener("DOMContentLoaded", () => {
   const footer = document.querySelector(".site-footer");
-  
-  if (!footer) return;
+  if (!footer) return; // Safety check
 
+  // Fade-in animation when footer enters viewport
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -14,7 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     },
-    { threshold: 0.2 }
+    {
+      threshold: 0.2, // Trigger when 20% of footer is visible
+    }
   );
 
   observer.observe(footer);

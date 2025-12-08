@@ -1,176 +1,143 @@
-// ===============================
-// NU-TRENDZ SHOP PAGE SCRIPT
-// ===============================
-
-/* ============================================
-  YOUTUBE VIDEO MANAGEMENT
-============================================ */
-
-let ytPlayers = [];
-
-/**
- * Initialize YouTube players with API
- */
-function onYouTubeIframeAPIReady() {
-  const iframes = document.querySelectorAll("iframe[src*='youtube.com']");
-  iframes.forEach((iframe, index) => {
-   ytPlayers[index] = new YT.Player(iframe, {
-    events: {
-      onReady: (event) => setupVideoObserver(event.target, iframe),
-    },
-   });
-  });
-}
-
-/**
- * Pause video when it scrolls out of view
- */
-function setupVideoObserver(player, iframe) {
-  const observer = new IntersectionObserver(
-   (entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) {
-       try {
-        player.pauseVideo();
-       } catch (err) {
-        console.warn("Pause failed:", err);
-       }
-      }
-    });
-   },
-   { threshold: 0.5 }
-  );
-  observer.observe(iframe);
-}
-
-/* ============================================
-  IMAGE GALLERY & OVERLAY
-============================================ */
-
-const GalleryManager = {
-  overlay: null,
-  overlayContent: null,
-  images: [],
-  currentIndex: 0,
-
-  init() {
-   this.overlay = document.getElementById("mediaOverlay");
-   this.overlayContent = document.getElementById("overlayContent");
-   this.images = Array.from(document.querySelectorAll(".gallery-img"));
-
-   this.setupEventListeners();
-   this.setupKeyboardNavigation();
-  },
-
-  showImage(index) {
-   const img = this.images[index];
-   if (!img) return;
-   this.overlayContent.innerHTML = `<img src="${img.src}" alt="preview">`;
-   this.overlay.style.display = "flex";
-   document.body.style.overflow = "hidden";
-  },
-
-  closeOverlay() {
-   this.overlay.style.display = "none";
-   this.overlayContent.innerHTML = "";
-   document.body.style.overflow = "auto";
-  },
-
-  nextImage() {
-   this.currentIndex = (this.currentIndex + 1) % this.images.length;
-   this.showImage(this.currentIndex);
-  },
-
-  prevImage() {
-   this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-   this.showImage(this.currentIndex);
-  },
-
-  setupEventListeners() {
-   // Close on overlay click
-   this.overlay.addEventListener("click", (e) => {
-    if (e.target === this.overlay) this.closeOverlay();
-   });
-
-   // Navigation buttons
-   const nextBtn = document.getElementById("nextBtn");
-   const prevBtn = document.getElementById("prevBtn");
-
-   if (nextBtn && prevBtn) {
-    nextBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.nextImage();
-    });
-
-    prevBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.prevImage();
-    });
-   }
-
-   // Image click handlers
-   this.images.forEach((img, i) => {
-    img.addEventListener("click", () => {
-      this.currentIndex = i;
-      this.showImage(this.currentIndex);
-    });
-   });
-  },
-
-  setupKeyboardNavigation() {
-   document.addEventListener("keydown", (e) => {
-    if (this.overlay.style.display === "flex") {
-      if (e.key === "ArrowRight") this.nextImage();
-      if (e.key === "ArrowLeft") this.prevImage();
-      if (e.key === "Escape") this.closeOverlay();
-    }
-   });
-  }
-};
-
-/* ============================================
-  AUTO-SCROLL GALLERY (Mobile/Tablet)
-============================================ */
-
-const AutoScrollManager = {
-  gallery: null,
-  paused: false,
-
-  init() {
-   this.gallery = document.getElementById("scrollGallery");
-   
-   if (!this.gallery || window.innerWidth > 992) return;
-
-   this.setupEventListeners();
-   this.startAutoScroll();
-  },
-
-  setupEventListeners() {
-   this.gallery.addEventListener("mouseenter", () => (this.paused = true));
-   this.gallery.addEventListener("mouseleave", () => (this.paused = false));
-   this.gallery.addEventListener("touchstart", () => (this.paused = true));
-   this.gallery.addEventListener("touchend", () => (this.paused = false));
-  },
-
-  startAutoScroll() {
-   const scroll = () => {
-    if (!this.paused && this.gallery.scrollWidth > this.gallery.clientWidth) {
-      this.gallery.scrollLeft += 0.6;
-      if (this.gallery.scrollLeft >= this.gallery.scrollWidth - this.gallery.clientWidth) {
-       this.gallery.scrollLeft = 0;
-      }
-    }
-    requestAnimationFrame(scroll);
-   };
-   scroll();
-  }
-};
-
-/* ============================================
-  INITIALIZATION
-============================================ */
+// =======================================
+// NU-TRENDZ SHOP PAGE SCRIPT (FIXED)
+// =======================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  GalleryManager.init();
-  AutoScrollManager.init();
+  const gallery = document.getElementById("scrollGallery");
+  const overlay = document.getElementById("mediaOverlay");
+  const overlayContent = document.getElementById("overlayContent");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const closeBtn = document.getElementById("closeOverlayBtn");
+
+  if (!gallery || !overlay || !overlayContent) return;
+
+  const mediaItems = Array.from(gallery.querySelectorAll("img, video"));
+  let currentIndex = 0;
+  let autoScrollInterval = null;
+  let overlayOpen = false;
+
+  // ===============================
+  // AUTO SCROLL
+  // ===============================
+  const startAutoScroll = () => {
+    stopAutoScroll();
+    autoScrollInterval = setInterval(() => {
+      gallery.scrollLeft += 1;
+      if (gallery.scrollLeft + gallery.clientWidth >= gallery.scrollWidth - 2) {
+        gallery.scrollLeft = 0;
+      }
+    }, 20);
+  };
+
+  const stopAutoScroll = () => {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+  };
+
+  startAutoScroll();
+
+  gallery.addEventListener("mouseenter", stopAutoScroll);
+  gallery.addEventListener("mouseleave", startAutoScroll);
+  gallery.addEventListener("touchstart", stopAutoScroll, { passive: true });
+
+  // ===============================
+  // OVERLAY CONTROLS
+  // ===============================
+  const openOverlay = (index) => {
+    overlayOpen = true;
+    currentIndex = index;
+
+    stopAutoScroll();
+
+    overlay.classList.add("show");
+    document.body.style.overflow = "hidden";
+
+    renderOverlay();
+  };
+
+  const closeOverlay = () => {
+    overlayOpen = false;
+
+    overlay.classList.remove("show");
+    overlayContent.innerHTML = "";
+    document.body.style.overflow = "";
+
+    startAutoScroll();
+  };
+
+  const renderOverlay = () => {
+    overlayContent.innerHTML = "";
+    const item = mediaItems[currentIndex];
+
+    let element;
+
+    if (item.tagName === "VIDEO") {
+      element = document.createElement("video");
+      element.src = item.src;
+      element.controls = true;
+      element.autoplay = true;
+    } else {
+      element = document.createElement("img");
+      element.src = item.src;
+      element.alt = item.alt || "Shop media";
+    }
+
+    element.classList.add("overlay-media");
+
+    // ✅ Clicking the image ALSO closes overlay
+
+    overlayContent.appendChild(element);
+  };
+
+  // ===============================
+  // NAVIGATION
+  // ===============================
+  const showNext = () => {
+    currentIndex = (currentIndex + 1) % mediaItems.length;
+    renderOverlay();
+  };
+
+  const showPrev = () => {
+    currentIndex =
+      (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+    renderOverlay();
+  };
+
+  nextBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showNext();
+  });
+
+  prevBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showPrev();
+  });
+
+  closeBtn?.addEventListener("click", closeOverlay);
+
+  // ===============================
+  // EVENT LISTENERS
+  // ===============================
+  mediaItems.forEach((item, index) => {
+    item.addEventListener("click", () => openOverlay(index));
+  });
+
+  // ✅ Clicking dark background closes overlay
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      closeOverlay();
+    }
+  });
+
+  // ✅ Keyboard controls
+  document.addEventListener("keydown", (e) => {
+    if (!overlayOpen) return;
+
+    if (e.key === "Escape") closeOverlay();
+    if (e.key === "ArrowRight") showNext();
+    if (e.key === "ArrowLeft") showPrev();
+  });
 });

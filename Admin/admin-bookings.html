@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nu-Trendz Admin – Bookings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Shared admin layout -->
+  <link rel="stylesheet" href="admin-panel.css">
+  <!-- Bookings-specific styling (table, filters, summary, search, chips) -->
+  <link rel="stylesheet" href="admin-bookings.css">
+</head>
+<body>
+  <!-- Mobile sidebar backdrop (used by hamburger menu JS) -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-badge">NT</span>
+        <div class="brand-text">
+          <span class="brand-name">Nu-Trendz</span>
+          <span class="brand-sub">Admin Panel</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <p class="nav-label">Management</p>
+        <button
+          class="nav-item"
+          type="button"
+          onclick="window.location.href='admin-panel.html'"
+        >
+          <span class="nav-dot"></span> Services &amp; Categories
+        </button>
+        <button class="nav-item nav-item--active" type="button">
+          <span class="nav-dot"></span> Bookings
+        </button>
+      </nav>
+
+      <p class="sidebar-footer">&copy; 2025 Nu-Trendz</p>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button
+            type="button"
+            class="nav-toggle"
+            id="navToggle"
+            aria-label="Toggle navigation"
+          >
+            <div class="nav-toggle-icon">
+              <span></span><span></span><span></span>
+            </div>
+            <span>Menu</span>
+          </button>
+          <div>
+            <h1 class="topbar-title">Bookings Manager</h1>
+            <p id="status" class="topbar-status">Checking authentication…</p>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline">Logout</button>
+      </header>
+
+      <!-- CONTENT -->
+      <section class="cards-grid">
+        <section class="card">
+          <div class="card-header">
+            <h2>All bookings</h2>
+            <p class="card-subtitle">
+              Search, filter by status, and confirm or cancel bookings as clients arrive.
+            </p>
+          </div>
+
+          <div class="card-body">
+            <!-- Big search bar -->
+            <div class="search-bar-wrapper">
+              <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input
+                  type="search"
+                  id="searchText"
+                  placeholder="Search by customer, phone, email, date, time, or service…"
+                >
+              </div>
+            </div>
+
+            <!-- Status filter chips -->
+            <div class="status-filter-row" id="statusFilterChips">
+              <button type="button" class="status-chip status-chip--active" data-status="all">
+                All
+              </button>
+              <button type="button" class="status-chip" data-status="pending">
+                Pending
+              </button>
+              <button type="button" class="status-chip" data-status="confirmed">
+                Confirmed
+              </button>
+              <button type="button" class="status-chip" data-status="cancelled">
+                Cancelled
+              </button>
+            </div>
+
+            <!-- Quick date range buttons -->
+            <div class="quick-range-row" id="quickRangeRow">
+              <span class="quick-range-label">Quick dates:</span>
+              <button type="button" class="quick-range-btn" data-range="today">
+                Today
+              </button>
+              <button type="button" class="quick-range-btn" data-range="7">
+                Next 7 days
+              </button>
+              <button type="button" class="quick-range-btn quick-range-btn--active" data-range="30">
+                Next 30 days
+              </button>
+            </div>
+
+            <!-- Date range filters -->
+            <div class="filters-row">
+              <div class="filter-group">
+                <label for="filterDateFrom">From</label>
+                <input type="date" id="filterDateFrom">
+              </div>
+
+              <div class="filter-group">
+                <label for="filterDateTo">To</label>
+                <input type="date" id="filterDateTo">
+              </div>
+
+              <div class="filter-buttons">
+                <button id="applyFilterBtn" class="btn btn-outline" type="button">
+                  Apply range
+                </button>
+                <button id="resetFilterBtn" class="btn btn-ghost" type="button">
+                  Reset to next 30 days
+                </button>
+              </div>
+            </div>
+
+            <!-- Summary pills (total / pending / confirmed / cancelled / today / showing) -->
+            <div class="summary-row" id="summaryRow" aria-live="polite">
+              <!-- Filled by JS -->
+            </div>
+
+            <p id="bookingsMessage" class="message" aria-live="polite"></p>
+
+            <!-- Table -->
+            <div class="table-wrapper" id="tableWrapper" style="display:none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Customer</th>
+                    <th>Services</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="bookingsTbody">
+                  <!-- Filled by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <!-- Bookings admin logic -->
+  <script src="admin-bookings.js"></script>
+</body>
+</html>

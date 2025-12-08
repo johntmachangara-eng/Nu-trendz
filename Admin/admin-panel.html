@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nu-Trendz Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="admin-panel.css">
+</head>
+<body>
+  <!-- Mobile sidebar backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-badge">NT</span>
+        <div class="brand-text">
+          <span class="brand-name">Nu-Trendz</span>
+          <span class="brand-sub">Admin Panel</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <p class="nav-label">Management</p>
+        <!-- Services & Categories (current page) -->
+        <button
+          class="nav-item nav-item--active"
+          type="button"
+          onclick="window.location.href='admin-panel.html'"
+        >
+          <span class="nav-dot"></span> Services &amp; Categories
+        </button>
+
+        <!-- Bookings manager link -->
+        <button
+          class="nav-item"
+          type="button"
+          onclick="window.location.href='admin-bookings.html'"
+        >
+          <span class="nav-dot"></span> Bookings
+        </button>
+      </nav>
+
+      <p class="sidebar-footer">&copy; 2025 Nu-Trendz</p>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button
+            type="button"
+            class="nav-toggle"
+            id="navToggle"
+            aria-label="Toggle navigation"
+          >
+            <div class="nav-toggle-icon">
+              <span></span><span></span><span></span>
+            </div>
+            <span>Menu</span>
+          </button>
+          <div>
+            <h1 class="topbar-title">Services Manager</h1>
+            <p id="status" class="topbar-status">Checking authentication…</p>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline">Logout</button>
+      </header>
+
+      <!-- CONTENT -->
+      <section class="cards-grid">
+
+        <!-- CATEGORY MANAGEMENT CARD -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Categories</h2>
+            <p class="card-subtitle">
+              Create and manage the categories that appear on the Services page.
+            </p>
+          </div>
+
+          <div class="card-body card-body--split">
+            <!-- Left: list -->
+            <div class="card-column">
+              <h3 class="small-title">Existing categories</h3>
+              <div id="categoryList" class="chip-list">
+                <!-- Filled by JS -->
+              </div>
+            </div>
+
+            <!-- Right: add form -->
+            <div class="card-column">
+              <h3 class="small-title">Add new category</h3>
+              <div class="field">
+                <label for="newCategoryName">Category name</label>
+                <input
+                  type="text"
+                  id="newCategoryName"
+                  placeholder="e.g. Braids, Locs, Kids, Featured"
+                >
+              </div>
+              <button id="addCategoryBtn" class="btn btn-primary" type="button">
+                Add Category
+              </button>
+              <p id="categoryMessage" class="message" aria-live="polite"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SERVICES MANAGEMENT CARD -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Services</h2>
+            <p class="card-subtitle">
+              Add, edit or remove services inside a selected category.
+            </p>
+          </div>
+
+          <div class="card-body card-body--split card-body--stack-md">
+            <!-- Left: select category + services list -->
+            <div class="card-column">
+              <div class="field">
+                <label for="categorySelect">Working in category</label>
+                <select id="categorySelect"></select>
+              </div>
+
+              <h3 class="small-title small-title--spaced">Services in this category</h3>
+              <div id="servicesList" class="services-list">
+                <!-- Filled by JS -->
+              </div>
+            </div>
+
+            <!-- Right: service form -->
+            <div class="card-column">
+              <h3 id="formTitle" class="small-title">Add new service</h3>
+
+              <div class="field">
+                <label for="svcName">Name</label>
+                <input type="text" id="svcName" placeholder="Knotless braids, starter locs, etc.">
+              </div>
+
+              <div class="field field-inline">
+                <label>Time</label>
+                <div class="field-inline-row">
+                  <input
+                    type="number"
+                    id="svcHours"
+                    min="0"
+                    max="10"
+                    step="1"
+                    placeholder="0"
+                  >
+                  <span class="field-inline-label">hours</span>
+
+                  <input
+                    type="number"
+                    id="svcMinutes"
+                    min="0"
+                    max="55"
+                    step="5"
+                    placeholder="0"
+                  >
+                  <span class="field-inline-label">mins</span>
+                </div>
+              </div>
+
+              <div class="field field-inline">
+                <label for="svcPriceNumber">Price</label>
+                <div class="field-inline-row">
+                  <span class="field-inline-label">£</span>
+                  <input
+                    type="number"
+                    id="svcPriceNumber"
+                    min="0"
+                    step="1"
+                    placeholder="0"
+                  >
+                  <label class="field-checkbox">
+                    <input type="checkbox" id="svcPriceFrom">
+                    <span>Show as "From"</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="svcDesc">Description (optional)</label>
+                <input type="text" id="svcDesc" placeholder="Short description">
+              </div>
+
+              <div class="form-actions">
+                <button id="saveServiceBtn" class="btn btn-primary" type="button">
+                  Save service
+                </button>
+                <button id="cancelEditBtn" class="btn btn-ghost" type="button">
+                  Cancel
+                </button>
+              </div>
+
+              <p id="formMessage" class="message" aria-live="polite"></p>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- Admin panel logic -->
+  <script src="admin-panel.js"></script>
+</body>
+</html>

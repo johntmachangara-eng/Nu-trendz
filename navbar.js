@@ -1,51 +1,81 @@
+// navbar.js - Handles sticky navbar + mobile menu for NU-TRENDZ
+
 document.addEventListener("DOMContentLoaded", () => {
-  // ========================================
-  // DOM Elements
-  // ========================================
-  const navbar = document.querySelector(".navbar");
+  const navbar = document.getElementById("navbar");
   const menuIcon = document.querySelector(".menu-icon");
-  const navLinks = document.querySelector(".nav-links");
+  const navLinks = document.getElementById("nav-links");
 
-  // ========================================
-  // Cleanup
-  // ========================================
-  // Remove any leftover checkbox toggles from old versions
-  document.querySelectorAll('input[type="checkbox"][id*="menu-toggle"]').forEach(el => el.remove());
+  if (!navbar || !menuIcon || !navLinks) {
+    // If something is missing, don't do anything to avoid errors.
+    return;
+  }
 
-  // ========================================
-  // Navbar Shrink on Scroll
-  // ========================================
-  let lastScroll = 0;
-  
-  window.addEventListener("scroll", () => {
-    const current = window.scrollY;
-    
-    if (current > 80 && current > lastScroll) {
+  const body = document.body;
+
+  // Make sure any old checkbox toggles don't interfere
+  const oldToggles = document.querySelectorAll('input[id*="menu-toggle"]');
+  oldToggles.forEach((el) => el.parentNode && el.parentNode.removeChild(el));
+
+  // === NAVBAR SHRINK ON SCROLL ===
+  const handleScroll = () => {
+    if (window.scrollY > 20) {
       navbar.classList.add("shrink");
-    } else if (current < lastScroll - 10 || current <= 0) {
+    } else {
       navbar.classList.remove("shrink");
     }
-    
-    lastScroll = current;
+  };
+
+  handleScroll();
+  window.addEventListener("scroll", handleScroll);
+
+  // === MOBILE MENU TOGGLE ===
+  const openMenu = () => {
+    menuIcon.classList.add("active");
+    navLinks.classList.add("show");
+    body.classList.add("menu-open");
+  };
+
+  const closeMenu = () => {
+    menuIcon.classList.remove("active");
+    navLinks.classList.remove("show");
+    body.classList.remove("menu-open");
+  };
+
+  const toggleMenu = () => {
+    const isOpen = navLinks.classList.contains("show");
+    if (isOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  };
+
+  // Click on hamburger icon
+  menuIcon.addEventListener("click", toggleMenu);
+
+  // Keyboard support for hamburger icon (Enter / Space)
+  menuIcon.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleMenu();
+    }
   });
 
-  // ========================================
-  // Mobile Menu Toggle
-  // ========================================
-  menuIcon.addEventListener("click", () => {
-    menuIcon.classList.toggle("active");
-    navLinks.classList.toggle("show");
-    document.body.classList.toggle("menu-open");
-  });
-
-  // ========================================
-  // Close Menu on Link Click
-  // ========================================
-  navLinks.querySelectorAll("a").forEach(link => {
+  // Close menu when a nav link is clicked (on mobile)
+  const linkElements = navLinks.querySelectorAll("a");
+  linkElements.forEach((link) => {
     link.addEventListener("click", () => {
-      menuIcon.classList.remove("active");
-      navLinks.classList.remove("show");
-      document.body.classList.remove("menu-open");
+      if (navLinks.classList.contains("show")) {
+        closeMenu();
+      }
     });
   });
+
+  // Close menu if window resized above mobile breakpoint
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 992 && navLinks.classList.contains("show")) {
+      closeMenu();
+    }
+  });
 });
+

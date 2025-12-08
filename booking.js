@@ -1,179 +1,213 @@
-// booking.js — accurate duration, live availability, multi-hour bookings, confirmation redirect
+// booking.js – 3-step booking flow with Realtime DB + popup calendar
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
-import {
-  getDatabase,
-  ref,
-  get,
-  push,
-  set
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+// ---------- 1. CONFIG ----------
 
-// ========== 1. Firebase setup ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyAmwRchhl7UDo3TcNZJmGUtWCguhgvcmrI",
-  authDomain: "nu-trendz-8f560.firebaseapp.com",
-  databaseURL: "https://nu-trendz-8f560-default-rtdb.firebaseio.com",
-  projectId: "nu-trendz-8f560",
-  storageBucket: "nu-trendz-8f560.firebasestorage.app",
-  messagingSenderId: "206750888989",
-  appId: "1:206750888989:web:83f40b0067649abc83c2f4",
-  measurementId: "G-E1W9Y3ZSRH"
-};
+const OPEN_MINUTES = 9 * 60;          // 09:00
+const CLOSE_MINUTES = 18 * 60 + 30;   // 18:30
+const SLOT_SIZE = 60;                 // 30-minute blocks
 
-const app = initializeApp(firebaseConfig);
-getAnalytics(app);
-const db = getDatabase(app);
+// DB paths (match your Realtime Database structure)
+const BOOKINGS_PATH = "bookings";
+const BOOKING_SLOTS_PATH = "bookingSlots";
 
-// ========== 2. EmailJS setup ==========
-const EMAIL_CONFIG = {
-  publicKey: "Lgg9FCMDk-lwWnNxZ",
-  serviceId: "service_63ezrdn",
-  adminTemplateId: "template_5kd1bxc",    // admin gets booking info
-  customerTemplateId: "template_5kd1bxc", // client gets confirmation
-  adminEmail: "PUT_SALON_EMAIL_HERE@example.com"
-};
-
-// ========== 3. Static data & state ==========
 const STYLISTS = [
-  { id: "any", name: "Any professional" },
-  { id: "fala", name: "Fala" },
+  { id: "any",   name: "Any professional" },
+  { id: "fala",  name: "Fala" },
   { id: "joice", name: "Joice" },
   { id: "neuza", name: "Neuza" }
 ];
 
-const OPEN_HOUR = 9;   // 09:00
-const CLOSE_HOUR = 18; // salon closes at 18:00
+const EMAIL_CONFIG = {
+  publicKey: "Lgg9FCMDk-lwWnNxZ",
+  serviceId: "service_63ezrdn",
+  adminTemplateId: "template_5kd1bxc",
+  customerTemplateId: "template_5kd1bxc",
+  adminEmail: "PUT_SALON_EMAIL_HERE@example.com" // change to salon email if you want admin emails
+};
+
+// Firebase RTDB is provided globally in booking.html as window.rtdb
+const db = window.rtdb || null;
+
+// ---------- 2. STATE ----------
 
 let basket = [];
-let mode = "one";
+let mode = "one";              // "one" or "per-service"
 let stylistForAll = "any";
-let stylistPerService = {};
-let selectedDate = null; // "YYYY-MM-DD"
-let selectedTime = null; // "HH:MM"
+let stylistPerService = {};    // { serviceName: stylistId }
+
+let selectedDate = null;       // "YYYY-MM-DD"
+let selectedTime = null;       // "HH:MM"
+let totalDurationMinutes = 60;
+
 let currentStep = 1;
-let totalDurationMinutes = 60; // total for all selected services
+let historyReady = false;
 
 // DOM refs
 let servicesSummaryEl, summaryTotalEl, summaryTotalLabelEl;
-let stylistAllSelect, stylistPerWrapper, step1ErrorEl;
+let stylistAllSelect, stylistPerWrapper, stylistGlobalSelectWrapper, step1ErrorEl;
 let stepPanels, stepIndicators;
-let bookingDateInput, timeSlotsEl, dateStatusEl;
+let bookingDateInput, bookingDateButton, bookingDateLabel, timeSlotsEl, dateStatusEl;
 let toStep2Btn, toStep3Btn, backTo1Btn, backTo2Btn;
 let detailsForm, finalStatusEl;
 let finalSummaryEl, finalTotalEl, finalTotalLabelEl;
+let firstNameInput, lastNameInput, fullNameInput;
 
-// ========== 4. Helpers ==========
+// Calendar DOM refs + state
+let calendarEl, calendarDaysEl, calendarMonthLabelEl;
+let calendarPrevBtn, calendarNextBtn, calendarCloseBtn;
+let calendarOpen = false;
+let calendarMonth = null;
+let calendarMinDate = null;
+let calendarMaxDate = null;
+
+// ---------- 3. HELPERS ----------
+
+function minutesFromHHMM(str) {
+  const [h, m] = (str || "09:00").split(":").map(n => parseInt(n, 10) || 0);
+  return h * 60 + m;
+}
+
+function hhmmFromMinutes(min) {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
 
 function moneyFromText(str) {
   if (!str) return 0;
-  const value = parseFloat(str.replace(/[^\d.]/g, ""));
-  return isNaN(value) ? 0 : value;
+  const v = parseFloat(str.replace(/[^\d.]/g, ""));
+  return isNaN(v) ? 0 : v;
 }
 
-function formatHHMM(h) {
-  return `${String(h).padStart(2, "0")}:00`;
-}
-
-function isSunday(date) {
-  return date.getDay() === 0;
-}
-
-// Parse "1 hour", "1 hr 30 min", "45 min" → minutes
+/**
+ * Parse durations like:
+ *  - "45 min"
+ *  - "2h"
+ *  - "2 hours"
+ *  - "1h 30"
+ *  - "1 hr 45 mins"
+ *  - "90 minutes"
+ *  - "120"  (treated as minutes if 30–240)
+ */
 function parseDurationFromText(text) {
   if (!text) return 60;
   const lower = text.toLowerCase();
-  const nums = lower.match(/\d+/g);
-  if (!nums) return 60;
 
-  let minutes = 0;
-
-  if (lower.includes("hour") || lower.includes("hr")) {
-    const hrs = parseInt(nums[0], 10) || 1;
-    minutes += hrs * 60;
-    if (nums.length > 1 && lower.includes("min")) {
-      minutes += parseInt(nums[1], 10) || 0;
-    }
-  } else if (lower.includes("min")) {
-    minutes += parseInt(nums[0], 10) || 30;
-  } else {
-    const raw = parseInt(nums[0], 10) || 0;
-    // if they wrote "2" we assume 2 hours, if "45" we treat as 45 min
-    minutes = raw <= 5 ? raw * 60 : raw;
+  const hourMin = lower.match(
+    /(\d+)\s*(h|hr|hrs|hour|hours)[^\d]*?(\d+)\s*(m|min|mins|minute|minutes)?/
+  );
+  if (hourMin) {
+    const h = parseInt(hourMin[1], 10) || 0;
+    const m = parseInt(hourMin[3], 10) || 0;
+    return h * 60 + m;
   }
 
-  return minutes || 60;
+  const hourOnly = lower.match(/(\d+)\s*(h|hr|hrs|hour|hours)/);
+  if (hourOnly) {
+    return (parseInt(hourOnly[1], 10) || 1) * 60;
+  }
+
+  const minOnly = lower.match(/(\d+)\s*(m|min|mins|minute|minutes)/);
+  if (minOnly) {
+    return parseInt(minOnly[1], 10) || 60;
+  }
+
+  const plainNumber = lower.match(/(\d{2,3})/);
+  if (plainNumber) {
+    const v = parseInt(plainNumber[1], 10);
+    if (v >= 30 && v <= 240) return v;
+  }
+
+  return 60;
 }
 
-// simple “signature” of the basket to detect a new booking
-function getBasketSignature() {
-  if (!basket || !basket.length) return "";
-  const parts = basket.map(s =>
-    `${s.name || ""}|${s.time || ""}|${s.price || ""}`
-  );
-  parts.sort();
-  return parts.join("||");
+function markDateStatus(message, isError) {
+  if (!dateStatusEl) return;
+  dateStatusEl.textContent = message || "";
+  dateStatusEl.classList.toggle("step-error", !!isError);
 }
 
-function setStep(stepNum) {
+function formatNamePart(str) {
+  if (!str) return "";
+  return str
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map(s => s[0].toUpperCase() + s.slice(1))
+    .join(" ");
+}
+
+function isValidNamePart(str) {
+  if (!str) return false;
+  const clean = str.trim();
+  if (clean.length < 2) return false;
+  return /^[A-Za-zÀ-ž' -]+$/.test(clean);
+}
+
+function formatDisplayDate(iso) {
+  if (!iso) return "Select a date";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+// ---------- 3a. HISTORY HELPERS ----------
+
+function pushStepHistory(stepNum) {
+  if (!historyReady || !window.history || !history.pushState) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("step", String(stepNum));
+  history.pushState({ bookingStep: stepNum }, "", url.toString());
+}
+
+function setStep(stepNum, options) {
+  const opts = options || {};
+  const fromHistory = !!opts.fromHistory;
+  const skipHistory = !!opts.skipHistory;
+
   currentStep = stepNum;
-
-  // save current step so refresh keeps it (for this basket)
   localStorage.setItem("bookingCurrentStep", String(stepNum));
 
-  // show / hide step panels
   stepPanels.forEach(panel => {
     const num = Number(panel.dataset.stepPanel);
     panel.classList.toggle("hidden", num !== stepNum);
   });
 
-  // update step indicator styling
   stepIndicators.forEach(ind => {
     const num = Number(ind.dataset.step);
-    ind.classList.remove("step--active", "step--complete");
+    ind.classList.remove("step--active", "step--complete", "step--disabled");
+
     if (num < stepNum) {
       ind.classList.add("step--complete");
     } else if (num === stepNum) {
       ind.classList.add("step--active");
+    } else {
+      ind.classList.add("step--disabled");
     }
   });
 
-  // whenever we enter step 2 and a date is selected, refresh availability
   if (stepNum === 2 && selectedDate) {
     renderTimeSlots();
   }
+
+  if (historyReady && !fromHistory && !skipHistory) {
+    pushStepHistory(stepNum);
+  }
 }
 
-function validateEmail(email) {
-  const simple = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return simple.test(email);
-}
-
-function validatePhone(phone) {
-  const digits = phone.replace(/\D/g, "");
-  return digits.length >= 9;
-}
-
-function limitString(str, max) {
-  if (!str) return "";
-  return str.length > max ? str.slice(0, max) : str;
-}
-
-function getSelectedPaymentMethod() {
-  const input = document.querySelector("input[name='paymentMethod']:checked");
-  return input ? input.value : "pay_at_venue";
-}
-
-// ========== 5. Basket + summary & duration ==========
+// ---------- 4. BASKET + SUMMARY ----------
 
 function loadBasket() {
   try {
     const raw = localStorage.getItem("basket");
     basket = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(basket)) basket = [];
-  } catch (err) {
-    console.error("Error parsing basket from localStorage", err);
+  } catch {
     basket = [];
   }
 }
@@ -184,11 +218,21 @@ function renderServicesSummary() {
   totalDurationMinutes = 0;
 
   if (!basket.length) {
-    servicesSummaryEl.innerHTML =
-      `<p>You don't have any services selected yet.<br>Go back to the services page and choose at least one style.</p>`;
+    servicesSummaryEl.innerHTML = `
+      <p>
+        You don't have any services selected yet.<br>
+        Go back to the Services page and choose at least one style.
+      </p>
+      <div class="step-buttons" style="margin-top:10px;">
+        <a href="services.html" class="primary-btn">
+          Go to services
+        </a>
+      </div>
+    `;
     summaryTotalEl.textContent = "£0";
     finalTotalEl.textContent = "£0";
     totalDurationMinutes = 60;
+    localStorage.setItem("bookingDurationMinutes", String(totalDurationMinutes));
     return;
   }
 
@@ -201,7 +245,6 @@ function renderServicesSummary() {
     total += priceValue;
     if (/^from\s+/i.test(priceStr)) hasFrom = true;
 
-    // duration from text like "1 hour 30 min"
     const dur = parseDurationFromText(service.time || "");
     totalDurationMinutes += dur;
 
@@ -211,7 +254,7 @@ function renderServicesSummary() {
           <div class="booking-service-name">${service.name}</div>
           <div class="booking-service-time">${service.time || ""}</div>
         </div>
-        <div class="booking-service-price">${service.price}</div>
+        <div class="booking-service-price">${service.price || ""}</div>
       </div>
     `;
     servicesSummaryEl.insertAdjacentHTML("beforeend", rowHtml);
@@ -219,6 +262,7 @@ function renderServicesSummary() {
   });
 
   if (totalDurationMinutes <= 0) totalDurationMinutes = 60;
+  localStorage.setItem("bookingDurationMinutes", String(totalDurationMinutes));
 
   const label = hasFrom ? "Estimated total:" : "Total:";
   summaryTotalLabelEl.textContent = label;
@@ -227,85 +271,462 @@ function renderServicesSummary() {
   finalTotalEl.textContent = "£" + total.toFixed(2);
 }
 
-// ========== 6. Stylists (step 1) ==========
-
-function populateStylistSelect(selectEl) {
-  selectEl.innerHTML = "";
-  STYLISTS.forEach(st => {
-    const opt = document.createElement("option");
-    opt.value = st.id;
-    opt.textContent = st.name;
-    selectEl.appendChild(opt);
-  });
-}
+// ---------- 5. STYLIST CONTROLS ----------
 
 function renderStylistControls() {
-  populateStylistSelect(stylistAllSelect);
+  stylistAllSelect.innerHTML = "";
+  STYLISTS.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.name;
+    stylistAllSelect.appendChild(opt);
+  });
   stylistAllSelect.value = stylistForAll;
 
   stylistPerWrapper.innerHTML = "";
   basket.forEach(service => {
-    const row = document.createElement("div");
-    row.className = "service-stylist-row";
+    const wrapper = document.createElement("div");
+    wrapper.className = "form-group";
+    const selectId = `stylist-${service.name.replace(/\s+/g, "-")}`;
 
-    const label = document.createElement("span");
-    label.textContent = service.name;
+    const label = document.createElement("label");
+    label.htmlFor = selectId;
+    label.textContent = `Stylist for ${service.name}`;
 
     const select = document.createElement("select");
-    populateStylistSelect(select);
+    select.id = selectId;
+    STYLISTS.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.name;
+      select.appendChild(opt);
+    });
+
     select.value = stylistPerService[service.name] || "any";
     select.addEventListener("change", () => {
       stylistPerService[service.name] = select.value;
     });
 
-    row.appendChild(label);
-    row.appendChild(select);
-    stylistPerWrapper.appendChild(row);
+    wrapper.appendChild(label);
+    wrapper.appendChild(select);
+    stylistPerWrapper.appendChild(wrapper);
   });
 
+  const radios = document.querySelectorAll('input[name="stylistMode"]');
+  radios.forEach(r => {
+    r.addEventListener("change", () => {
+      mode = r.value === "per-service" ? "per-service" : "one";
+      updateStylistVisibility();
+    });
+  });
+
+  stylistAllSelect.addEventListener("change", () => {
+    stylistForAll = stylistAllSelect.value;
+  });
+
+  updateStylistVisibility();
+}
+
+function updateStylistVisibility() {
+  if (!stylistGlobalSelectWrapper || !stylistPerWrapper) return;
   if (mode === "one") {
-    stylistAllSelect.parentElement.classList.remove("hidden");
+    stylistGlobalSelectWrapper.classList.remove("hidden");
     stylistPerWrapper.classList.add("hidden");
   } else {
-    stylistAllSelect.parentElement.classList.add("hidden");
+    stylistGlobalSelectWrapper.classList.add("hidden");
     stylistPerWrapper.classList.remove("hidden");
   }
 }
 
-function getStylistsForBooking() {
-  if (!basket.length) return null;
-  const map = new Map();
+function buildServicesWithStylists() {
+  return basket.map(service => {
+    let stylistId;
+    if (mode === "one") stylistId = stylistForAll;
+    else stylistId = stylistPerService[service.name] || "any";
 
-  if (mode === "one") {
-    const s = STYLISTS.find(st => st.id === stylistForAll) || STYLISTS[0];
-    map.set(s.id, s);
-  } else {
-    for (const service of basket) {
-      const id = stylistPerService[service.name] || "any";
-      const s = STYLISTS.find(st => st.id === id) || STYLISTS[0];
-      map.set(s.id, s);
+    const stylist = STYLISTS.find(s => s.id === stylistId) || STYLISTS[0];
+
+    return {
+      name: service.name,
+      time: service.time,
+      price: service.price,
+      stylistId: stylist.id,
+      stylistName: stylist.name
+    };
+  });
+}
+
+// ---------- 6. DATE LIMITS & DURATION ----------
+
+function limitDateInput() {
+  if (!bookingDateInput) return;
+
+  const today = new Date();
+  const min = today.toISOString().slice(0, 10);
+
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + 30);
+  const max = maxDate.toISOString().slice(0, 10);
+
+  bookingDateInput.min = min;
+  bookingDateInput.max = max;
+}
+
+/**
+ * Shared duration logic:
+ * - uses totalDurationMinutes
+ * - falls back to localStorage
+ * - ensures at least 30 mins
+ */
+function getEffectiveDurationMinutes() {
+  let duration = Math.max(30, totalDurationMinutes || 0);
+
+  if (!duration || duration < 30) {
+    const stored = parseInt(
+      localStorage.getItem("bookingDurationMinutes") || "60",
+      10
+    );
+    if (!isNaN(stored) && stored >= 30) {
+      duration = stored;
+    } else {
+      duration = 60;
     }
   }
-  return Array.from(map.values());
+
+  return duration;
 }
+
+/**
+ * Read public slot data for a specific date from /bookingSlots/{date}
+ * (contains only time + durationMinutes, no personal info).
+ */
+function getBlockedIntervalsForDate(dateStr) {
+  if (!db || !dateStr) return Promise.resolve([]);
+
+  return db
+    .ref(BOOKING_SLOTS_PATH + "/" + dateStr)
+    .once("value")
+    .then(snapshot => {
+      const blocked = [];
+      snapshot.forEach(child => {
+        const data = child.val() || {};
+        const startMin = minutesFromHHMM(data.time || "09:00");
+        const duration = data.durationMinutes || 60;
+        const endMin = startMin + duration;
+        blocked.push({ start: startMin, end: endMin });
+      });
+      return blocked;
+    })
+    .catch(err => {
+      console.error("Error reading slots for date", dateStr, err);
+      // On error: treat as no existing bookings so page still works
+      return [];
+    });
+}
+
+function slotIsFree(start, end, blocked) {
+  return !blocked.some(b => !(end <= b.start || start >= b.end));
+}
+
+// ---------- 7. CALENDAR POPUP ----------
+
+function parseISODate(str) {
+  if (!str) return null;
+  const [y, m, d] = str.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+
+function initCalendarState() {
+  if (!bookingDateInput) return;
+  const minStr = bookingDateInput.min;
+  const maxStr = bookingDateInput.max;
+  if (!minStr || !maxStr) return;
+
+  calendarMinDate = parseISODate(minStr);
+  calendarMaxDate = parseISODate(maxStr);
+
+  if (!calendarMonth) {
+    calendarMonth = new Date(
+      calendarMinDate.getFullYear(),
+      calendarMinDate.getMonth(),
+      1
+    );
+  }
+}
+
+function buildCalendarGrid() {
+  if (!calendarEl || !calendarDaysEl || !calendarMonthLabelEl || !bookingDateInput) {
+    return;
+  }
+
+  calendarDaysEl.innerHTML = "";
+  if (!calendarMonth) return;
+
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+
+  const label = calendarMonth.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric"
+  });
+  calendarMonthLabelEl.textContent = label;
+
+  const firstOfMonth = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Monday-based index: 0 = Mon ... 6 = Sun
+  const jsDay = firstOfMonth.getDay(); // 0=Sun
+  const firstDayIndex = (jsDay + 6) % 7;
+
+  const minStr = bookingDateInput.min;
+  const maxStr = bookingDateInput.max;
+
+  const datesForAvailability = [];
+
+  // empty cells before day 1
+  for (let i = 0; i < firstDayIndex; i++) {
+    const empty = document.createElement("span");
+    empty.className = "calendar-day calendar-day--empty";
+    calendarDaysEl.appendChild(empty);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    const iso = date.toISOString().slice(0, 10);
+
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "calendar-day booking-day";
+    cell.dataset.date = iso;
+    cell.textContent = String(day);
+
+    if (iso < minStr || iso > maxStr) {
+      cell.classList.add("booking-day--disabled");
+      cell.dataset.disabled = "true";
+    } else {
+      cell.classList.add("booking-day--in-range");
+      cell.dataset.disabled = "false";
+      datesForAvailability.push(iso);
+    }
+
+    if (selectedDate === iso) {
+      cell.classList.add("booking-day--selected");
+    }
+
+    calendarDaysEl.appendChild(cell);
+  }
+
+  markCalendarAvailability(datesForAvailability);
+}
+
+function markCalendarAvailability(dateList) {
+  if (!calendarEl) return;
+
+  const duration = getEffectiveDurationMinutes();
+  const maxDuration = CLOSE_MINUTES - OPEN_MINUTES;
+
+  if (duration > maxDuration) {
+    dateList.forEach(dateStr => {
+      const el = calendarEl.querySelector(
+        '.booking-day[data-date="' + dateStr + '"]'
+      );
+      if (!el) return;
+      el.classList.add("booking-day--full");
+      el.dataset.disabled = "true";
+    });
+    return;
+  }
+
+  dateList.forEach(dateStr => {
+    getBlockedIntervalsForDate(dateStr)
+      .then(blocked => {
+        let hasSlot = false;
+
+        for (
+          let start = OPEN_MINUTES;
+          start + duration <= CLOSE_MINUTES;
+          start += SLOT_SIZE
+        ) {
+          const end = start + duration;
+          if (slotIsFree(start, end, blocked)) {
+            hasSlot = true;
+            break;
+          }
+        }
+
+        const el = calendarEl.querySelector(
+          '.booking-day[data-date="' + dateStr + '"]'
+        );
+        if (!el) return;
+
+        if (hasSlot) {
+          el.dataset.disabled = "false";
+        } else {
+          el.classList.add("booking-day--full");
+          el.dataset.disabled = "true";
+        }
+      })
+      .catch(() => {
+        // On error, leave as available instead of blocking bookings
+      });
+  });
+}
+
+function updateCalendarSelection() {
+  if (!calendarEl) return;
+  const allDays = calendarEl.querySelectorAll(".booking-day");
+  allDays.forEach(d => {
+    d.classList.toggle(
+      "booking-day--selected",
+      !!selectedDate && d.dataset.date === selectedDate
+    );
+  });
+}
+
+function openCalendar() {
+  if (!calendarEl) return;
+  calendarEl.classList.add("booking-calendar--open");
+  calendarEl.setAttribute("aria-hidden", "false");
+  calendarOpen = true;
+  if (bookingDateButton) {
+    bookingDateButton.setAttribute("aria-expanded", "true");
+  }
+}
+
+function closeCalendar() {
+  if (!calendarEl) return;
+  calendarEl.classList.remove("booking-calendar--open");
+  calendarEl.setAttribute("aria-hidden", "true");
+  calendarOpen = false;
+  if (bookingDateButton) {
+    bookingDateButton.setAttribute("aria-expanded", "false");
+  }
+}
+
+function changeCalendarMonth(delta) {
+  if (!calendarMonth || !calendarMinDate || !calendarMaxDate) return;
+
+  const newMonth = new Date(
+    calendarMonth.getFullYear(),
+    calendarMonth.getMonth() + delta,
+    1
+  );
+
+  const monthStart = newMonth;
+  const monthEnd = new Date(newMonth.getFullYear(), newMonth.getMonth() + 1, 0);
+
+  if (monthEnd < calendarMinDate || monthStart > calendarMaxDate) {
+    return;
+  }
+
+  calendarMonth = newMonth;
+  buildCalendarGrid();
+}
+
+function updateDateLabel() {
+  if (!bookingDateLabel) return;
+  bookingDateLabel.textContent = formatDisplayDate(selectedDate);
+}
+
+// ---------- 8. TIME SLOTS (NO DUPLICATE / BOOKED SLOTS) ----------
+
+function renderTimeSlots() {
+  if (!bookingDateInput || !timeSlotsEl) return;
+
+  const dateStr = bookingDateInput.value;
+  timeSlotsEl.innerHTML = "";
+
+  if (!dateStr) {
+    markDateStatus("Please choose a date first.", true);
+    return;
+  }
+
+  selectedDate = dateStr;
+  localStorage.setItem("bookingDate", selectedDate);
+
+  updateCalendarSelection();
+  updateDateLabel();
+  markDateStatus("Checking availability…", false);
+
+  getBlockedIntervalsForDate(dateStr).then(blocked => {
+    timeSlotsEl.innerHTML = "";
+
+    const duration = getEffectiveDurationMinutes();
+    const maxDuration = CLOSE_MINUTES - OPEN_MINUTES;
+
+    if (duration > maxDuration) {
+      markDateStatus(
+        "The selected services are too long to fit in one day. Remove a service or contact the salon.",
+        true
+      );
+      return;
+    }
+
+    const slots = [];
+    const usedStarts = new Set();
+
+    for (
+      let start = OPEN_MINUTES;
+      start + duration <= CLOSE_MINUTES;
+      start += SLOT_SIZE
+    ) {
+      const end = start + duration;
+
+      // Never show slot if it overlaps an existing booking
+      if (!slotIsFree(start, end, blocked)) continue;
+
+      if (usedStarts.has(start)) continue;
+      usedStarts.add(start);
+
+      slots.push({ start, end });
+    }
+
+    if (!slots.length) {
+      markDateStatus(
+        "This day is fully booked or has no suitable slots. Try another date.",
+        true
+      );
+      return;
+    }
+
+    markDateStatus("Select a time that suits you.", false);
+
+    slots.forEach(slot => {
+      const timeText = hhmmFromMinutes(slot.start);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "time-slot";
+      btn.textContent = timeText;
+      btn.dataset.time = timeText;
+      if (selectedTime === timeText) {
+        btn.classList.add("selected");
+      }
+      timeSlotsEl.appendChild(btn);
+    });
+  });
+}
+
+// ---------- 9. VALIDATION ----------
 
 function validateStep1() {
   if (!basket.length) {
     step1ErrorEl.textContent =
-      "You have no services selected. Please go back and choose at least one style.";
+      "You need at least one service in your basket before booking.";
     return false;
   }
 
-  if (mode === "one" && !stylistAllSelect.value) {
-    step1ErrorEl.textContent = "Please choose a stylist for your services.";
-    return false;
-  }
-
-  if (mode === "per-service") {
+  if (mode === "one") {
+    if (!stylistAllSelect.value) {
+      step1ErrorEl.textContent = "Please choose a stylist.";
+      return false;
+    }
+  } else {
     for (const service of basket) {
-      const id = stylistPerService[service.name] || "any";
+      const id = stylistPerService[service.name];
       if (!id) {
-        step1ErrorEl.textContent = "Please select a stylist for each service.";
+        step1ErrorEl.textContent =
+          "Please choose a stylist for each service.";
         return false;
       }
     }
@@ -315,364 +736,204 @@ function validateStep1() {
   return true;
 }
 
-// ========== 7. Date & time (step 2) ==========
-
-function limitDateInput() {
-  const today = new Date();
-  const min = today.toISOString().slice(0, 10);
-
-  const maxDate = new Date();
-  maxDate.setMonth(maxDate.getMonth() + 3);
-  const max = maxDate.toISOString().slice(0, 10);
-
-  bookingDateInput.min = min;
-  bookingDateInput.max = max;
-}
-
-// returns map: stylistId -> Set of BLOCKED hour-start times like "09:00"
-async function getBlockedTimesForDate(dateStr) {
-  if (!dateStr) return {};
-  const snapshot = await get(ref(db, "bookings/" + dateStr));
-  const blocked = {};
-
-  if (snapshot.exists()) {
-    snapshot.forEach(child => {
-      const data = child.val();
-      const time = data.time;
-      const durationMinutes = data.durationMinutes || 60;
-      const services = data.services || [];
-      if (!time) return;
-
-      const startHour = parseInt(time.split(":")[0], 10) || OPEN_HOUR;
-      const hoursNeeded = Math.max(1, Math.ceil(durationMinutes / 60));
-
-      services.forEach(svc => {
-        const id = svc.stylistId || "any";
-        if (!blocked[id]) blocked[id] = new Set();
-        for (let i = 0; i < hoursNeeded; i++) {
-          const slotTime = formatHHMM(startHour + i);
-          blocked[id].add(slotTime);
-        }
-      });
-    });
-  }
-  return blocked;
-}
-
-async function renderTimeSlots() {
-  timeSlotsEl.innerHTML = "";
-  dateStatusEl.textContent = "";
-  selectedTime = null;
-
-  if (!selectedDate) {
-    dateStatusEl.textContent = "Please choose a date first.";
-    return;
-  }
-
-  const dateObj = new Date(selectedDate + "T00:00:00");
-  if (isSunday(dateObj)) {
-    dateStatusEl.textContent = "We are closed on Sundays. Please pick Monday to Saturday.";
-    bookingDateInput.value = "";
-    selectedDate = null;
-    return;
-  }
-
-  const involvedStylists = getStylistsForBooking();
-  if (!involvedStylists || !involvedStylists.length) {
-    dateStatusEl.textContent = "Go back and choose a stylist first.";
-    return;
-  }
-
-  const blocked = await getBlockedTimesForDate(selectedDate);
-  const hoursNeededNew = Math.max(1, Math.ceil(totalDurationMinutes / 60));
-
-  let anyAvailable = false;
-
-  // only show start times that fit before closing and don't clash
-  for (let h = OPEN_HOUR; h <= CLOSE_HOUR - hoursNeededNew; h++) {
-    const startTime = formatHHMM(h);
-    let blockedHere = false;
-
-    for (const s of involvedStylists) {
-      const set = blocked[s.id];
-      for (let i = 0; i < hoursNeededNew; i++) {
-        const t = formatHHMM(h + i);
-        if (set && set.has(t)) {
-          blockedHere = true;
-          break;
-        }
-      }
-      if (blockedHere) break;
-    }
-
-    if (blockedHere) {
-      // this start would overlap existing bookings → do NOT show it
-      continue;
-    }
-
-    anyAvailable = true;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = startTime;
-    btn.className = "time-slot";
-    btn.addEventListener("click", () => {
-      selectedTime = startTime;
-      document
-        .querySelectorAll(".time-slot")
-        .forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-    });
-    timeSlotsEl.appendChild(btn);
-  }
-
-  if (!anyAvailable) {
-    dateStatusEl.textContent =
-      "This day is fully booked for the length of your services. Please choose another date.";
-  }
-}
-
 function validateStep2() {
   if (!selectedDate) {
-    dateStatusEl.textContent = "Please select a date.";
+    markDateStatus("Please choose a date.", true);
     return false;
   }
   if (!selectedTime) {
-    dateStatusEl.textContent = "Please select a time.";
+    markDateStatus("Please choose a time.", true);
     return false;
   }
-  dateStatusEl.textContent = "";
+  markDateStatus("", false);
   return true;
 }
 
-// ========== 8. Email text builders ==========
-
-function buildBookingText(booking, forClient) {
-  const lines = [];
-
-  if (forClient) {
-    lines.push("Thank you for booking with Nu-Trendz!");
-    lines.push("");
-    lines.push("Here are your booking details:");
-  } else {
-    lines.push("New booking from Nu-Trendz website");
-  }
-
-  lines.push("==================================");
-  lines.push("");
-  lines.push(`Name: ${booking.customerName}`);
-  lines.push(`Email: ${booking.email}`);
-  lines.push(`Phone: ${booking.phone}`);
-  lines.push(`Date: ${booking.date}`);
-  lines.push(`Time: ${booking.time}`);
-  lines.push(`Payment choice: ${booking.paymentMethod}`);
-  lines.push("");
-
-  lines.push("Services:");
-  booking.services.forEach(svc => {
-    lines.push(
-      `- ${svc.name} (${svc.time || "time not set"}) — ${svc.price} — Stylist: ${svc.stylistName}`
-    );
-  });
-
-  lines.push("");
-  if (booking.notes) {
-    lines.push("Client notes:");
-    lines.push(booking.notes);
-  } else {
-    lines.push("Client notes: (none)");
-  }
-
-  if (forClient) {
-    lines.push("");
-    lines.push(
-      "We will contact you to confirm the appointment and talk about payment if needed."
-    );
-    lines.push("If anything looks wrong, please contact Nu-Trendz as soon as possible.");
-  }
-
-  return lines.join("\n");
+function getSelectedPaymentMethod() {
+  const checked = document.querySelector(
+    'input[name="paymentMethod"]:checked'
+  );
+  return checked ? checked.value : "pay_at_venue";
 }
 
-async function sendConfirmationEmails(bookingData) {
-  if (typeof emailjs === "undefined") return;
+// ---------- 10. EMAILS ----------
 
-  emailjs.init(EMAIL_CONFIG.publicKey);
-
-  const adminMsg = buildBookingText(bookingData, false);
-  const clientMsg = buildBookingText(bookingData, true);
-
-  const adminPayload = {
-    from_name: "Nu-Trendz Website",
-    reply_to: bookingData.email,
-    to_email: EMAIL_CONFIG.adminEmail,
-    message: adminMsg
-  };
-
-  const clientPayload = {
-    from_name: "Nu-Trendz",
-    reply_to: EMAIL_CONFIG.adminEmail,
-    to_email: bookingData.email,
-    message: clientMsg
-  };
-
-  await Promise.all([
-    emailjs.send(
-      EMAIL_CONFIG.serviceId,
-      EMAIL_CONFIG.adminTemplateId,
-      adminPayload,
-      EMAIL_CONFIG.publicKey
-    ),
-    emailjs.send(
-      EMAIL_CONFIG.serviceId,
-      EMAIL_CONFIG.customerTemplateId,
-      clientPayload,
-      EMAIL_CONFIG.publicKey
-    )
-  ]);
-}
-
-// ========== 9. Final save (step 3) ==========
-
-async function saveBooking(e) {
-  e.preventDefault();
-
-  if (!validateStep1()) {
-    setStep(1);
-    return;
+function sendConfirmationEmails(bookingData) {
+  if (!window.emailjs || !EMAIL_CONFIG.publicKey) {
+    return Promise.resolve();
   }
-  if (!validateStep2()) {
-    setStep(2);
-    return;
-  }
-
-  let fullName = limitString(document.getElementById("fullName").value.trim(), 100);
-  let email = limitString(document.getElementById("email").value.trim(), 120);
-  let phone = limitString(document.getElementById("phone").value.trim(), 30);
-  let notes = limitString(document.getElementById("notes").value.trim(), 1000);
-
-  if (!fullName || !email || !phone) {
-    finalStatusEl.textContent =
-      "Please fill in your name, email and phone so we can contact you.";
-    finalStatusEl.style.color = "#ff6b6b";
-    return;
-  }
-  if (!validateEmail(email)) {
-    finalStatusEl.textContent = "Please enter a valid email address.";
-    finalStatusEl.style.color = "#ff6b6b";
-    return;
-  }
-  if (!validatePhone(phone)) {
-    finalStatusEl.textContent =
-      "Please enter a phone number we can call or text (at least 9 digits).";
-    finalStatusEl.style.color = "#ff6b6b";
-    return;
-  }
-
-  finalStatusEl.style.color = "#ff9800";
-  finalStatusEl.textContent = "Checking your time and saving your booking...";
-
-  const paymentMethod = getSelectedPaymentMethod();
-  const involvedStylists = getStylistsForBooking();
-  const hoursNeededNew = Math.max(1, Math.ceil(totalDurationMinutes / 60));
-
-  // Re-check to avoid double-booking
-  const blocked = await getBlockedTimesForDate(selectedDate);
-  const startHour = parseInt(selectedTime.split(":")[0], 10) || OPEN_HOUR;
-
-  let conflict = false;
-  for (const s of involvedStylists) {
-    const set = blocked[s.id];
-    for (let i = 0; i < hoursNeededNew; i++) {
-      const t = formatHHMM(startHour + i);
-      if (set && set.has(t)) {
-        conflict = true;
-        break;
-      }
-    }
-    if (conflict) break;
-  }
-
-  if (conflict) {
-    finalStatusEl.textContent =
-      "Sorry, someone just booked this time. Please choose another time.";
-    finalStatusEl.style.color = "#ff6b6b";
-    selectedTime = null;
-    await renderTimeSlots(); // refresh the list so the taken slot disappears
-    setStep(2);
-    return;
-  }
-
-  const servicesWithStylists = basket.map(service => {
-    let stylistId;
-    if (mode === "one") stylistId = stylistForAll;
-    else stylistId = stylistPerService[service.name] || "any";
-
-    const stylist = STYLISTS.find(s => s.id === stylistId) || STYLISTS[0];
-    return {
-      name: service.name,
-      time: service.time,
-      price: service.price,
-      stylistId: stylist.id,
-      stylistName: stylist.name
-    };
-  });
-
-  const dayRef = ref(db, "bookings/" + selectedDate);
-  const newRef = push(dayRef);
-  const bookingData = {
-    id: newRef.key,
-    createdAt: Date.now(),
-    customerName: fullName,
-    email,
-    phone,
-    notes,
-    date: selectedDate,
-    time: selectedTime,
-    paymentMethod,
-    status: "pending",
-    durationMinutes: totalDurationMinutes,
-    services: servicesWithStylists
-  };
 
   try {
-    await set(newRef, bookingData);
+    const totalText = document.getElementById("finalTotal")?.textContent || "";
 
-    try {
-      await sendConfirmationEmails(bookingData);
-    } catch (emailErr) {
-      console.error("Email sending failed:", emailErr);
-      // continue anyway; booking is saved
-    }
-
-    // store summary for confirmation page
-    const totalText = finalTotalEl.textContent || "";
-    const lastBookingSummary = {
-      customerName: bookingData.customerName,
+    const customerParams = {
+      to_email: bookingData.email,
+      to_name: bookingData.customerName,
       date: bookingData.date,
       time: bookingData.time,
-      paymentMethod: bookingData.paymentMethod,
-      services: bookingData.services,
-      total: totalText,
-      bookingId: bookingData.id
+      payment_method:
+        bookingData.paymentMethod === "pay_at_venue"
+          ? "Pay at the salon"
+          : "Decide later",
+      services: (bookingData.services || [])
+        .map(s => `${s.name} (${s.stylistName})`)
+        .join(", "),
+      total: totalText
     };
-    localStorage.setItem("lastBooking", JSON.stringify(lastBookingSummary));
 
-    // clear booking flow state so next booking starts fresh
-    localStorage.removeItem("basket");
-    localStorage.removeItem("bookingCurrentStep");
-    localStorage.removeItem("bookingBasketSig");
+    const adminParams = {
+      to_email: EMAIL_CONFIG.adminEmail,
+      customer_name: bookingData.customerName,
+      customer_phone: bookingData.phone,
+      customer_email: bookingData.email,
+      date: bookingData.date,
+      time: bookingData.time,
+      payment_method: customerParams.payment_method,
+      services: customerParams.services,
+      total: totalText
+    };
 
-    // go to confirmation page
-    window.location.href = "booking-confirmation.html";
+    const sendCustomer = emailjs.send(
+      EMAIL_CONFIG.serviceId,
+      EMAIL_CONFIG.customerTemplateId,
+      customerParams,
+      EMAIL_CONFIG.publicKey
+    );
+
+    const sendAdmin = EMAIL_CONFIG.adminEmail
+      ? emailjs.send(
+          EMAIL_CONFIG.serviceId,
+          EMAIL_CONFIG.adminTemplateId,
+          adminParams,
+          EMAIL_CONFIG.publicKey
+        )
+      : Promise.resolve();
+
+    return Promise.allSettled([sendCustomer, sendAdmin]).then(() => {});
   } catch (err) {
-    console.error("Firebase booking error", err);
-    finalStatusEl.textContent =
-      "Something went wrong while saving your booking. Please try again in a moment.";
-    finalStatusEl.style.color = "#ff6b6b";
+    console.warn("EmailJS error (ignored):", err);
+    return Promise.resolve();
   }
 }
 
-// ========== 10. Init & step-click behaviour ==========
+// ---------- 11. SAVE BOOKING ----------
+
+function saveBooking(fullName, email, phone, notes) {
+  if (!db) {
+    finalStatusEl.textContent =
+      "Booking system is not connected right now. Please contact the salon directly.";
+    finalStatusEl.style.color = "#ff6b6b";
+    return;
+  }
+
+  if (!selectedDate || !selectedTime) {
+    finalStatusEl.textContent =
+      "Please pick a date and time before confirming.";
+    finalStatusEl.style.color = "#ff6b6b";
+    return;
+  }
+
+  finalStatusEl.style.color = "#f59e0b";
+  finalStatusEl.textContent = "Checking availability and saving your booking…";
+
+  const paymentMethod = getSelectedPaymentMethod();
+  const duration = getEffectiveDurationMinutes();
+
+  const startMin = minutesFromHHMM(selectedTime);
+  const endMin = startMin + duration;
+
+  getBlockedIntervalsForDate(selectedDate).then(blocked => {
+    if (!slotIsFree(startMin, endMin, blocked)) {
+      finalStatusEl.textContent =
+        "Sorry, this time was just taken. Please choose another time.";
+      finalStatusEl.style.color = "#ff6b6b";
+      selectedTime = null;
+      renderTimeSlots();
+      setStep(2);
+      return;
+    }
+
+    const servicesWithStylists = buildServicesWithStylists();
+
+    // Private booking (full data)
+    const privateRef = db
+      .ref(BOOKINGS_PATH + "/" + selectedDate)
+      .push();
+
+    // Public slot (time + duration only)
+    const slotRef = db.ref(
+      BOOKING_SLOTS_PATH + "/" + selectedDate + "/" + privateRef.key
+    );
+
+    const bookingData = {
+      id: privateRef.key,
+      createdAt: Date.now(),
+      customerName: fullName,
+      email,
+      phone,
+      notes,
+      date: selectedDate,
+      time: selectedTime,
+      paymentMethod,
+      status: "pending",
+      durationMinutes: duration,
+      services: servicesWithStylists
+    };
+
+    Promise.all([
+      privateRef.set(bookingData),
+      slotRef.set({
+        time: selectedTime,
+        durationMinutes: duration
+      })
+    ])
+      .then(() => sendConfirmationEmails(bookingData))
+      .then(() => {
+        const totalText = finalTotalEl.textContent || "";
+        const lastBookingSummary = {
+          customerName: bookingData.customerName,
+          date: bookingData.date,
+          time: bookingData.time,
+          paymentMethod: bookingData.paymentMethod,
+          services: bookingData.services,
+          total: totalText,
+          bookingId: bookingData.id
+        };
+        localStorage.setItem(
+          "lastBooking",
+          JSON.stringify(lastBookingSummary)
+        );
+
+        // Clear local storage booking state & basket
+        localStorage.removeItem("basket");
+        localStorage.removeItem("bookingCurrentStep");
+        localStorage.removeItem("bookingBasketSig");
+        localStorage.removeItem("bookingDate");
+        localStorage.removeItem("bookingTime");
+        localStorage.removeItem("bookingDurationMinutes");
+
+        window.location.href = "booking-confirmation.html";
+      })
+      .catch(err => {
+        console.error("Firebase booking error", err);
+
+        if (err && err.code === "PERMISSION_DENIED") {
+          finalStatusEl.textContent =
+            "Our booking system is not allowed to save bookings right now. " +
+            "Please tell the salon there is a Firebase Realtime Database rules issue.";
+        } else {
+          finalStatusEl.textContent =
+            "Something went wrong while saving your booking" +
+            (err && err.code ? " (" + err.code + ")" : "") +
+            ". Please try again in a moment.";
+        }
+
+        finalStatusEl.style.color = "#ff6b6b";
+      });
+  });
+}
+
+// ---------- 12. INIT ----------
 
 document.addEventListener("DOMContentLoaded", () => {
   servicesSummaryEl = document.getElementById("servicesSummary");
@@ -680,12 +941,17 @@ document.addEventListener("DOMContentLoaded", () => {
   summaryTotalLabelEl = document.getElementById("summaryTotalLabel");
   stylistAllSelect = document.getElementById("stylistAll");
   stylistPerWrapper = document.getElementById("stylistPerServiceWrapper");
+  stylistGlobalSelectWrapper = document.getElementById("stylistGlobalSelectWrapper");
   step1ErrorEl = document.getElementById("step1Error");
 
   stepPanels = Array.from(document.querySelectorAll(".booking-step"));
-  stepIndicators = Array.from(document.querySelectorAll(".steps-strip .step"));
+  stepIndicators = Array.from(
+    document.querySelectorAll(".steps-strip .step")
+  );
 
   bookingDateInput = document.getElementById("bookingDate");
+  bookingDateButton = document.getElementById("bookingDateButton");
+  bookingDateLabel = document.getElementById("bookingDateLabel");
   timeSlotsEl = document.getElementById("timeSlots");
   dateStatusEl = document.getElementById("dateStatus");
 
@@ -700,94 +966,287 @@ document.addEventListener("DOMContentLoaded", () => {
   finalTotalEl = document.getElementById("finalTotal");
   finalTotalLabelEl = document.getElementById("finalTotalLabel");
 
+  firstNameInput = document.getElementById("firstName");
+  lastNameInput = document.getElementById("lastName");
+  fullNameInput = document.getElementById("fullName");
+
+  // calendar elements
+  calendarEl = document.getElementById("bookingCalendar");
+  calendarDaysEl = document.getElementById("calendarDays");
+  calendarMonthLabelEl = document.getElementById("calendarMonthLabel");
+  calendarPrevBtn = document.getElementById("calendarPrev");
+  calendarNextBtn = document.getElementById("calendarNext");
+  calendarCloseBtn = document.getElementById("calendarClose");
+
   loadBasket();
-
-  // decide whether to restore last step or start fresh
-  const signatureNow = getBasketSignature();
-  const savedSignature = localStorage.getItem("bookingBasketSig");
-  const savedStep = Number(localStorage.getItem("bookingCurrentStep") || "1");
-
-  if (!signatureNow) {
-    // no services → always fresh, step 1
-    localStorage.removeItem("bookingBasketSig");
-    localStorage.removeItem("bookingCurrentStep");
-    currentStep = 1;
-  } else if (!savedSignature || savedSignature !== signatureNow) {
-    // basket changed → treat as NEW booking
-    localStorage.setItem("bookingBasketSig", signatureNow);
-    localStorage.removeItem("bookingCurrentStep");
-    currentStep = 1;
-  } else {
-    // same basket → restore step
-    if (savedStep >= 1 && savedStep <= 3) {
-      currentStep = savedStep;
-    } else {
-      currentStep = 1;
-    }
-  }
-
   renderServicesSummary();
   renderStylistControls();
   limitDateInput();
 
-  // stylist mode switch
-  document.querySelectorAll("input[name='stylistMode']").forEach(radio => {
-    radio.addEventListener("change", () => {
-      mode = radio.value;
-      renderStylistControls();
-    });
-  });
-
-  stylistAllSelect.addEventListener("change", () => {
-    stylistForAll = stylistAllSelect.value;
-  });
-
-  // step buttons
-  toStep2Btn.addEventListener("click", () => {
-    if (!validateStep1()) return;
-    setStep(2);
-  });
-
-  backTo1Btn.addEventListener("click", () => setStep(1));
-
-  bookingDateInput.addEventListener("change", async () => {
-    selectedDate = bookingDateInput.value || null;
-    if (selectedDate) {
-      await renderTimeSlots(); // always pull latest bookings for that date
-    } else {
-      timeSlotsEl.innerHTML = "";
-      dateStatusEl.textContent = "";
+  // navigation type (to handle reload vs new visit)
+  let navType = "navigate";
+  try {
+    const navEntry = performance.getEntriesByType("navigation")[0];
+    if (navEntry && navEntry.type) {
+      navType = navEntry.type;
     }
-  });
+  } catch {
+    // ignore
+  }
 
-  toStep3Btn.addEventListener("click", () => {
-    if (!validateStep2()) return;
-    setStep(3);
-  });
+  const isReload = navType === "reload";
+  const isBackForward = navType === "back_forward";
 
-  backTo2Btn.addEventListener("click", () => setStep(2));
+  if (!isReload && !isBackForward) {
+    [
+      "bookingCurrentStep",
+      "bookingBasketSig",
+      "bookingDate",
+      "bookingTime",
+      "bookingDurationMinutes"
+    ].forEach(key => localStorage.removeItem(key));
+  }
 
-  detailsForm.addEventListener("submit", saveBooking);
+  let storedStep = parseInt(
+    localStorage.getItem("bookingCurrentStep") || "1",
+    10
+  );
+  if (isNaN(storedStep) || storedStep < 1 || storedStep > 3) {
+    storedStep = 1;
+  }
 
-  // clickable steps: users can go back, but not skip forward
+  if (isReload) {
+    if (storedStep === 2) {
+      localStorage.removeItem("bookingDate");
+      localStorage.removeItem("bookingTime");
+    }
+  }
+
+  const storedDate = localStorage.getItem("bookingDate") || null;
+  const storedTime = localStorage.getItem("bookingTime") || null;
+  selectedDate = storedDate;
+  selectedTime = storedTime;
+
+  if (bookingDateInput && selectedDate) {
+    bookingDateInput.value = selectedDate;
+  }
+
+  updateDateLabel();
+
+  currentStep = storedStep;
+
+  if (window.history && history.replaceState) {
+    historyReady = true;
+    const url = new URL(window.location.href);
+    url.searchParams.set("step", String(currentStep));
+    history.replaceState({ bookingStep: currentStep }, "", url.toString());
+  }
+
+  setStep(currentStep, { skipHistory: true });
+
+  // calendar state
+  initCalendarState();
+  buildCalendarGrid();
+  updateCalendarSelection();
+
+  if (currentStep === 2 && selectedDate && bookingDateInput) {
+    renderTimeSlots();
+  }
+
+  // Step indicators (allow going back but not skipping ahead)
   stepIndicators.forEach(ind => {
     ind.addEventListener("click", () => {
-      const target = Number(ind.dataset.step);
-      if (target < currentStep) {
-        setStep(target);
-      }
-    });
-    ind.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        const target = Number(ind.dataset.step);
-        if (target < currentStep) {
-          setStep(target);
-        }
+      const stepNum = Number(ind.dataset.step);
+      if (stepNum < currentStep) {
+        setStep(stepNum);
       }
     });
   });
 
-  // initial step
-  setStep(currentStep);
+  if (toStep2Btn) {
+    toStep2Btn.addEventListener("click", () => {
+      if (!validateStep1()) return;
+      setStep(2);
+    });
+  }
+
+  if (backTo1Btn) {
+    backTo1Btn.addEventListener("click", () => setStep(1));
+  }
+
+  if (toStep3Btn) {
+    toStep3Btn.addEventListener("click", () => {
+      if (!validateStep2()) return;
+      setStep(3);
+    });
+  }
+
+  if (backTo2Btn) {
+    backTo2Btn.addEventListener("click", () => setStep(2));
+  }
+
+  if (bookingDateInput) {
+    bookingDateInput.addEventListener("change", () => {
+      selectedDate = bookingDateInput.value || null;
+      selectedTime = null;
+      if (selectedDate) {
+        localStorage.setItem("bookingDate", selectedDate);
+      }
+      localStorage.removeItem("bookingTime");
+      updateCalendarSelection();
+      updateDateLabel();
+      renderTimeSlots();
+    });
+  }
+
+  if (bookingDateButton) {
+    bookingDateButton.addEventListener("click", () => {
+      openCalendar();
+    });
+  }
+
+  if (calendarPrevBtn) {
+    calendarPrevBtn.addEventListener("click", () => {
+      changeCalendarMonth(-1);
+    });
+  }
+
+  if (calendarNextBtn) {
+    calendarNextBtn.addEventListener("click", () => {
+      changeCalendarMonth(1);
+    });
+  }
+
+  if (calendarCloseBtn) {
+    calendarCloseBtn.addEventListener("click", () => {
+      closeCalendar();
+    });
+  }
+
+  if (calendarEl) {
+    calendarEl.addEventListener("click", e => {
+      if (e.target === calendarEl) {
+        closeCalendar();
+        return;
+      }
+
+      const dayBtn = e.target.closest(".booking-day");
+      if (!dayBtn) return;
+
+      const dateStr = dayBtn.dataset.date;
+      if (!dateStr) return;
+      if (
+        dayBtn.dataset.disabled === "true" ||
+        dayBtn.classList.contains("booking-day--full")
+      ) {
+        return;
+      }
+
+      selectedDate = dateStr;
+      localStorage.setItem("bookingDate", dateStr);
+      selectedTime = null;
+      localStorage.removeItem("bookingTime");
+
+      if (bookingDateInput) {
+        bookingDateInput.value = dateStr;
+      }
+
+      updateCalendarSelection();
+      updateDateLabel();
+      renderTimeSlots();
+      closeCalendar();
+    });
+  }
+
+  if (timeSlotsEl) {
+    timeSlotsEl.addEventListener("click", e => {
+      const btn = e.target.closest(".time-slot");
+      if (!btn) return;
+
+      const time = btn.dataset.time;
+      if (!time) return;
+
+      selectedTime = time;
+      localStorage.setItem("bookingTime", time);
+
+      const all = timeSlotsEl.querySelectorAll(".time-slot");
+      all.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+
+      markDateStatus("", false);
+    });
+  }
+
+  if (detailsForm) {
+    detailsForm.addEventListener("submit", e => {
+      e.preventDefault();
+
+      let firstName = firstNameInput?.value.trim() || "";
+      let lastName = lastNameInput?.value.trim() || "";
+      const singleName = fullNameInput?.value.trim() || "";
+
+      if (firstNameInput && lastNameInput) {
+        if (!isValidNamePart(firstName) || !isValidNamePart(lastName)) {
+          finalStatusEl.textContent =
+            "Please enter a valid first and last name (letters only, at least 2 characters).";
+          finalStatusEl.style.color = "#ff6b6b";
+          return;
+        }
+      } else {
+        if (!singleName || singleName.length < 2) {
+          finalStatusEl.textContent = "Please enter your full name.";
+          finalStatusEl.style.color = "#ff6b6b";
+          return;
+        }
+        const parts = singleName.split(" ").filter(Boolean);
+        firstName = parts[0];
+        lastName = parts.slice(1).join(" ") || " ";
+      }
+
+      const formattedFirst = formatNamePart(firstName);
+      const formattedLast = formatNamePart(lastName);
+      const fullName = (formattedFirst + " " + formattedLast).trim();
+
+      const email = document.getElementById("email")?.value.trim();
+      const phone = document.getElementById("phone")?.value.trim();
+      const notes = document.getElementById("notes")?.value.trim() || "";
+
+      if (!email || !phone) {
+        finalStatusEl.textContent =
+          "Please fill in your email and mobile number.";
+        finalStatusEl.style.color = "#ff6b6b";
+        return;
+      }
+
+      if (!basket.length) {
+        finalStatusEl.textContent =
+          "Your services list is empty. Please go back and select at least one service.";
+        finalStatusEl.style.color = "#ff6b6b";
+        return;
+      }
+
+      if (!validateStep2()) {
+        setStep(2);
+        return;
+      }
+
+      saveBooking(fullName, email, phone, notes);
+    });
+  }
+
+  // Browser back/forward between steps
+  window.addEventListener("popstate", event => {
+    if (!event.state || typeof event.state.bookingStep === "undefined") {
+      return;
+    }
+    const step = Math.min(3, Math.max(1, Number(event.state.bookingStep) || 1));
+    setStep(step, { fromHistory: true });
+  });
+
+  // ESC to close calendar
+  document.addEventListener("keydown", e => {
+    if (calendarOpen && e.key === "Escape") {
+      closeCalendar();
+    }
+  });
 });

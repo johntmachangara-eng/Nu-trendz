@@ -1,5 +1,5 @@
 /* ============================================================
-  NU-TRENDZ SERVICES PAGE – IMPROVED VERSION
+  NU-TRENDZ SERVICES PAGE – IMPROVED VERSION (UPDATED)
   ============================================================ */
 
 /* ============================================================
@@ -195,8 +195,8 @@ body.no-scroll {
   white-space: nowrap;
 }
 
-/* Category Buttons */
-.category-btn {
+/* Category Pills – matches JS class ".category-pill" */
+.category-pill {
   background: var(--bg-dark);
   border: 1px solid var(--border-light);
   color: var(--text-light);
@@ -204,23 +204,31 @@ body.no-scroll {
   border-radius: 25px;
   cursor: pointer;
   transition: var(--transition-fast);
+  font-size: 0.85rem;
 }
 
-.category-btn:hover:not(.active),
-.category-btn:focus:not(.active),
-.category-btn:active:not(.active) {
+.category-pill:hover:not(.active),
+.category-pill:focus:not(.active),
+.category-pill:active:not(.active) {
   border-color: var(--border-light);
   outline: none;
   box-shadow: none;
 }
 
-.category-btn.active {
+.category-pill.active {
   background: var(--orange) !important;
   color: var(--bg-dark) !important;
   border-color: var(--orange) !important;
   font-weight: 700;
   transform: scale(1.05) !important;
   box-shadow: var(--shadow-glow) !important;
+}
+
+/* Disabled pill when there are no categories yet */
+.category-pill.disabled {
+  opacity: 0.5;
+  cursor: default;
+  border-style: dashed;
 }
 
 /* ============================================================
@@ -331,6 +339,14 @@ body.no-scroll {
   box-shadow: var(--shadow-glow);
 }
 
+/* Generic messages (no services / no results) */
+.message {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 20px 0 10px;
+}
+
 /* Category Section */
 .category-section {
   margin-bottom: 80px;
@@ -362,34 +378,31 @@ body.no-scroll {
   padding: 25px;
   transition: var(--transition-fast);
   animation: fadeInUp 0.8s ease both;
+  display: flex;
+  flex-direction: column;
 }
 
-.service-card:hover {
-  transform: translateY(-6px);
-  border-color: var(--orange);
-  box-shadow: var(--shadow-strong);
+/* Wrap main info inside card */
+.service-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.service-meta {
+/* Title – matches .service-card-title created by JS */
+.service-card h3,
+.service-card-title {
+  color: var(--orange);
+  font-size: 1.2rem;
+}
+
+/* Time + price row – works with old .service-meta and new .service-card-meta */
+.service-meta,
+.service-card-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-}
-
-.service-tag {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border-light);
-  color: var(--text-muted);
-}
-
-.service-card h3 {
-  color: var(--orange);
-  font-size: 1.2rem;
+  margin-bottom: 6px;
 }
 
 .service-time {
@@ -398,16 +411,19 @@ body.no-scroll {
   font-size: 0.9rem;
 }
 
-.service-desc {
+/* Description – supports .service-desc and .service-card-desc */
+.service-desc,
+.service-card-desc {
   color: #eee;
   font-size: 0.9rem;
-  margin: 10px 0;
+  margin: 8px 0 4px;
 }
 
+/* Price */
 .service-price {
   color: var(--orange);
   font-weight: bold;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .service-price .from-label {
@@ -418,15 +434,28 @@ body.no-scroll {
   color: var(--text-muted);
 }
 
+/* Card hover */
+.service-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--orange);
+  box-shadow: var(--shadow-strong);
+}
+
+/* “No services in this category” state */
 .no-services {
   text-align: center;
   color: var(--text-muted);
   margin-top: 20px;
 }
 
+/* Actions wrapper */
+.service-card-actions {
+  margin-top: 10px;
+}
+
 /* Book Button */
 .book-btn {
-  margin-top: 10px;
+  margin-top: 4px;
   background: var(--orange);
   color: #111;
   padding: 10px 20px;
@@ -434,6 +463,7 @@ body.no-scroll {
   border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 0.9rem;
   transition: var(--transition-fast);
 }
 
@@ -861,4 +891,36 @@ mark {
   .site-footer {
     font-size: 0.8rem;
   }
+}
+
+/* MOBILE MENU SHOULD COVER ENTIRE SCREEN ABOVE ALL ELEMENTS */
+@media (max-width: 992px) {
+  .nav-links {
+    height: 100vh !important;
+    inset: 0 !important;
+    bottom: 0 !important;
+    z-index: 99999 !important; /* guaranteed above basket bar */
+  }
+
+  body.menu-open .basket-bar,
+  body.menu-open .basket-panel {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* =========================================================
+   SERVICES PAGE ONLY – LOCK NAVBAR HEIGHT
+   ========================================================= */
+
+/* Keep navbar 80px at all times */
+.navbar {
+  height: 80px !important;
+}
+
+/* Disable shrink effect completely */
+.navbar.shrink {
+  height: 80px !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  box-shadow: none !important;
 }

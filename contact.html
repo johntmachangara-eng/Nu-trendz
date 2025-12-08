@@ -6,14 +6,37 @@
   <title>Nu-Trendz | Contact</title>
   <meta name="description" content="Get in touch with Nu-Trendz for bookings, inquiries, and more.">
 
-  <!-- ===== CSS ===== -->
+  <!-- ✅ GOOGLE FONT: POPPINS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- ✅ GOOGLE MATERIAL SYMBOLS (in case you want icons later) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <!-- ✅ CSS -->
   <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="footer.css">
   <link rel="stylesheet" href="contact.css">
 
-  <!-- External Libraries -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- ✅ FONT AWESOME (social media logos) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+
+  <!-- ✅ EMAILJS LIB -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  <!-- ✅ Force POPPINS on this page -->
+  <style>
+    body {
+      font-family: "Poppins", system-ui, sans-serif;
+    }
+  </style>
 </head>
 
 <body>
@@ -22,13 +45,12 @@
     <div class="nav-content">
       <a href="index.html" class="logo">NU-TRENDZ</a>
 
-      <!-- Mobile Menu Toggle -->
-      <input type="checkbox" id="menu-toggle" />
-      <label for="menu-toggle" class="menu-icon" aria-label="Toggle menu">
+      <!-- Clean mobile menu icon (no checkbox) -->
+      <div class="menu-icon" aria-label="Toggle menu" role="button" tabindex="0">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
-      </label>
+      </div>
 
       <ul class="nav-links" id="nav-links">
         <li><a href="index.html">Home</a></li>
@@ -62,7 +84,7 @@
 
         <div class="form-group">
           <label for="message">Message</label>
-          <textarea id="message" name="message" rows="5" placeholder="Type your message here..." required></textarea>
+          <textarea id="message" name="message" rows="5" placeholder="Type your message here." required></textarea>
         </div>
 
         <button type="submit" class="cta-btn">Send Message</button>
@@ -101,9 +123,27 @@
       <div class="footer-right">
         <p>Follow us</p>
         <div class="social-icons">
-          <a href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="https://www.facebook.com/p/Nu-trendz-100037624576513/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="https://www.tiktok.com/@nu_trendz" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+          <a
+            href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/"
+            target="_blank"
+            aria-label="Instagram"
+          >
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a
+            href="https://www.facebook.com/p/Nu-trendz-100037624576513/"
+            target="_blank"
+            aria-label="Facebook"
+          >
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a
+            href="https://www.tiktok.com/@nu_trendz"
+            target="_blank"
+            aria-label="TikTok"
+          >
+            <i class="fab fa-tiktok"></i>
+          </a>
         </div>
       </div>
     </div>

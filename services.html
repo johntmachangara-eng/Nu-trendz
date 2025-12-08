@@ -197,10 +197,35 @@
     </div>
   </footer>
 
+<!-- Firebase (COMPAT VERSION – correct for this project) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBshg3uKI9UK043ItARQhPf4kw4fDqDnkc",
+    authDomain: "database-93ee7.firebaseapp.com",
+    projectId: "database-93ee7",
+    storageBucket: "database-93ee7.firebasestorage.app",
+    messagingSenderId: "512064197430",
+    appId: "1:512064197430:web:62ca518c67d20f82001997",
+    measurementId: "G-Z3MPD1RWMD"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // ✅ Make Firestore global
+  window.db = firebase.firestore();
+</script>
+
+
   <!-- JavaScript Files -->
   <script src="navbar.js" defer></script>
   <script src="services.js" defer></script>
   <script src="reviews.js" defer></script>
   <script src="footer.js" defer></script>
+
+
 </body>
 </html>

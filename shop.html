@@ -3,35 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NU-TRENDZ | Shop</title>
+  <title>Nu-Trendz | Shop</title>
 
-  <!-- ===== CSS ===== -->
-  <link rel="stylesheet" href="footer.css" />
-  <link rel="stylesheet" href="navbar.css" />
-  <link rel="stylesheet" href="shop.css" />
-  
-  <!-- ===== FONTS ===== -->
+  <!-- ===== GOOGLE FONT: POPPINS (GLOBAL CONSISTENCY) ===== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- ===== GOOGLE MATERIAL SYMBOLS (IF YOU WANT EXTRA ICONS LATER) ===== -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
   <!-- ===== EXTERNAL LIBRARIES ===== -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Font Awesome JUST for brand/social icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+  <!-- YouTube iframe API for shop videos -->
   <script src="https://www.youtube.com/iframe_api"></script>
+
+  <!-- ===== LOCAL CSS ===== -->
+  <link rel="stylesheet" href="navbar.css" />
+  <link rel="stylesheet" href="shop.css" />
+  <link rel="stylesheet" href="footer.css" />
+
+  <!-- ===== PAGE FONT OVERRIDE (USE POPPINS EVERYWHERE) ===== -->
+  <style>
+    body {
+      font-family: "Poppins", system-ui, sans-serif;
+    }
+  </style>
 </head>
 
 <body>
   <!-- ===== NAVBAR ===== -->
   <nav class="navbar" id="navbar">
     <div class="nav-content">
-      <h1 class="logo">NU-TRENDZ</h1>
+      <a href="index.html" class="logo">NU-TRENDZ</a>
 
-      <input type="checkbox" id="menu-toggle">
-      <label for="menu-toggle" class="menu-icon">
+      <!-- Clean mobile menu icon (works with navbar.js) -->
+      <div class="menu-icon" aria-label="Toggle menu" role="button" tabindex="0">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
-      </label>
+      </div>
 
       <ul class="nav-links" id="nav-links">
         <li><a href="index.html">Home</a></li>
@@ -49,13 +67,20 @@
     <!-- ===== HEADER ===== -->
     <div class="shop-header">
       <h1><span class="highlight">Inside</span> NU-TRENDZ</h1>
-      <p>Step inside our shop and explore <span class="white-text">authentic hair care</span> and <span class="white-text">premium styles</span>.</p>
+      <p>
+        Step inside our shop and explore
+        <span class="white-text">authentic hair care</span> and
+        <span class="white-text">premium styles</span>.
+      </p>
     </div>
 
     <!-- ===== VIDEO 1: SHOP EXPERIENCE ===== -->
     <div class="video-section">
       <h2 class="highlight">Shop Experience</h2>
-      <p>Take a look inside our store — discover <span class="white-text">hair products</span>, wigs, and accessories.</p>
+      <p>
+        Take a look inside our store — discover
+        <span class="white-text">hair products</span>, wigs, and accessories.
+      </p>
       <div class="media-frame">
         <iframe 
           width="560" 
@@ -72,7 +97,11 @@
     <!-- ===== VIDEO 2: PERSONAL ASSISTANCE ===== -->
     <div class="video-section">
       <h2 class="highlight">Personal Assistance</h2>
-      <p>Watch our stylists help customers find their <span class="white-text">perfect wig</span> or <span class="white-text">ideal product</span>.</p>
+      <p>
+        Watch our stylists help customers find their
+        <span class="white-text">perfect wig</span> or
+        <span class="white-text">ideal product</span>.
+      </p>
       <div class="media-frame">
         <iframe 
           width="560" 
@@ -104,7 +133,8 @@
     </div>
 
     <!-- ===== MEDIA OVERLAY ===== -->
-    <div class="media-overlay" id="mediaOverlay">
+   <div class="media-overlay" id="mediaOverlay">
+      <button id="closeOverlayBtn" aria-label="Close overlay">&times;</button>
       <button class="nav-btn prev" id="prevBtn">&#10094;</button>
       <div class="overlay-content" id="overlayContent"></div>
       <button class="nav-btn next" id="nextBtn">&#10095;</button>
@@ -113,7 +143,10 @@
     <!-- ===== LOCATION ===== -->
     <div class="shop-location">
       <h2 class="highlight">Find Us</h2>
-      <p>Visit us at <strong class="white-text">43 St Botolph's St, Colchester CO2 7EA</strong>.</p>
+      <p>
+        Visit us at
+        <strong class="white-text">43 St Botolph's St, Colchester CO2 7EA</strong>.
+      </p>
       <div class="map-container">
         <iframe
           src="https://www.google.com/maps?q=43+St+Botolph's+St,+Colchester+CO2+7EA&output=embed"
@@ -149,13 +182,25 @@
       <div class="footer-right">
         <p>Follow us</p>
         <div class="social-icons">
-          <a href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/" target="_blank" aria-label="Instagram">
+          <a
+            href="https://www.instagram.com/explore/locations/705522836222546/nu-trendz/"
+            target="_blank"
+            aria-label="Instagram"
+          >
             <i class="fab fa-instagram"></i>
           </a>
-          <a href="https://www.facebook.com/p/Nu-trendz-100037624576513/" target="_blank" aria-label="Facebook">
+          <a
+            href="https://www.facebook.com/p/Nu-trendz-100037624576513/"
+            target="_blank"
+            aria-label="Facebook"
+          >
             <i class="fab fa-facebook"></i>
           </a>
-          <a href="https://www.tiktok.com/@nu_trendz" target="_blank" aria-label="TikTok">
+          <a
+            href="https://www.tiktok.com/@nu_trendz"
+            target="_blank"
+            aria-label="TikTok"
+          >
             <i class="fab fa-tiktok"></i>
           </a>
         </div>

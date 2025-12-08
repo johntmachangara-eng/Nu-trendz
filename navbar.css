@@ -1,6 +1,8 @@
 /* ================================================
-  CSS VARIABLES
-  ================================================ */
+  NAVBAR — NU-TRENDZ (CONSISTENT VERSION)
+================================================ */
+
+/* ===== CSS VARIABLES ===== */
 :root {
   --orange: #ff9800;
   --text: #fff;
@@ -8,8 +10,8 @@
 }
 
 /* ================================================
-  NAVBAR - BASE STYLES
-  ================================================ */
+  NAVBAR BASE
+================================================ */
 .navbar {
   position: fixed;
   top: 0;
@@ -19,11 +21,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
   background: var(--bg-dark);
   backdrop-filter: blur(10px);
   transition: all 0.4s ease;
   z-index: 1000;
+
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  /* ✅ FORCE POPPINS FOR NAVBAR */
+  font-family: "Poppins", system-ui, sans-serif;
 }
 
 .navbar.shrink {
@@ -42,7 +49,7 @@
 
 /* ================================================
   LOGO
-  ================================================ */
+================================================ */
 .logo {
   color: var(--orange);
   font-size: 2rem;
@@ -53,7 +60,7 @@
 
 /* ================================================
   NAVIGATION LINKS
-  ================================================ */
+================================================ */
 .nav-links {
   list-style: none;
   display: flex;
@@ -91,7 +98,7 @@
 
 /* ================================================
   HAMBURGER MENU ICON
-  ================================================ */
+================================================ */
 .menu-icon {
   display: none;
   flex-direction: column;
@@ -99,8 +106,10 @@
   width: 30px;
   height: 21px;
   cursor: pointer;
-  z-index: 10000; /* ✅ higher than nav-links */
-  position: relative; /* ensure z-index works */
+
+  /* keep above menu */
+  z-index: 10000;
+  position: relative;
 }
 
 .bar {
@@ -111,6 +120,7 @@
   transition: all 0.3s ease;
 }
 
+/* Hamburger animation */
 .menu-icon.active .bar:nth-child(1) {
   transform: rotate(45deg) translate(6px, 6px);
 }
@@ -124,56 +134,57 @@
   background: var(--orange);
 }
 
-
-
 /* ================================================
-  UTILITY & CLEANUP
-  ================================================ */
+  CLEANUP (NO CHECKBOX HACK)
+================================================ */
 input[type="checkbox"][id*="menu-toggle"] {
   display: none !important;
 }
 
 /* ================================================
-  RESPONSIVE - MOBILE
-  ================================================ */
+  RESPONSIVE — MOBILE
+================================================ */
 @media (max-width: 992px) {
   .menu-icon {
-   display: flex;
+    display: flex;
   }
 
   .nav-links {
-   position: fixed;
-   inset: 0;
-   height: 100vh;
-   background: rgba(0, 0, 0, 0.97);
-   flex-direction: column;
-   justify-content: center;
-   align-items: center;
-   gap: 35px;
-   transform: translateY(-100%);
-   opacity: 0;
-   transition: all 0.35s ease;
-   pointer-events: none;
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+
+    background: rgba(0, 0, 0, 0.97);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 35px;
+
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+
+    transition: all 0.35s ease;
   }
 
   .nav-links.show {
-   transform: translateY(0);
-   opacity: 1;
-   pointer-events: auto;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .nav-links a {
-   font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 
   body.menu-open {
-   overflow: hidden;
+    overflow: hidden;
   }
 }
 
 /* ================================================
-  FOOTER
-  ================================================ */
+  FALLBACK FOOTER STYLE (SAFE)
+================================================ */
 footer {
   background: #000;
   text-align: center;
